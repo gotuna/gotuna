@@ -1,7 +1,10 @@
 package server_test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -22,7 +25,7 @@ func TestRoutes(t *testing.T) {
 		{"/login", http.MethodGet, http.StatusOK},
 	}
 
-	srv := server.NewServer()
+	srv := server.NewServer(getTestLogger(&bytes.Buffer{}))
 
 	for _, r := range routes {
 		t.Run(fmt.Sprintf("test route %s", r.route), func(t *testing.T) {
@@ -42,14 +45,17 @@ func TestRoutes(t *testing.T) {
 
 func TestPanicWillBeRecovered(t *testing.T) {
 
+	log := &bytes.Buffer{}
+	logger := getTestLogger(log)
+
 	badHandler := func() http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var x map[string]int
-			x["y"] = 1 // will produce nil map panic
+			x["y"] = 1 // will panic with: assignment to entry in nil map
 		})
 	}
 
-	srv := server.NewServer()
+	srv := server.NewServer(logger)
 
 	srv.Router.Handle("/bad", badHandler())
 
@@ -66,5 +72,10 @@ func TestPanicWillBeRecovered(t *testing.T) {
 	gotBody := response.Body.String()
 
 	assert.Contains(t, gotBody, server.DefaultError)
+	assert.Contains(t, log.String(), "assignment to entry in nil map")
 
+}
+
+func getTestLogger(w io.Writer) *log.Logger {
+	return log.New(w, "test logger: ", log.Lshortfile)
 }
