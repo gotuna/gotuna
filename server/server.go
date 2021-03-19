@@ -6,27 +6,53 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type Server struct{}
+type Server struct {
+	Router *mux.Router
+}
 
 const get = http.MethodGet
 const post = http.MethodPost
+const DefaultError = "Whoops, something went wrong"
 
-func NewServer() http.Handler {
-	router := mux.NewRouter()
-	router.NotFoundHandler = http.HandlerFunc(notFound)
+func NewServer() *Server {
+	s := &Server{}
+	s.Router = mux.NewRouter()
+	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
 
-	router.Handle("/", http.HandlerFunc(home)).Methods(get)
-	router.Handle("/login", http.HandlerFunc(login)).Methods(get)
+	s.Router.Handle("/", home()).Methods(get)
+	s.Router.Handle("/login", login()).Methods(get)
 
-	return router
+	s.Router.Use(recoverer)
+
+	return s
 }
 
-func home(w http.ResponseWriter, r *http.Request) {
+func home() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	})
 }
 
-func login(w http.ResponseWriter, r *http.Request) {
+func login() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	})
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func recoverer(next http.Handler) http.Handler {
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		defer func() {
+			if err := recover(); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(DefaultError))
+				return
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	})
 }
