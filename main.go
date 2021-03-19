@@ -13,7 +13,7 @@ func main() {
 
 	port := ":8888"
 
-	logger := log.New(os.Stdout, "logger: ", log.Lshortfile)
+	logger := log.New(os.Stdout, "", 0)
 	srv := app.NewServer(logger)
 
 	fmt.Printf("starting server at http://localhost%s \n", port)

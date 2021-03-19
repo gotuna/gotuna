@@ -12,7 +12,22 @@ import (
 	"github.com/alcalbg/gotdd/util"
 )
 
-func TestRecoverer(t *testing.T) {
+func TestLogging(t *testing.T) {
+	req, err := http.NewRequest("GET", "/sample", nil)
+	assert.NoError(t, err)
+	response := httptest.NewRecorder()
+
+	wlog := &bytes.Buffer{}
+	logger := log.New(wlog, "", 0)
+	middleware := middleware.Logger(logger)
+	handler := middleware(http.NotFoundHandler())
+
+	handler.ServeHTTP(response, req)
+
+	assert.Contains(t, wlog.String(), "/sample")
+}
+
+func TestRecoveringFromPanic(t *testing.T) {
 
 	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var x map[string]int
@@ -25,7 +40,7 @@ func TestRecoverer(t *testing.T) {
 
 	wlog := &bytes.Buffer{}
 	logger := log.New(wlog, "", 0)
-	middleware := middleware.Recoverer(logger)
+	middleware := middleware.Logger(logger)
 	handler := middleware(badHandler)
 
 	handler.ServeHTTP(response, req)
@@ -33,5 +48,4 @@ func TestRecoverer(t *testing.T) {
 	assert.Equal(t, response.Code, http.StatusInternalServerError)
 	assert.Contains(t, response.Body.String(), util.DefaultError)
 	assert.Contains(t, wlog.String(), "assignment to entry in nil map")
-
 }

@@ -18,11 +18,8 @@ func NewServer(logger *log.Logger) *Server {
 	s.Router = mux.NewRouter()
 	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
 
-	get := http.MethodGet
-	//post := http.MethodPost
-
-	s.Router.Handle("/", home()).Methods(get)
-	s.Router.Handle("/login", login()).Methods(get)
+	s.Router.Handle("/", home()).Methods(http.MethodGet)
+	s.Router.Handle("/login", login()).Methods(http.MethodGet)
 
 	//bad := func() http.Handler {
 	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +29,7 @@ func NewServer(logger *log.Logger) *Server {
 	//}
 	//s.Router.Handle("/bad", bad())
 
-	s.Router.Use(middleware.Recoverer(logger))
+	s.Router.Use(middleware.Logger(logger))
 
 	return s
 }
