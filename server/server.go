@@ -14,6 +14,7 @@ func NewServer() http.Handler {
 
 	router.Handle("/", http.HandlerFunc(home))
 	router.Handle("/login", http.HandlerFunc(login))
+
 	return router
 }
 

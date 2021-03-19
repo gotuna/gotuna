@@ -26,7 +26,7 @@ func TestRoutes(t *testing.T) {
 		t.Run(fmt.Sprintf("test route %s", r.route), func(t *testing.T) {
 			server := server.NewServer()
 
-			request, _ := http.NewRequest(http.MethodGet, "/", nil)
+			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
 			server.ServeHTTP(response, request)
