@@ -1,6 +1,7 @@
 package server_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -11,45 +12,30 @@ import (
 
 func TestRoutes(t *testing.T) {
 
-	t.Run("test home", func(t *testing.T) {
-		server := server.NewServer()
+	routes := []struct {
+		route  string
+		method string
+		status int
+	}{
+		{"/", http.MethodGet, http.StatusOK},
+		{"/invalid", http.MethodGet, http.StatusNotFound},
+		{"/login", http.MethodGet, http.StatusOK},
+	}
 
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		response := httptest.NewRecorder()
+	for _, r := range routes {
+		t.Run(fmt.Sprintf("test route %s", r.route), func(t *testing.T) {
+			server := server.NewServer()
 
-		server.ServeHTTP(response, request)
+			request, _ := http.NewRequest(http.MethodGet, "/", nil)
+			response := httptest.NewRecorder()
 
-		got := response.Code
-		want := http.StatusOK
+			server.ServeHTTP(response, request)
 
-		assert.Equal(t, got, want)
-	})
+			got := response.Code
+			want := r.status
 
-	t.Run("test not found", func(t *testing.T) {
-		server := server.NewServer()
+			assert.Equal(t, got, want)
+		})
+	}
 
-		request, _ := http.NewRequest(http.MethodGet, "/invalid", nil)
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		got := response.Code
-		want := http.StatusNotFound
-
-		assert.Equal(t, got, want)
-	})
-
-	t.Run("test show login page", func(t *testing.T) {
-		server := server.NewServer()
-
-		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
-		response := httptest.NewRecorder()
-
-		server.ServeHTTP(response, request)
-
-		got := response.Code
-		want := http.StatusOK
-
-		assert.Equal(t, got, want)
-	})
 }

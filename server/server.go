@@ -10,19 +10,19 @@ type Server struct{}
 
 func NewServer() http.Handler {
 	router := mux.NewRouter()
-	router.NotFoundHandler = http.HandlerFunc(notFoundHandler)
+	router.NotFoundHandler = http.HandlerFunc(notFound)
 
-	router.Handle("/", http.HandlerFunc(homeHandler))
-	router.Handle("/login", http.HandlerFunc(loginHandler))
+	router.Handle("/", http.HandlerFunc(home))
+	router.Handle("/login", http.HandlerFunc(login))
 	return router
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func home(w http.ResponseWriter, r *http.Request) {
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request) {
 }
 
-func notFoundHandler(w http.ResponseWriter, r *http.Request) {
+func notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
