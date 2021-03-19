@@ -12,14 +12,14 @@ type Server struct {
 	Router *mux.Router
 }
 
-const get = http.MethodGet
-const post = http.MethodPost
-
 func NewServer(logger *log.Logger) *Server {
 	s := &Server{}
 
 	s.Router = mux.NewRouter()
 	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
+
+	get := http.MethodGet
+	//post := http.MethodPost
 
 	s.Router.Handle("/", home()).Methods(get)
 	s.Router.Handle("/login", login()).Methods(get)
