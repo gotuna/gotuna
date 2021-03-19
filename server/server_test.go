@@ -18,6 +18,7 @@ func TestRoutes(t *testing.T) {
 		status int
 	}{
 		{"/", http.MethodGet, http.StatusOK},
+		{"/", http.MethodPost, http.StatusMethodNotAllowed},
 		{"/invalid", http.MethodGet, http.StatusNotFound},
 		{"/login", http.MethodGet, http.StatusOK},
 	}

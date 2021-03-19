@@ -8,12 +8,15 @@ import (
 
 type Server struct{}
 
+const get = http.MethodGet
+const post = http.MethodPost
+
 func NewServer() http.Handler {
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(notFound)
 
-	router.Handle("/", http.HandlerFunc(home))
-	router.Handle("/login", http.HandlerFunc(login))
+	router.Handle("/", http.HandlerFunc(home)).Methods(get)
+	router.Handle("/login", http.HandlerFunc(login)).Methods(get)
 
 	return router
 }
