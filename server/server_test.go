@@ -9,30 +9,47 @@ import (
 	"github.com/alcalbg/gotdd/server"
 )
 
-func TestHome(t *testing.T) {
-	server := server.NewServer()
+func TestRoutes(t *testing.T) {
 
-	request, _ := http.NewRequest(http.MethodGet, "/", nil)
-	response := httptest.NewRecorder()
+	t.Run("test home", func(t *testing.T) {
+		server := server.NewServer()
 
-	server.ServeHTTP(response, request)
+		request, _ := http.NewRequest(http.MethodGet, "/", nil)
+		response := httptest.NewRecorder()
 
-	got := response.Code
-	want := http.StatusOK
+		server.ServeHTTP(response, request)
 
-	assert.Equal(t, got, want)
-}
+		got := response.Code
+		want := http.StatusOK
 
-func TestNotFoundOnInvalidRoute(t *testing.T) {
-	server := server.NewServer()
+		assert.Equal(t, got, want)
+	})
 
-	request, _ := http.NewRequest(http.MethodGet, "/invalid", nil)
-	response := httptest.NewRecorder()
+	t.Run("test not found", func(t *testing.T) {
+		server := server.NewServer()
 
-	server.ServeHTTP(response, request)
+		request, _ := http.NewRequest(http.MethodGet, "/invalid", nil)
+		response := httptest.NewRecorder()
 
-	got := response.Code
-	want := http.StatusNotFound
+		server.ServeHTTP(response, request)
 
-	assert.Equal(t, got, want)
+		got := response.Code
+		want := http.StatusNotFound
+
+		assert.Equal(t, got, want)
+	})
+
+	t.Run("test show login page", func(t *testing.T) {
+		server := server.NewServer()
+
+		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
+		response := httptest.NewRecorder()
+
+		server.ServeHTTP(response, request)
+
+		got := response.Code
+		want := http.StatusOK
+
+		assert.Equal(t, got, want)
+	})
 }
