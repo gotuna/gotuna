@@ -16,14 +16,15 @@ func TestRecoverer(t *testing.T) {
 
 	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var x map[string]int
-		x["y"] = 1 // will panic with: assignment to entry in nil map
+		x["y"] = 1 // this will panic with: assignment to entry in nil map
 	})
 
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest("GET", "/", nil)
+	assert.NoError(t, err)
 	response := httptest.NewRecorder()
 
-	logw := &bytes.Buffer{}
-	logger := log.New(logw, "", 0)
+	wlog := &bytes.Buffer{}
+	logger := log.New(wlog, "", 0)
 	middleware := middleware.Recoverer(logger)
 	handler := middleware(badHandler)
 
@@ -31,6 +32,6 @@ func TestRecoverer(t *testing.T) {
 
 	assert.Equal(t, response.Code, http.StatusInternalServerError)
 	assert.Contains(t, response.Body.String(), util.DefaultError)
-	assert.Contains(t, logw.String(), "assignment to entry in nil map")
+	assert.Contains(t, wlog.String(), "assignment to entry in nil map")
 
 }
