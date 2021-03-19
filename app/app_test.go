@@ -1,4 +1,4 @@
-package server_test
+package app_test
 
 import (
 	"fmt"
@@ -8,8 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/assert"
-	"github.com/alcalbg/gotdd/server"
 )
 
 func TestRoutes(t *testing.T) {
@@ -24,7 +24,7 @@ func TestRoutes(t *testing.T) {
 		{"/login", http.MethodGet, http.StatusOK},
 	}
 
-	srv := server.NewServer(stubLogger())
+	srv := app.NewServer(stubLogger())
 
 	for _, r := range routes {
 		t.Run(fmt.Sprintf("test route %s", r.route), func(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alcalbg/gotdd/server"
+	"github.com/alcalbg/gotdd/app"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 	port := ":8888"
 
 	logger := log.New(os.Stdout, "logger: ", log.Lshortfile)
-	srv := server.NewServer(logger)
+	srv := app.NewServer(logger)
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
