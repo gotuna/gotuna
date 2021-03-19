@@ -11,6 +11,7 @@ import (
 
 	"github.com/alcalbg/gotdd/assert"
 	"github.com/alcalbg/gotdd/server"
+	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRoutes(t *testing.T) {
@@ -71,7 +72,7 @@ func TestPanicWillBeRecovered(t *testing.T) {
 
 	gotBody := response.Body.String()
 
-	assert.Contains(t, gotBody, server.DefaultError)
+	assert.Contains(t, gotBody, util.DefaultError)
 	assert.Contains(t, log.String(), "assignment to entry in nil map")
 
 }
