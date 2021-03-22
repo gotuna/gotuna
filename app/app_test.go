@@ -2,45 +2,14 @@ package app_test
 
 import (
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/gorilla/sessions"
+	"github.com/alcalbg/gotdd/test/stubs"
 )
-
-func newStubLogger() *log.Logger {
-	return log.New(io.Discard, "", 0)
-}
-
-func newStubSessionStore(r *http.Request, userSID string) sessions.Store {
-
-	userSession := sessions.NewSession(nil, session.SessionName)
-	userSession.Values[session.UserSIDKey] = userSID
-
-	return &stubSessionStore{userSession}
-}
-
-type stubSessionStore struct {
-	userSession *sessions.Session
-}
-
-func (session *stubSessionStore) Get(r *http.Request, name string) (*sessions.Session, error) {
-	return session.userSession, nil
-}
-
-func (session *stubSessionStore) New(r *http.Request, name string) (*sessions.Session, error) {
-	return session.userSession, nil
-}
-
-func (session *stubSessionStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
-	return nil
-}
 
 func TestRoutes(t *testing.T) {
 	routes := []struct {
@@ -60,7 +29,7 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			srv := app.NewServer(newStubLogger(), newStubSessionStore(request, ""))
+			srv := app.NewServer(stubs.NewLogger(), stubs.NewSessionStore(request, ""))
 
 			srv.Router.ServeHTTP(response, request)
 
@@ -74,7 +43,7 @@ func TestGuestIsRedirectedToLogin(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	srv := app.NewServer(newStubLogger(), newStubSessionStore(request, ""))
+	srv := app.NewServer(stubs.NewLogger(), stubs.NewSessionStore(request, ""))
 
 	srv.Router.ServeHTTP(response, request)
 
@@ -86,9 +55,7 @@ func TestLoggedInUserCanSeeHome(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	session := newStubSessionStore(request, "123")
-
-	srv := app.NewServer(newStubLogger(), session)
+	srv := app.NewServer(stubs.NewLogger(), stubs.NewSessionStore(request, "123"))
 
 	srv.Router.ServeHTTP(response, request)
 
