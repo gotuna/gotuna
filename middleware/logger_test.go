@@ -13,7 +13,7 @@ import (
 )
 
 func TestLogging(t *testing.T) {
-	req, err := http.NewRequest("GET", "/sample", nil)
+	req, err := http.NewRequest(http.MethodGet, "/sample", nil)
 	assert.NoError(t, err)
 	response := httptest.NewRecorder()
 
@@ -24,6 +24,7 @@ func TestLogging(t *testing.T) {
 
 	handler.ServeHTTP(response, req)
 
+	assert.Contains(t, wlog.String(), "GET")
 	assert.Contains(t, wlog.String(), "/sample")
 }
 
@@ -34,7 +35,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 		x["y"] = 1 // this will panic with: assignment to entry in nil map
 	})
 
-	req, err := http.NewRequest("GET", "/", nil)
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
 	assert.NoError(t, err)
 	response := httptest.NewRecorder()
 
