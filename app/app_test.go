@@ -23,6 +23,7 @@ func TestRoutes(t *testing.T) {
 		{"", "/", http.MethodPost, http.StatusMethodNotAllowed},
 		{"", "/invalid", http.MethodGet, http.StatusNotFound},
 		{"", "/login", http.MethodGet, http.StatusOK},
+		{"123", "/login", http.MethodGet, http.StatusFound},
 	}
 
 	for _, r := range routes {
@@ -38,16 +39,4 @@ func TestRoutes(t *testing.T) {
 			assert.Equal(t, response.Code, r.status)
 		})
 	}
-}
-
-func TestGuestIsRedirectedToLoginPage(t *testing.T) {
-
-	request, _ := http.NewRequest(http.MethodGet, "/", nil)
-	response := httptest.NewRecorder()
-
-	srv := app.NewServer(doubles.NewLogger(), doubles.NewSessionStoreSpy(request, ""))
-
-	srv.Router.ServeHTTP(response, request)
-
-	assert.Redirects(t, response, "/login", http.StatusFound)
 }

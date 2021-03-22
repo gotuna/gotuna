@@ -27,7 +27,7 @@ func TestRedirections(t *testing.T) {
 		assert.Redirects(t, response, "/login", http.StatusFound)
 	})
 
-	t.Run("logged in user should be redirected from login page to home", func(t *testing.T) {
+	t.Run("logged in user should be redirected back from login page", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
@@ -41,12 +41,11 @@ func TestRedirections(t *testing.T) {
 		assert.Redirects(t, response, "/", http.StatusFound)
 	})
 
-	t.Run("requests to public resources should not redirect nor fetch user", func(t *testing.T) {
+	t.Run("requests to public resources should skip checks early", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/public/file.zip", nil)
 		response := httptest.NewRecorder()
 
 		sessionStore := doubles.NewSessionStoreSpy(request, "")
-
 		session := session.NewSession(sessionStore)
 
 		middleware := middleware.AuthRedirector(session)
