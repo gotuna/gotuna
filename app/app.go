@@ -34,17 +34,12 @@ func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 	//s.Router.Handle("/bad", bad())
 
 	s.Router.Use(middleware.Logger(logger))
+	s.Router.Use(middleware.AuthRedirector(s.session))
 
 	return s
 }
 
 func (srv Server) home(w http.ResponseWriter, r *http.Request) {
-	sid, err := srv.session.GetUserSID(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusFound)
-		return
-	}
-	w.Write([]byte(sid))
 }
 
 func login() http.Handler {

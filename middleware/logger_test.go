@@ -13,8 +13,7 @@ import (
 )
 
 func TestLogging(t *testing.T) {
-	req, err := http.NewRequest(http.MethodGet, "/sample", nil)
-	assert.NoError(t, err)
+	request, _ := http.NewRequest(http.MethodGet, "/sample", nil)
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
@@ -22,7 +21,7 @@ func TestLogging(t *testing.T) {
 	middleware := middleware.Logger(logger)
 	handler := middleware(http.NotFoundHandler())
 
-	handler.ServeHTTP(response, req)
+	handler.ServeHTTP(response, request)
 
 	assert.Contains(t, wlog.String(), "GET")
 	assert.Contains(t, wlog.String(), "/sample")
@@ -35,8 +34,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 		x["y"] = 1 // this will panic with: assignment to entry in nil map
 	})
 
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
-	assert.NoError(t, err)
+	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
@@ -44,7 +42,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 	middleware := middleware.Logger(logger)
 	handler := middleware(badHandler)
 
-	handler.ServeHTTP(response, req)
+	handler.ServeHTTP(response, request)
 
 	assert.Equal(t, response.Code, http.StatusInternalServerError)
 	assert.Contains(t, response.Body.String(), util.DefaultError)

@@ -8,7 +8,7 @@ import (
 
 	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/stubs"
+	"github.com/alcalbg/gotdd/test/doubles"
 )
 
 func TestRoutes(t *testing.T) {
@@ -31,7 +31,7 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			srv := app.NewServer(stubs.NewLogger(), stubs.NewSessionStore(request, r.userSID))
+			srv := app.NewServer(doubles.NewLogger(), doubles.NewSessionStoreSpy(request, r.userSID))
 
 			srv.Router.ServeHTTP(response, request)
 
@@ -45,7 +45,7 @@ func TestGuestIsRedirectedToLoginPage(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	srv := app.NewServer(stubs.NewLogger(), stubs.NewSessionStore(request, ""))
+	srv := app.NewServer(doubles.NewLogger(), doubles.NewSessionStoreSpy(request, ""))
 
 	srv.Router.ServeHTTP(response, request)
 

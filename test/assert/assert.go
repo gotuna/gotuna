@@ -14,6 +14,14 @@ func Equal(t *testing.T, got, want interface{}) {
 	}
 }
 
+func Greater(t *testing.T, v1, v2 int) {
+	t.Helper()
+
+	if !(v1 > v2) {
+		t.Errorf(`%s: %d should be greater than %d`, t.Name(), v1, v2)
+	}
+}
+
 func Contains(t *testing.T, s, substring string) {
 	t.Helper()
 
