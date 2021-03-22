@@ -15,7 +15,7 @@ func NewLogger() *log.Logger {
 
 func NewSessionStore(r *http.Request, userSID string) sessions.Store {
 
-	userSession := sessions.NewSession(nil, "stub_session")
+	userSession := sessions.NewSession(nil, "")
 	userSession.Values[session.UserSIDKey] = userSID
 
 	return &stubSessionStore{userSession}
