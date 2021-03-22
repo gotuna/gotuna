@@ -5,20 +5,24 @@ import (
 	"net/http"
 
 	"github.com/alcalbg/gotdd/middleware"
+	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 type Server struct {
-	Router *mux.Router
+	Router       *mux.Router
+	sessionStore sessions.Store
 }
 
-func NewServer(logger *log.Logger) *Server {
+func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 	s := &Server{}
+	s.sessionStore = sessionStore
 
 	s.Router = mux.NewRouter()
 	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
 
-	s.Router.Handle("/", home()).Methods(http.MethodGet)
+	s.Router.Handle("/", http.HandlerFunc(s.home)).Methods(http.MethodGet)
 	s.Router.Handle("/login", login()).Methods(http.MethodGet)
 
 	//bad := func() http.Handler {
@@ -34,9 +38,13 @@ func NewServer(logger *log.Logger) *Server {
 	return s
 }
 
-func home() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	})
+func (srv Server) home(w http.ResponseWriter, r *http.Request) {
+	sid, err := session.GetUserSID(r, srv.sessionStore)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusFound)
+		return
+	}
+	w.Write([]byte(sid))
 }
 
 func login() http.Handler {
