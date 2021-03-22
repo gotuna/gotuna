@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func AuthRedirector(s *session.Session) mux.MiddlewareFunc {
+func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -20,7 +20,7 @@ func AuthRedirector(s *session.Session) mux.MiddlewareFunc {
 				return
 			}
 
-			sid, _ := s.GetUserSID(r)
+			sid, _ := session.GetUserSID(r)
 
 			if sid == "" && path != "/login" {
 				http.Redirect(w, r, "/login", http.StatusFound)

@@ -20,10 +20,10 @@ func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 	s.session = session.NewSession(sessionStore)
 
 	s.Router = mux.NewRouter()
-	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
+	s.Router.NotFoundHandler = s.notFound()
 
-	s.Router.Handle("/", http.HandlerFunc(s.home)).Methods(http.MethodGet)
-	s.Router.Handle("/login", login()).Methods(http.MethodGet)
+	s.Router.Handle("/", s.home()).Methods(http.MethodGet)
+	s.Router.Handle("/login", s.login()).Methods(http.MethodGet)
 
 	//bad := func() http.Handler {
 	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,14 +39,18 @@ func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 	return s
 }
 
-func (srv Server) home(w http.ResponseWriter, r *http.Request) {
-}
-
-func login() http.Handler {
+func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func notFound(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusNotFound)
+func (srv Server) login() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	})
+}
+
+func (srv Server) notFound() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	})
 }

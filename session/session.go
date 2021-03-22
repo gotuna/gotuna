@@ -14,10 +14,10 @@ type Session struct {
 	store sessions.Store
 }
 
-// NewSession returns new session with store
+// NewSession returns new session with requested store
 func NewSession(store sessions.Store) *Session {
 	if store == nil {
-		panic("Must supply a session store")
+		panic("Must supply a valid session store")
 	}
 
 	return &Session{store: store}
