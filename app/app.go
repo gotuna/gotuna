@@ -11,13 +11,13 @@ import (
 )
 
 type Server struct {
-	Router       *mux.Router
-	sessionStore sessions.Store
+	Router  *mux.Router
+	session *session.Session
 }
 
 func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 	s := &Server{}
-	s.sessionStore = sessionStore
+	s.session = session.NewSession(sessionStore)
 
 	s.Router = mux.NewRouter()
 	s.Router.NotFoundHandler = http.HandlerFunc(notFound)
@@ -39,7 +39,7 @@ func NewServer(logger *log.Logger, sessionStore sessions.Store) *Server {
 }
 
 func (srv Server) home(w http.ResponseWriter, r *http.Request) {
-	sid, err := session.GetUserSID(r, srv.sessionStore)
+	sid, err := srv.session.GetUserSID(r)
 	if err != nil {
 		http.Redirect(w, r, "/login", http.StatusFound)
 		return

@@ -22,26 +22,25 @@ const keyPair = "1234"
 
 func newStubSessionStore(r *http.Request, userSID string) sessions.Store {
 
-	cookieStore := sessions.NewCookieStore([]byte(keyPair))
-	s := sessions.NewSession(cookieStore, session.SessionName)
-	s.Values[session.UserSIDKey] = userSID
+	userSession := sessions.NewSession(nil, session.SessionName)
+	userSession.Values[session.UserSIDKey] = userSID
 
-	return &stubUserSession{s}
+	return &stubSessionStore{userSession}
 }
 
-type stubUserSession struct {
-	session *sessions.Session
+type stubSessionStore struct {
+	userSession *sessions.Session
 }
 
-func (session *stubUserSession) Get(r *http.Request, name string) (*sessions.Session, error) {
-	return session.session, nil
+func (session *stubSessionStore) Get(r *http.Request, name string) (*sessions.Session, error) {
+	return session.userSession, nil
 }
 
-func (session *stubUserSession) New(r *http.Request, name string) (*sessions.Session, error) {
-	return session.session, nil
+func (session *stubSessionStore) New(r *http.Request, name string) (*sessions.Session, error) {
+	return session.userSession, nil
 }
 
-func (session *stubUserSession) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
+func (session *stubSessionStore) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
 	return nil
 }
 
