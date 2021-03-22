@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd/assert"
 	"github.com/alcalbg/gotdd/middleware"
+	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/util"
 )
 

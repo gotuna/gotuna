@@ -9,16 +9,14 @@ import (
 	"testing"
 
 	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/assert"
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/gorilla/sessions"
 )
 
 func newStubLogger() *log.Logger {
 	return log.New(io.Discard, "", 0)
 }
-
-const keyPair = "1234"
 
 func newStubSessionStore(r *http.Request, userSID string) sessions.Store {
 

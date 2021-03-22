@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd/assert"
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/gorilla/sessions"
 )
 
