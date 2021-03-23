@@ -12,6 +12,7 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gorilla/sessions"
 )
 
 func TestRoutes(t *testing.T) {
@@ -38,8 +39,8 @@ func TestRoutes(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			srv := app.NewServer(
-				doubles.NewLogger(),
-				doubles.NewSessionStoreSpy(request, r.userSID),
+				doubles.StubLogger(),
+				sessions.NewSession(doubles.SessionStore(request, r.userSID), ""),
 				doubles.NewUserRepository(app.User{}),
 			)
 
@@ -59,11 +60,12 @@ func TestLogin(t *testing.T) {
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	response := httptest.NewRecorder()
 
-	sessionStoreSpy := doubles.NewSessionStoreSpy(request, "")
+	sessionStorageSpy := doubles.SessionStore(request, "")
+	sessionStub := sessions.NewSession(sessionStorageSpy, "")
 
 	srv := app.NewServer(
-		doubles.NewLogger(),
-		sessionStoreSpy,
+		doubles.StubLogger(),
+		sessionStub,
 		doubles.NewUserRepository(app.User{
 			SID:          "123",
 			Email:        "john@example.com",
@@ -75,7 +77,7 @@ func TestLogin(t *testing.T) {
 
 	assert.Redirects(t, response, "/", http.StatusFound)
 
-	s, err := sessionStoreSpy.Get(request, "")
+	s, err := sessionStorageSpy.Get(request, "")
 	assert.NoError(t, err)
 	assert.Equal(t, s.Values[session.UserSIDKey], "123")
 }

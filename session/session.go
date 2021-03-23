@@ -8,10 +8,10 @@ import (
 )
 
 const UserSIDKey = "user_sid"
-const sessionName = "app_session"
+const SessionName = "app_session"
 
 type Session struct {
-	store sessions.Store
+	Store sessions.Store
 }
 
 // NewSession returns new session with requested store
@@ -20,11 +20,11 @@ func NewSession(store sessions.Store) *Session {
 		panic("Must supply a valid session store")
 	}
 
-	return &Session{store: store}
+	return &Session{Store: store}
 }
 
 func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) error {
-	session, err := s.store.Get(r, sessionName)
+	session, err := s.Store.Get(r, SessionName)
 	if err != nil {
 		return errors.New("Cannot get session from the store")
 	}
@@ -39,7 +39,7 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 }
 
 func (s Session) GetUserSID(r *http.Request) (string, error) {
-	session, err := s.store.Get(r, sessionName)
+	session, err := s.Store.Get(r, SessionName)
 	if err != nil {
 		return "", errors.New("Cannot get a session from the store")
 	}
@@ -53,7 +53,7 @@ func (s Session) GetUserSID(r *http.Request) (string, error) {
 }
 
 func (s Session) DestroySession(r *http.Request) error {
-	session, err := s.store.Get(r, sessionName)
+	session, err := s.Store.Get(r, SessionName)
 	if err != nil {
 		return errors.New("Cannot get a session from the store")
 	}

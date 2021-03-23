@@ -10,24 +10,23 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func NewLogger() *log.Logger {
+func StubLogger() *log.Logger {
 	return log.New(io.Discard, "", 0)
 }
 
-func NewSessionStoreSpy(r *http.Request, userSID string) *SessionStoreSpy {
+func SessionStore(r *http.Request, userSID string) *SessionStoreSpy {
 
 	userSession := sessions.NewSession(&SessionStoreSpy{}, "")
 	userSession.Values[session.UserSIDKey] = userSID
 
-	return &SessionStoreSpy{
-		Session:  userSession,
-		GetCalls: 0,
-	}
+	return &SessionStoreSpy{Session: userSession}
 }
 
 type SessionStoreSpy struct {
-	Session  *sessions.Session
-	GetCalls int
+	Session   *sessions.Session
+	GetCalls  int
+	NewCalls  int
+	SaveCalls int
 }
 
 func (stub *SessionStoreSpy) Get(r *http.Request, name string) (*sessions.Session, error) {
@@ -36,10 +35,12 @@ func (stub *SessionStoreSpy) Get(r *http.Request, name string) (*sessions.Sessio
 }
 
 func (stub *SessionStoreSpy) New(r *http.Request, name string) (*sessions.Session, error) {
+	stub.NewCalls++
 	return stub.Session, nil
 }
 
 func (stub *SessionStoreSpy) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
+	stub.SaveCalls++
 	return nil
 }
 

@@ -28,9 +28,9 @@ type Server struct {
 	userRepository UserRepository
 }
 
-func NewServer(logger *log.Logger, sessionStore sessions.Store, userRepository UserRepository) *Server {
+func NewServer(logger *log.Logger, gs *sessions.Session, userRepository UserRepository) *Server {
 	s := &Server{}
-	s.session = session.NewSession(sessionStore)
+	s.session = &session.Session{Store: gs.Store()}
 	s.userRepository = userRepository
 
 	s.Router = mux.NewRouter()

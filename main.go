@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/alcalbg/gotdd/app"
+	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/sessions"
 )
 
@@ -17,7 +18,7 @@ func main() {
 	logger := log.New(os.Stdout, "", 0)
 
 	cookieStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
-	srv := app.NewServer(logger, cookieStore)
+	srv := app.NewServer(logger, sessions.NewSession(cookieStore, session.SessionName))
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
