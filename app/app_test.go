@@ -68,6 +68,32 @@ func TestLogin(t *testing.T) {
 		assert.Contains(t, response.Body.String(), "Log In")
 	})
 
+	t.Run("test submit non existing user", func(t *testing.T) {
+		data := url.Values{}
+		data.Set("email", "nonexisting@example.com")
+		data.Set("password", "bad")
+
+		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
+		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		response := httptest.NewRecorder()
+		srv := newStubServer()
+		srv.Router.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, http.StatusUnauthorized)
+	})
+
+	t.Run("test submit bad credentials", func(t *testing.T) {
+		data := url.Values{}
+		data.Set("email", stubUser().Email)
+		data.Set("password", "bad")
+
+		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
+		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		response := httptest.NewRecorder()
+		srv := newStubServer()
+		srv.Router.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, http.StatusUnauthorized)
+	})
+
 	t.Run("test submit login form and go to the home page", func(t *testing.T) {
 		data := url.Values{}
 		data.Set("email", stubUser().Email)
@@ -77,13 +103,13 @@ func TestLogin(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
-		srv := NewStubServer()
+		srv := newStubServer()
 		srv.Router.ServeHTTP(response, request)
 		assert.Redirects(t, response, "/", http.StatusFound)
 		gotCookies := response.Result().Cookies()
 
 		// step2: user shoud stay on the home page
-		srv = NewStubServer()
+		srv = newStubServer()
 		request, _ = http.NewRequest(http.MethodGet, "/", nil)
 		response = httptest.NewRecorder()
 		for _, c := range gotCookies {
@@ -95,7 +121,7 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func NewStubServer() *app.Server {
+func newStubServer() *app.Server {
 	cookieKey := "abc"
 	srv := app.NewServer(
 		doubles.NewLoggerStub(),

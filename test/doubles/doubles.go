@@ -1,6 +1,7 @@
 package doubles
 
 import (
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -52,5 +53,8 @@ type UserRepositoryStub struct {
 }
 
 func (u UserRepositoryStub) GetUserByEmail(email string) (app.User, error) {
+	if u.user.Email != email {
+		return app.User{}, errors.New("no user")
+	}
 	return u.user, nil
 }
