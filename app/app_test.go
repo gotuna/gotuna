@@ -15,7 +15,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func TestRoutes(t *testing.T) {
+func TestRoutesWithUsersAndGuests(t *testing.T) {
 	routes := []struct {
 		userSID string
 		route   string
@@ -52,23 +52,18 @@ func TestRoutes(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	t.Run("test show login template", func(t *testing.T) {
+	t.Run("show login template", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		srv := app.NewServer(
-			doubles.NewLoggerStub(),
-			session.NewSession(doubles.NewSessionStoreSpy(session.GuestSID)),
-			doubles.NewUserRepositoryStub(app.User{}),
-		)
-
+		srv := stubServer()
 		srv.Router.ServeHTTP(response, request)
 
 		assert.Equal(t, response.Code, http.StatusOK)
 		assert.Contains(t, response.Body.String(), "Log In")
 	})
 
-	t.Run("test submit non existing user", func(t *testing.T) {
+	t.Run("submit login with non-existing user", func(t *testing.T) {
 		data := url.Values{}
 		data.Set("email", "nonexisting@example.com")
 		data.Set("password", "bad")
@@ -76,12 +71,12 @@ func TestLogin(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
-		srv := newStubServer()
+		srv := stubServer()
 		srv.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 	})
 
-	t.Run("test submit bad credentials", func(t *testing.T) {
+	t.Run("submit login bad password", func(t *testing.T) {
 		data := url.Values{}
 		data.Set("email", stubUser().Email)
 		data.Set("password", "bad")
@@ -89,27 +84,27 @@ func TestLogin(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
-		srv := newStubServer()
+		srv := stubServer()
 		srv.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 	})
 
-	t.Run("test submit login form and go to the home page", func(t *testing.T) {
+	t.Run("submit successful login and go to the home page", func(t *testing.T) {
 		data := url.Values{}
 		data.Set("email", stubUser().Email)
 		data.Set("password", "pass123")
 
 		// step1: after successful login, user is redirected to the home page
+		srv := stubServer()
 		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
-		srv := newStubServer()
 		srv.Router.ServeHTTP(response, request)
 		assert.Redirects(t, response, "/", http.StatusFound)
 		gotCookies := response.Result().Cookies()
 
 		// step2: user shoud stay on the home page
-		srv = newStubServer()
+		srv = stubServer()
 		request, _ = http.NewRequest(http.MethodGet, "/", nil)
 		response = httptest.NewRecorder()
 		for _, c := range gotCookies {
@@ -117,11 +112,10 @@ func TestLogin(t *testing.T) {
 		}
 		srv.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
-
 	})
 }
 
-func newStubServer() *app.Server {
+func stubServer() *app.Server {
 	cookieKey := "abc"
 	srv := app.NewServer(
 		doubles.NewLoggerStub(),
