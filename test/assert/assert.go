@@ -6,19 +6,19 @@ import (
 	"testing"
 )
 
-func Equal(t *testing.T, got, want interface{}) {
+func Equal(t *testing.T, a, b interface{}) {
 	t.Helper()
 
-	if got != want {
-		t.Errorf(`%s: got "%v" want "%v"`, t.Name(), got, want)
+	if a != b {
+		t.Errorf(`%s: "%v" and "%v" should be equal`, t.Name(), a, b)
 	}
 }
 
-func Greater(t *testing.T, v1, v2 int) {
+func Greater(t *testing.T, a, b int) {
 	t.Helper()
 
-	if !(v1 > v2) {
-		t.Errorf(`%s: %d should be greater than %d`, t.Name(), v1, v2)
+	if !(a > b) {
+		t.Errorf(`%s: %d should be greater than %d`, t.Name(), a, b)
 	}
 }
 

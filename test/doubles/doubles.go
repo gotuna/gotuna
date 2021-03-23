@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/sessions"
 )
@@ -15,29 +16,41 @@ func NewLogger() *log.Logger {
 
 func NewSessionStoreSpy(r *http.Request, userSID string) *SessionStoreSpy {
 
-	userSession := sessions.NewSession(nil, "")
+	userSession := sessions.NewSession(&SessionStoreSpy{}, "")
 	userSession.Values[session.UserSIDKey] = userSID
 
 	return &SessionStoreSpy{
-		userSession: userSession,
-		GetCalls:    0,
+		Session:  userSession,
+		GetCalls: 0,
 	}
 }
 
 type SessionStoreSpy struct {
-	userSession *sessions.Session
-	GetCalls    int
+	Session  *sessions.Session
+	GetCalls int
 }
 
 func (stub *SessionStoreSpy) Get(r *http.Request, name string) (*sessions.Session, error) {
 	stub.GetCalls++
-	return stub.userSession, nil
+	return stub.Session, nil
 }
 
 func (stub *SessionStoreSpy) New(r *http.Request, name string) (*sessions.Session, error) {
-	return stub.userSession, nil
+	return stub.Session, nil
 }
 
 func (stub *SessionStoreSpy) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
 	return nil
+}
+
+func NewUserRepository(user app.User) UserRepository {
+	return UserRepository{user}
+}
+
+type UserRepository struct {
+	user app.User
+}
+
+func (u UserRepository) GetUserByEmail(email string) (app.User, error) {
+	return u.user, nil
 }

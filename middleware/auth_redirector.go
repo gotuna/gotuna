@@ -22,11 +22,11 @@ func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
 
 			sid, _ := session.GetUserSID(r)
 
-			if sid == "" && path != "/login" {
+			if sid == "" && path != "/login" && path != "/register" {
 				http.Redirect(w, r, "/login", http.StatusFound)
 			}
 
-			if sid != "" && path == "/login" {
+			if sid != "" && (path == "/login" || path == "/register") {
 				http.Redirect(w, r, "/", http.StatusFound)
 			}
 

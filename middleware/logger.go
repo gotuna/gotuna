@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -21,6 +22,8 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 					// log error and stack trace to console
 					logger.Printf("PANIC RECOVERED: %v", err)
 					logger.Println(string(debug.Stack()))
+
+					fmt.Println(err, string(debug.Stack()))
 
 					w.WriteHeader(http.StatusInternalServerError)
 					w.Write([]byte(util.DefaultError))
