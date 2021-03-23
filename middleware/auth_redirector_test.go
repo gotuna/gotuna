@@ -13,7 +13,7 @@ import (
 
 func TestRedirections(t *testing.T) {
 
-	t.Run("guest is redirected to login page", func(t *testing.T) {
+	t.Run("guest is redirected to the login page", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
@@ -27,7 +27,7 @@ func TestRedirections(t *testing.T) {
 		assert.Redirects(t, response, "/login", http.StatusFound)
 	})
 
-	t.Run("logged in user should be redirected back from login page", func(t *testing.T) {
+	t.Run("logged in user should be redirected back from the login page", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
