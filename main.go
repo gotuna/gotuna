@@ -44,7 +44,7 @@ func main() {
 
 	srv := app.NewServer(
 		log.New(os.Stdout, "", 0),
-		sessions.NewSession(cookieStore, session.SessionName),
+		session.NewSession(cookieStore),
 		NewMemoryUserRepository(),
 	)
 

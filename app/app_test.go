@@ -12,7 +12,6 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
-	"github.com/gorilla/sessions"
 )
 
 func TestRoutes(t *testing.T) {
@@ -40,7 +39,7 @@ func TestRoutes(t *testing.T) {
 
 			srv := app.NewServer(
 				doubles.StubLogger(),
-				sessions.NewSession(doubles.NewSessionStore(r.userSID), ""),
+				session.NewSession(doubles.NewSessionStoreSpy(r.userSID)),
 				doubles.NewUserRepository(app.User{}),
 			)
 
@@ -58,7 +57,7 @@ func TestLogin(t *testing.T) {
 
 		srv := app.NewServer(
 			doubles.StubLogger(),
-			doubles.StubSession(),
+			session.NewSession(doubles.NewSessionStoreSpy("")),
 			doubles.NewUserRepository(app.User{}),
 		)
 
@@ -77,12 +76,11 @@ func TestLogin(t *testing.T) {
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
 
-		sessionStorageSpy := doubles.NewSessionStore("")
-		sessionStub := sessions.NewSession(sessionStorageSpy, "")
+		sessionStorageSpy := doubles.NewSessionStoreSpy("")
 
 		srv := app.NewServer(
 			doubles.StubLogger(),
-			sessionStub,
+			session.NewSession(sessionStorageSpy),
 			doubles.NewUserRepository(app.User{
 				SID:          "123",
 				Email:        "john@example.com",

@@ -13,7 +13,7 @@ import (
 func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 
 	request := &http.Request{}
-	session := session.NewSession(doubles.NewSessionStore(""))
+	session := session.NewSession(doubles.NewSessionStoreSpy(""))
 
 	sid, err := session.GetUserSID(request)
 	assert.Error(t, err)
@@ -23,7 +23,7 @@ func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 func TestSaveUserSIDAndRetrieve(t *testing.T) {
 
 	request := &http.Request{}
-	session := session.NewSession(doubles.NewSessionStore(""))
+	session := session.NewSession(doubles.NewSessionStoreSpy(""))
 	response := httptest.ResponseRecorder{}
 
 	err := session.SetUserSID(&response, request, "333")
@@ -37,7 +37,7 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 func TestDestroyActiveSession(t *testing.T) {
 
 	request := &http.Request{}
-	session := session.NewSession(doubles.NewSessionStore(""))
+	session := session.NewSession(doubles.NewSessionStoreSpy(""))
 	response := httptest.ResponseRecorder{}
 
 	session.SetUserSID(&response, request, "333")

@@ -9,7 +9,6 @@ import (
 	"github.com/alcalbg/gotdd/render"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -29,18 +28,18 @@ type Server struct {
 	userRepository UserRepository
 }
 
-func NewServer(logger *log.Logger, gs *sessions.Session, userRepository UserRepository) *Server {
-	s := &Server{}
-	s.session = &session.Session{Store: gs.Store()}
-	s.userRepository = userRepository
+func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
+	srv := &Server{}
+	srv.session = s
+	srv.userRepository = userRepository
 
-	s.Router = mux.NewRouter()
-	s.Router.NotFoundHandler = s.notFound()
+	srv.Router = mux.NewRouter()
+	srv.Router.NotFoundHandler = srv.notFound()
 
-	s.Router.Handle("/", s.home()).Methods(http.MethodGet)
-	s.Router.Handle("/login", s.login()).Methods(http.MethodGet)
-	s.Router.Handle("/login", s.loginSubmit()).Methods(http.MethodPost)
-	s.Router.Handle("/register", s.login()).Methods(http.MethodGet, http.MethodPost)
+	srv.Router.Handle("/", srv.home()).Methods(http.MethodGet)
+	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet)
+	srv.Router.Handle("/login", srv.loginSubmit()).Methods(http.MethodPost)
+	srv.Router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
 	//bad := func() http.Handler {
 	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,10 +49,10 @@ func NewServer(logger *log.Logger, gs *sessions.Session, userRepository UserRepo
 	//}
 	//s.Router.Handle("/bad", bad())
 
-	s.Router.Use(middleware.Logger(logger))
-	s.Router.Use(middleware.AuthRedirector(s.session))
+	srv.Router.Use(middleware.Logger(logger))
+	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
-	return s
+	return srv
 }
 
 func (srv Server) home() http.Handler {
