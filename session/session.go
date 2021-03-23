@@ -53,13 +53,17 @@ func (s Session) GetUserSID(r *http.Request) (string, error) {
 	return sid, nil
 }
 
-func (s Session) DestroySession(r *http.Request) error {
+func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
 	session, err := s.Store.Get(r, SessionName)
 	if err != nil {
 		return errors.New("Cannot get a session from the store")
 	}
 
 	delete(session.Values, UserSIDKey)
+
+	if err = s.Store.Save(r, w, session); err != nil {
+		return errors.New("Cannot store to session")
+	}
 
 	return nil
 }
