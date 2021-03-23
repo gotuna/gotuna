@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func StubLogger() *log.Logger {
+func NewLoggerStub() *log.Logger {
 	return log.New(io.Discard, "", 0)
 }
 
@@ -43,14 +43,14 @@ func (stub *SessionStoreSpy) Save(r *http.Request, w http.ResponseWriter, s *ses
 	return nil
 }
 
-func NewUserRepository(user app.User) UserRepository {
-	return UserRepository{user}
+func NewUserRepositoryStub(user app.User) UserRepositoryStub {
+	return UserRepositoryStub{user}
 }
 
-type UserRepository struct {
+type UserRepositoryStub struct {
 	user app.User
 }
 
-func (u UserRepository) GetUserByEmail(email string) (app.User, error) {
+func (u UserRepositoryStub) GetUserByEmail(email string) (app.User, error) {
 	return u.user, nil
 }

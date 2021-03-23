@@ -38,9 +38,9 @@ func TestRoutes(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			srv := app.NewServer(
-				doubles.StubLogger(),
+				doubles.NewLoggerStub(),
 				session.NewSession(doubles.NewSessionStoreSpy(r.userSID)),
-				doubles.NewUserRepository(app.User{}),
+				doubles.NewUserRepositoryStub(app.User{}),
 			)
 
 			srv.Router.ServeHTTP(response, request)
@@ -56,9 +56,9 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		srv := app.NewServer(
-			doubles.StubLogger(),
+			doubles.NewLoggerStub(),
 			session.NewSession(doubles.NewSessionStoreSpy("")),
-			doubles.NewUserRepository(app.User{}),
+			doubles.NewUserRepositoryStub(app.User{}),
 		)
 
 		srv.Router.ServeHTTP(response, request)
@@ -79,9 +79,9 @@ func TestLogin(t *testing.T) {
 		sessionStorageSpy := doubles.NewSessionStoreSpy("")
 
 		srv := app.NewServer(
-			doubles.StubLogger(),
+			doubles.NewLoggerStub(),
 			session.NewSession(sessionStorageSpy),
-			doubles.NewUserRepository(app.User{
+			doubles.NewUserRepositoryStub(app.User{
 				SID:          "123",
 				Email:        "john@example.com",
 				PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
