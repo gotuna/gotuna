@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+const GuestSID = ""
 const UserSIDKey = "user_sid"
 const SessionName = "app_session"
 
@@ -31,7 +32,7 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 
 	session.Values[UserSIDKey] = sid
 
-	if err = session.Save(r, w); err != nil {
+	if err = s.Store.Save(r, w, session); err != nil {
 		return errors.New("Cannot store to session")
 	}
 
@@ -41,12 +42,12 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 func (s Session) GetUserSID(r *http.Request) (string, error) {
 	session, err := s.Store.Get(r, SessionName)
 	if err != nil {
-		return "", errors.New("Cannot get a session from the store")
+		return GuestSID, errors.New("Cannot get a session from the store")
 	}
 
 	sid, ok := session.Values[UserSIDKey].(string)
-	if !ok || sid == "" {
-		return "", errors.New("No user in the session")
+	if !ok || sid == GuestSID {
+		return GuestSID, errors.New("No user in the session")
 	}
 
 	return sid, nil

@@ -57,7 +57,7 @@ func TestLogin(t *testing.T) {
 
 		srv := app.NewServer(
 			doubles.NewLoggerStub(),
-			session.NewSession(doubles.NewSessionStoreSpy("")),
+			session.NewSession(doubles.NewSessionStoreSpy(session.GuestSID)),
 			doubles.NewUserRepositoryStub(app.User{}),
 		)
 
@@ -76,7 +76,7 @@ func TestLogin(t *testing.T) {
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
 
-		sessionStorageSpy := doubles.NewSessionStoreSpy("")
+		sessionStorageSpy := doubles.NewSessionStoreSpy(session.GuestSID)
 
 		srv := app.NewServer(
 			doubles.NewLoggerStub(),
