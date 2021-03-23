@@ -19,6 +19,8 @@ func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 	sid, err := ses.GetUserSID(request)
 	assert.Error(t, err)
 	assert.Equal(t, sid, session.GuestSID)
+	assert.Equal(t, sessionStoreSpy.GetCalls, 1)
+	assert.Equal(t, sessionStoreSpy.SaveCalls, 0)
 }
 
 func TestSaveUserSIDAndRetrieve(t *testing.T) {
