@@ -1,0 +1,62 @@
+{{- define "app" -}}
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>{{block "title" .}}{{end}}</title>
+      <link rel="stylesheet" href="/public/bulma/bulma.min.css">
+      <link rel="stylesheet" href="/public/style.css?{{.Ver}}">
+    </head>
+    <body>
+
+      {{if .Data.user}}
+        <nav class="navbar is-info" role="navigation" aria-label="main navigation">
+          <div class="container">
+            <div class="navbar-brand">
+              <a class="navbar-item" href="/">
+                Home
+              </a>
+              <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarmenu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+              </a>
+            </div>
+            <div id="navbarmenu" class="navbar-menu">
+              <div class="navbar-end">
+                <div class="navbar-item has-dropdown is-hoverable">
+                  <a class="navbar-link">
+                    {{.Data.user.Name}}
+                  </a>
+                  <div class="navbar-dropdown is-right">
+                    <a class="navbar-item" href="/profile">
+                      Profile
+                    </a>
+                    <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                      <form id="logout-form" method="POST" action="/logout">
+                        {{.Data.csrf}}
+                        {{.Lang.T "Log Out"}}
+                      </form>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </nav>
+      {{end}}
+
+      <section class="section">
+        <div class="container">
+          {{block "content" .}}{{end}}
+        </div>
+      </section>
+
+      <script type="text/javascript" src="/public/script.js?{{.Ver}}"></script>
+      {{block "additional_scripts" .}}{{end}}
+
+    </body>
+  </html>
+
+{{- end -}}

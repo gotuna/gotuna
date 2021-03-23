@@ -7,13 +7,13 @@ import (
 
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/gorilla/sessions"
+	"github.com/alcalbg/gotdd/test/doubles"
 )
 
 func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 
-	session := session.NewSession(sessions.NewCookieStore([]byte("123")))
 	request := &http.Request{}
+	session := session.NewSession(doubles.NewSessionStore(""))
 
 	sid, err := session.GetUserSID(request)
 	assert.Error(t, err)
@@ -22,8 +22,8 @@ func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 
 func TestSaveUserSIDAndRetrieve(t *testing.T) {
 
-	session := session.NewSession(sessions.NewCookieStore([]byte("123")))
 	request := &http.Request{}
+	session := session.NewSession(doubles.NewSessionStore(""))
 	response := httptest.ResponseRecorder{}
 
 	err := session.SetUserSID(&response, request, "333")
@@ -36,8 +36,8 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 
 func TestDestroyActiveSession(t *testing.T) {
 
-	session := session.NewSession(sessions.NewCookieStore([]byte("123")))
 	request := &http.Request{}
+	session := session.NewSession(doubles.NewSessionStore(""))
 	response := httptest.ResponseRecorder{}
 
 	session.SetUserSID(&response, request, "333")

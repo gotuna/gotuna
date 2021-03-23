@@ -19,7 +19,8 @@ type MemoryUserRepository struct {
 func NewMemoryUserRepository() app.UserRepository {
 	repo := &MemoryUserRepository{}
 	repo.users = []app.User{
-		app.User{SID: "1", Email: "alcalbg@gmail.com", PasswordHash: ""},
+		app.User{SID: "1", Email: "alcalbg@gmail.com", PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm"}, // pass123
+		app.User{SID: "2", Email: "admin@example.com", PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm"}, // pass123
 	}
 	return repo
 }
@@ -40,6 +41,7 @@ func main() {
 	port := ":8888"
 
 	cookieStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
+
 	srv := app.NewServer(
 		log.New(os.Stdout, "", 0),
 		sessions.NewSession(cookieStore, session.SessionName),

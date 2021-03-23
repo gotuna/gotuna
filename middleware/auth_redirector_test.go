@@ -17,7 +17,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
-		session := session.NewSession(doubles.SessionStore(request, ""))
+		session := session.NewSession(doubles.NewSessionStore(""))
 
 		middleware := middleware.AuthRedirector(session)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -31,7 +31,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		session := session.NewSession(doubles.SessionStore(request, "123"))
+		session := session.NewSession(doubles.NewSessionStore("123"))
 
 		middleware := middleware.AuthRedirector(session)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -45,7 +45,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/public/file.zip", nil)
 		response := httptest.NewRecorder()
 
-		sessionStore := doubles.SessionStore(request, "")
+		sessionStore := doubles.NewSessionStore("")
 		session := session.NewSession(sessionStore)
 
 		middleware := middleware.AuthRedirector(session)

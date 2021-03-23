@@ -1,0 +1,9 @@
+{{define "title"}}Internal Server Error{{end}}
+
+{{define "content"}}
+  Internal Server Error
+  {{if eq .Data.env "development" }}
+  <pre>{{.Data.error}}</pre>
+  <pre>{{.Data.stacktrace}}</pre>
+  {{end}}
+{{end}}

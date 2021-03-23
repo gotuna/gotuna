@@ -14,8 +14,11 @@ func StubLogger() *log.Logger {
 	return log.New(io.Discard, "", 0)
 }
 
-func SessionStore(r *http.Request, userSID string) *SessionStoreSpy {
+func StubSession() *sessions.Session {
+	return sessions.NewSession(NewSessionStore(""), "")
+}
 
+func NewSessionStore(userSID string) *SessionStoreSpy {
 	userSession := sessions.NewSession(&SessionStoreSpy{}, "")
 	userSession.Values[session.UserSIDKey] = userSID
 

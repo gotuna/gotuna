@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/alcalbg/gotdd/middleware"
+	"github.com/alcalbg/gotdd/render"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -37,7 +38,8 @@ func NewServer(logger *log.Logger, gs *sessions.Session, userRepository UserRepo
 	s.Router.NotFoundHandler = s.notFound()
 
 	s.Router.Handle("/", s.home()).Methods(http.MethodGet)
-	s.Router.Handle("/login", s.login()).Methods(http.MethodGet, http.MethodPost)
+	s.Router.Handle("/login", s.login()).Methods(http.MethodGet)
+	s.Router.Handle("/login", s.loginSubmit()).Methods(http.MethodPost)
 	s.Router.Handle("/register", s.login()).Methods(http.MethodGet, http.MethodPost)
 
 	//bad := func() http.Handler {
@@ -61,6 +63,14 @@ func (srv Server) home() http.Handler {
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t := render.NewTemplate("login.html")
+		t.Render(w, r, http.StatusOK)
+	})
+}
+
+func (srv Server) loginSubmit() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 		password := r.FormValue("password")
 

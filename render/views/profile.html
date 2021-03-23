@@ -1,0 +1,43 @@
+{{define "title"}}{{.Lang.T "Profile"}}{{end}}
+
+{{define "content"}}
+  <div class="columns">
+    <div class="column">
+    <form method="POST" action="/profile">
+      {{.Data.csrf}}
+      <div class="field">
+        <label class="label">{{.Lang.T "Email"}}</label>
+        <div class="control">
+          <input class="input" value="{{.Data.user.Email}}" disabled>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">{{.Lang.T "Name"}}</label>
+        <div class="control">
+          <input class="input {{if index .Errors "name"}}is-danger{{end}}" type="name" name="name" placeholder="{{.Lang.T "Name"}}" value="{{.Data.user.Name}}">
+        </div>
+        <p class="help is-danger">{{index .Errors "name"}}</p>
+      </div>
+      <div class="field">
+        <label class="label">{{.Lang.T "New Password"}}</label>
+        <div class="control">
+          <input class="input {{if index .Errors "new_password"}}is-danger{{end}}" type="password" name="new_password" placeholder="{{.Lang.T "Leave blank if you don't want to change it"}}">
+        </div>
+        <p class="help is-danger">{{index .Errors "new_password"}}</p>
+      </div>
+      <div class="field">
+        <label class="label">{{.Lang.T "Repeat Password"}}</label>
+        <div class="control">
+          <input class="input {{if index .Errors "repeat_password"}}is-danger{{end}}" type="password" name="repeat_password" placeholder="{{.Lang.T "Leave blank if you don't want to change it"}}">
+        </div>
+        <p class="help is-danger">{{index .Errors "repeat_password"}}</p>
+      </div>
+      <div class="field is-grouped mt-5">
+        <div class="control">
+          <button class="button is-link">{{.Lang.T "Submit"}}</button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+{{end}}

@@ -1,0 +1,13 @@
+/* css styles */
+#guest-form {
+  margin: 0 auto;
+  max-width: 400px;
+}
+.notification-wrap {
+  position: absolute;
+  width: 100%;
+}
+.notification {
+  z-index: 10;
+  margin: 0;
+}

@@ -40,7 +40,7 @@ func TestRoutes(t *testing.T) {
 
 			srv := app.NewServer(
 				doubles.StubLogger(),
-				sessions.NewSession(doubles.SessionStore(request, r.userSID), ""),
+				sessions.NewSession(doubles.NewSessionStore(r.userSID), ""),
 				doubles.NewUserRepository(app.User{}),
 			)
 
@@ -52,32 +52,50 @@ func TestRoutes(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	data := url.Values{}
-	data.Set("email", "john@example.com")
-	data.Set("password", "pass123")
+	t.Run("test show login template", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
+		response := httptest.NewRecorder()
 
-	request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
-	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	response := httptest.NewRecorder()
+		srv := app.NewServer(
+			doubles.StubLogger(),
+			doubles.StubSession(),
+			doubles.NewUserRepository(app.User{}),
+		)
 
-	sessionStorageSpy := doubles.SessionStore(request, "")
-	sessionStub := sessions.NewSession(sessionStorageSpy, "")
+		srv.Router.ServeHTTP(response, request)
 
-	srv := app.NewServer(
-		doubles.StubLogger(),
-		sessionStub,
-		doubles.NewUserRepository(app.User{
-			SID:          "123",
-			Email:        "john@example.com",
-			PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
-		}),
-	)
+		assert.Equal(t, response.Code, http.StatusOK)
+		assert.Contains(t, response.Body.String(), "Log In")
+	})
 
-	srv.Router.ServeHTTP(response, request)
+	t.Run("test submit login form should save user to session", func(t *testing.T) {
+		data := url.Values{}
+		data.Set("email", "john@example.com")
+		data.Set("password", "pass123")
 
-	assert.Redirects(t, response, "/", http.StatusFound)
+		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
+		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+		response := httptest.NewRecorder()
 
-	s, err := sessionStorageSpy.Get(request, "")
-	assert.NoError(t, err)
-	assert.Equal(t, s.Values[session.UserSIDKey], "123")
+		sessionStorageSpy := doubles.NewSessionStore("")
+		sessionStub := sessions.NewSession(sessionStorageSpy, "")
+
+		srv := app.NewServer(
+			doubles.StubLogger(),
+			sessionStub,
+			doubles.NewUserRepository(app.User{
+				SID:          "123",
+				Email:        "john@example.com",
+				PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
+			}),
+		)
+
+		srv.Router.ServeHTTP(response, request)
+
+		assert.Redirects(t, response, "/", http.StatusFound)
+
+		s, err := sessionStorageSpy.Get(request, "")
+		assert.NoError(t, err)
+		assert.Equal(t, s.Values[session.UserSIDKey], "123")
+	})
 }

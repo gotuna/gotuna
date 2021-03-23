@@ -1,0 +1,28 @@
+{{define "title"}}{{.Lang.T "Login"}}{{end}}
+
+{{define "content"}}
+  <div class="guest-form">
+    <form method="POST" action="/login">
+      {{.Data.csrf}}
+      <div class="field">
+        <label class="label">{{.Lang.T "Email"}}</label>
+        <div class="control">
+          <input class="input {{if index .Errors "email"}}is-danger{{end}}" type="email" name="email" placeholder="{{.Lang.T "Email"}}" value="{{.Request.FormValue "email"}}">
+        </div>
+        <p class="help is-danger">{{index .Errors "email"}}</p>
+      </div>
+      <div class="field">
+        <label class="label">{{.Lang.T "Password"}}</label>
+        <div class="control">
+          <input class="input {{if index .Errors "password"}}is-danger{{end}}" type="password" name="password" placeholder="{{.Lang.T "Password"}}">
+        </div>
+        <p class="help is-danger">{{index .Errors "password"}}</p>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-link">{{.Lang.T "Log In"}}</button>
+        </div>
+      </div>
+    </form>
+  </div>
+{{end}}
