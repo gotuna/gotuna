@@ -47,7 +47,7 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	//		x["y"] = 1 // will produce nil map panic
 	//	})
 	//}
-	//s.Router.Handle("/bad", bad())
+	//srv.Router.Handle("/bad", bad())
 
 	srv.Router.Use(middleware.Logger(logger))
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
