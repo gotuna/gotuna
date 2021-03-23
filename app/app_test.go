@@ -12,6 +12,7 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gorilla/sessions"
 )
 
 func TestRoutes(t *testing.T) {
@@ -67,33 +68,48 @@ func TestLogin(t *testing.T) {
 		assert.Contains(t, response.Body.String(), "Log In")
 	})
 
-	t.Run("test submit login form should save user to session", func(t *testing.T) {
+	t.Run("test submit login form and go to the home page", func(t *testing.T) {
 		data := url.Values{}
-		data.Set("email", "john@example.com")
+		data.Set("email", stubUser().Email)
 		data.Set("password", "pass123")
 
+		// step1: after successful login, user is redirected to the home page
 		request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(data.Encode()))
 		request.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 		response := httptest.NewRecorder()
-
-		sessionStorageSpy := doubles.NewSessionStoreSpy(session.GuestSID)
-
-		srv := app.NewServer(
-			doubles.NewLoggerStub(),
-			session.NewSession(sessionStorageSpy),
-			doubles.NewUserRepositoryStub(app.User{
-				SID:          "123",
-				Email:        "john@example.com",
-				PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
-			}),
-		)
-
+		srv := NewStubServer()
 		srv.Router.ServeHTTP(response, request)
-
 		assert.Redirects(t, response, "/", http.StatusFound)
+		gotCookies := response.Result().Cookies()
 
-		s, err := sessionStorageSpy.Get(request, "")
-		assert.NoError(t, err)
-		assert.Equal(t, s.Values[session.UserSIDKey], "123")
+		// step2: user shoud stay on the home page
+		srv = NewStubServer()
+		request, _ = http.NewRequest(http.MethodGet, "/", nil)
+		response = httptest.NewRecorder()
+		for _, c := range gotCookies {
+			request.AddCookie(c)
+		}
+		srv.Router.ServeHTTP(response, request)
+		assert.Equal(t, response.Code, http.StatusOK)
+
 	})
+}
+
+func NewStubServer() *app.Server {
+	cookieKey := "abc"
+	srv := app.NewServer(
+		doubles.NewLoggerStub(),
+		session.NewSession(sessions.NewCookieStore([]byte(cookieKey))),
+		doubles.NewUserRepositoryStub(stubUser()),
+	)
+
+	return srv
+}
+
+func stubUser() app.User {
+	return app.User{
+		SID:          "123",
+		Email:        "john@example.com",
+		PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
+	}
 }

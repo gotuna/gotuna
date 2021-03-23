@@ -76,12 +76,14 @@ func (srv Server) loginSubmit() http.Handler {
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
 			// TODO
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			// TODO - login failed
+			// TODO
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
