@@ -108,13 +108,11 @@ func TestLogin(t *testing.T) {
 }
 
 func stubServer() *app.Server {
-	srv := app.NewServer(
+	return app.NewServer(
 		doubles.NewLoggerStub(),
 		session.NewSession(sessions.NewCookieStore([]byte("abc"))),
 		doubles.NewUserRepositoryStub(stubUser()),
 	)
-
-	return srv
 }
 
 func stubUser() app.User {
