@@ -19,7 +19,7 @@ const ContentTypeHTML = "text/html; charset=utf-8"
 var embededViews embed.FS
 
 //go:embed public/*
-var public embed.FS
+var embededPublic embed.FS
 
 var funcs = template.FuncMap{
 	"uppercase": func(v string) string {
@@ -72,7 +72,7 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) {
 
 func ServeFiles(filesystem fs.FS) http.Handler {
 	if filesystem == nil {
-		filesystem = public
+		filesystem = embededPublic
 	}
 	fs := http.FS(filesystem)
 	filesrv := http.FileServer(fs)
