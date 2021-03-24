@@ -3,8 +3,11 @@ package doubles
 import (
 	"errors"
 	"io"
+	"io/fs"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/session"
@@ -81,4 +84,31 @@ func UserStub() app.User {
 		Email:        "john@example.com",
 		PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
 	}
+}
+
+func NewFileSystemStub(files map[string]string) *filesystemStub {
+	return &filesystemStub{
+		files: files,
+	}
+}
+
+type filesystemStub struct {
+	files map[string]string
+}
+
+func (f *filesystemStub) Open(name string) (fs.File, error) {
+	tmpfile, err := ioutil.TempFile("", "fsdemo")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	contents, ok := f.files[name]
+	if !ok {
+		return nil, os.ErrNotExist
+	}
+
+	tmpfile.Write([]byte(contents))
+	tmpfile.Seek(0, 0)
+
+	return tmpfile, nil
 }

@@ -2,8 +2,11 @@ package app
 
 import (
 	"embed"
+	"io/fs"
 	"log"
 	"net/http"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/alcalbg/gotdd/middleware"
@@ -57,9 +60,26 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the public directory
-	srv.Router.PathPrefix("/public/").Handler(renderer.ServeFiles(embededPublic))
+	srv.Router.PathPrefix("/public/").Handler(ServeFiles(embededPublic))
 
 	return srv
+}
+
+func ServeFiles(filesystem fs.FS) http.Handler {
+	fs := http.FS(filesystem)
+	filesrv := http.FileServer(fs)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := fs.Open(path.Clean(r.URL.Path))
+		if os.IsNotExist(err) {
+			//NotFoundHandler(w, r)
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+		//stat, _ := f.Stat()
+		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
+		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
+		filesrv.ServeHTTP(w, r)
+	})
 }
 
 func (srv Server) home() http.Handler {

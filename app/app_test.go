@@ -52,6 +52,30 @@ func TestRoutes(t *testing.T) {
 	}
 }
 
+func TestServingStaticFiles(t *testing.T) {
+
+	files := map[string]string{}
+	files["public/image.jpg"] = "***"
+
+	fileServer := app.ServeFiles(doubles.NewFileSystemStub(files))
+
+	t.Run("return a valid static file", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "public/image.jpg", nil)
+		w := httptest.NewRecorder()
+		fileServer.ServeHTTP(w, r)
+
+		assert.Equal(t, w.Code, http.StatusOK)
+	})
+
+	t.Run("return 404 on non existing file", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
+		w := httptest.NewRecorder()
+		fileServer.ServeHTTP(w, r)
+
+		assert.Equal(t, w.Code, http.StatusNotFound)
+	})
+}
+
 func TestLogin(t *testing.T) {
 	t.Run("show login template", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
