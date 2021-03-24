@@ -13,7 +13,7 @@ import (
 func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 
 	request := &http.Request{}
-	sessionStoreSpy := doubles.NewSessionStoreSpy(session.GuestSID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
 	ses := session.NewSession(sessionStoreSpy)
 
 	sid, err := ses.GetUserSID(request)
@@ -27,15 +27,15 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 
 	request := &http.Request{}
 	response := httptest.NewRecorder()
-	sessionStoreSpy := doubles.NewSessionStoreSpy(session.GuestSID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
 	ses := session.NewSession(sessionStoreSpy)
 
-	err := ses.SetUserSID(response, request, "333")
+	err := ses.SetUserSID(response, request, doubles.UserStub().SID)
 	assert.NoError(t, err)
 
 	sid, err := ses.GetUserSID(request)
 	assert.NoError(t, err)
-	assert.Equal(t, sid, "333")
+	assert.Equal(t, sid, doubles.UserStub().SID)
 	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
 }
 
@@ -43,11 +43,11 @@ func TestDestroyActiveSession(t *testing.T) {
 
 	request := &http.Request{}
 	response := httptest.NewRecorder()
-	sessionStoreSpy := doubles.NewSessionStoreSpy("333")
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)
 	ses := session.NewSession(sessionStoreSpy)
 
 	sid, _ := ses.GetUserSID(request)
-	assert.Equal(t, sid, "333")
+	assert.Equal(t, sid, doubles.UserStub().SID)
 
 	ses.DestroySession(response, request)
 

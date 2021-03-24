@@ -17,7 +17,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
-		ses := session.NewSession(doubles.NewSessionStoreSpy(session.GuestSID))
+		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID))
 
 		middleware := middleware.AuthRedirector(ses)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -31,7 +31,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		ses := session.NewSession(doubles.NewSessionStoreSpy("123"))
+		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
 
 		middleware := middleware.AuthRedirector(ses)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
@@ -45,7 +45,7 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/public/file.zip", nil)
 		response := httptest.NewRecorder()
 
-		sessionStore := doubles.NewSessionStoreSpy(session.GuestSID)
+		sessionStore := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
 		ses := session.NewSession(sessionStore)
 
 		middleware := middleware.AuthRedirector(ses)
