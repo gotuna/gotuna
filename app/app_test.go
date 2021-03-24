@@ -29,6 +29,10 @@ func TestRoutes(t *testing.T) {
 		{"123", "/login", http.MethodGet, http.StatusFound},
 		{"", "/register", http.MethodGet, http.StatusOK},
 		{"123", "/register", http.MethodGet, http.StatusFound},
+		{"123", "/public/robots.txt", http.MethodGet, http.StatusOK},
+		{"", "/public/robots.txt", http.MethodGet, http.StatusOK},
+		{"123", "/public/non-existing.txt", http.MethodGet, http.StatusNotFound},
+		{"", "/public/non-existing.txt", http.MethodGet, http.StatusNotFound},
 	}
 
 	for _, r := range routes {
@@ -101,27 +105,6 @@ func TestLogin(t *testing.T) {
 		}
 		doubles.NewServerWithCookieStoreStub().Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
-	})
-}
-
-func TestServingPublicFiles(t *testing.T) {
-	t.Run("get robots file", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/public/robots.txt", nil)
-		response := httptest.NewRecorder()
-
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
-
-		assert.Equal(t, response.Code, http.StatusOK)
-		assert.Contains(t, response.Body.String(), "robots")
-	})
-
-	t.Run("get non-existing file should return 404", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/public/non-existing.txt", nil)
-		response := httptest.NewRecorder()
-
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
-
-		assert.Equal(t, response.Code, http.StatusNotFound)
 	})
 }
 
