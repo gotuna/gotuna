@@ -14,8 +14,7 @@ func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
 
 			path := r.URL.Path
 
-			// TODO: skip for static files
-			if strings.HasPrefix(path, "/public") {
+			if strings.HasPrefix(path, "/public/") {
 				next.ServeHTTP(w, r)
 				return
 			}

@@ -70,11 +70,12 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) {
 	}
 }
 
-func ServeFiles(fs fs.FS) http.Handler {
-	if fs == nil {
-		fs = public
+func ServeFiles(filesystem fs.FS) http.Handler {
+	if filesystem == nil {
+		filesystem = public
 	}
-	filesrv := http.FileServer(http.FS(fs))
+	fs := http.FS(filesystem)
+	filesrv := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
