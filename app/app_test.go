@@ -37,13 +37,11 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			srv := app.NewServer(
+			app.NewServer(
 				doubles.NewLoggerStub(),
 				session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
 				doubles.NewUserRepositoryStub(app.User{}),
-			)
-
-			srv.Router.ServeHTTP(response, request)
+			).Router.ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
 		})
@@ -58,7 +56,7 @@ func TestLogin(t *testing.T) {
 		doubles.NewServerStub().Router.ServeHTTP(response, request)
 
 		assert.Equal(t, response.Code, http.StatusOK)
-		assert.Contains(t, response.Body.String(), "Log In")
+		assert.Contains(t, response.Body.String(), `action="/login"`)
 	})
 
 	t.Run("submit login with non-existing user", func(t *testing.T) {
@@ -103,6 +101,27 @@ func TestLogin(t *testing.T) {
 		}
 		doubles.NewServerWithCookieStoreStub().Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
+	})
+}
+
+func TestServingPublicFiles(t *testing.T) {
+	t.Run("get robots file", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/public/robots.txt", nil)
+		response := httptest.NewRecorder()
+
+		doubles.NewServerStub().Router.ServeHTTP(response, request)
+
+		assert.Equal(t, response.Code, http.StatusOK)
+		assert.Contains(t, response.Body.String(), "robots")
+	})
+
+	t.Run("get non-existing file should return 404", func(t *testing.T) {
+		request, _ := http.NewRequest(http.MethodGet, "/public/non-existing.txt", nil)
+		response := httptest.NewRecorder()
+
+		doubles.NewServerStub().Router.ServeHTTP(response, request)
+
+		assert.Equal(t, response.Code, http.StatusNotFound)
 	})
 }
 

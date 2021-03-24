@@ -52,11 +52,16 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Use(middleware.Logger(logger))
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
+	// serve files from the public directory
+	srv.Router.PathPrefix("/public/").Handler(render.ServeFiles())
+
 	return srv
 }
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t := render.NewTemplate("home.html")
+		t.Render(w, r, http.StatusOK)
 	})
 }
 
