@@ -18,29 +18,24 @@ const ContentTypeHTML = "text/html; charset=utf-8"
 //go:embed views/*
 var embededViews embed.FS
 
-//go:embed public/*
-var embededPublic embed.FS
-
 var funcs = template.FuncMap{
 	"uppercase": func(v string) string {
 		return strings.ToUpper(v)
 	},
 }
 
+func NewHTMLRenderer(filename string) Renderer {
+	return &htmlRenderer{
+		filename: filename,
+		fs:       embededViews,
+		Data:     make(map[string]interface{}),
+	}
+}
+
 type Renderer interface {
 	Render(w http.ResponseWriter, statusCode int)
 	Set(key string, data interface{})
-}
-
-func NewHTMLRenderer(filename string, fs fs.FS) Renderer {
-	if fs == nil {
-		fs = embededViews
-	}
-	return &htmlRenderer{
-		filename: filename,
-		fs:       fs,
-		Data:     make(map[string]interface{}),
-	}
+	Mount(fs fs.FS)
 }
 
 type htmlRenderer struct {
@@ -71,9 +66,6 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) {
 }
 
 func ServeFiles(filesystem fs.FS) http.Handler {
-	if filesystem == nil {
-		filesystem = embededPublic
-	}
 	fs := http.FS(filesystem)
 	filesrv := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -88,4 +80,8 @@ func ServeFiles(filesystem fs.FS) http.Handler {
 		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
 		filesrv.ServeHTTP(w, r)
 	})
+}
+
+func (t *htmlRenderer) Mount(fs fs.FS) {
+	t.fs = fs
 }

@@ -1,6 +1,7 @@
 package app
 
 import (
+	"embed"
 	"log"
 	"net/http"
 	"strings"
@@ -11,6 +12,9 @@ import (
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
+
+//go:embed public/*
+var embededPublic embed.FS
 
 type User struct {
 	SID          string
@@ -53,21 +57,21 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the public directory
-	srv.Router.PathPrefix("/public/").Handler(renderer.ServeFiles(nil))
+	srv.Router.PathPrefix("/public/").Handler(renderer.ServeFiles(embededPublic))
 
 	return srv
 }
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("home.html", nil)
+		t := renderer.NewHTMLRenderer("home.html")
 		t.Render(w, http.StatusOK)
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("login.html", nil)
+		t := renderer.NewHTMLRenderer("login.html")
 		t.Render(w, http.StatusOK)
 	})
 }

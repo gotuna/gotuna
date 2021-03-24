@@ -38,8 +38,8 @@ const html_parsed = `<!DOCTYPE html>
 func TestRenderingTemplates(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	fs := newFileSystemStub()
-	htmlRenderer := renderer.NewHTMLRenderer(testViewFile, fs)
+	htmlRenderer := renderer.NewHTMLRenderer(testViewFile)
+	htmlRenderer.Mount(newFileSystemStub())
 	htmlRenderer.Set("customvar", "Billy")
 
 	htmlRenderer.Render(w, http.StatusOK)
@@ -50,8 +50,7 @@ func TestRenderingTemplates(t *testing.T) {
 }
 
 func TestServingStaticFiles(t *testing.T) {
-	fs := newFileSystemStub()
-	fileServer := renderer.ServeFiles(fs)
+	fileServer := renderer.ServeFiles(newFileSystemStub())
 
 	t.Run("return a valid static file", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, testImage, nil)
@@ -114,7 +113,7 @@ func (f *filesystemStub) Glob(pattern string) ([]string, error) {
 }
 
 func (f *filesystemStub) Open(name string) (fs.File, error) {
-	tmpfile, err := ioutil.TempFile("", "")
+	tmpfile, err := ioutil.TempFile("", "fsdemo")
 	if err != nil {
 		log.Fatal(err)
 	}
