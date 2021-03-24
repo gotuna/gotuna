@@ -40,11 +40,11 @@ func main() {
 
 	port := ":8888"
 
-	cookieStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
+	gorillaSessionStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
 
 	srv := app.NewServer(
 		log.New(os.Stdout, "", 0),
-		session.NewSession(cookieStore),
+		session.NewSession(gorillaSessionStore),
 		NewMemoryUserRepository(),
 	)
 

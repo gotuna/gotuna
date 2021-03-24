@@ -16,7 +16,6 @@ func NewLoggerStub() *log.Logger {
 }
 
 func NewGorillaSessionStoreSpy(userSID string) *GorillaSessionStoreSpy {
-
 	userSession := sessions.NewSession(&GorillaSessionStoreSpy{}, "")
 	userSession.Values[session.UserSIDKey] = userSID
 
