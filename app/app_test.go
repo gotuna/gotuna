@@ -55,7 +55,7 @@ func TestRoutes(t *testing.T) {
 func TestServingStaticFiles(t *testing.T) {
 
 	files := map[string]string{}
-	files["public/image.jpg"] = "***"
+	files["public/image.jpg"] = ""
 
 	fileServer := app.ServeFiles(doubles.NewFileSystemStub(files))
 

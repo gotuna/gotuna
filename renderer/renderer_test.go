@@ -12,7 +12,6 @@ import (
 )
 
 const testViewFile = "test.html"
-const testImage = "public/image.jpg"
 
 const html_layout = `{{- define "app" -}}
 <!DOCTYPE html>
@@ -37,7 +36,6 @@ func TestRenderingTemplates(t *testing.T) {
 	files := map[string]string{}
 	files[fmt.Sprintf("%s/%s", renderer.BaseDir, renderer.LayoutFile)] = html_layout
 	files[fmt.Sprintf("%s/%s", renderer.BaseDir, testViewFile)] = html_content
-	files[testImage] = "***"
 
 	w := httptest.NewRecorder()
 
