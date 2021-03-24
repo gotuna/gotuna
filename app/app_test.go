@@ -104,27 +104,6 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func TestServingPublicFiles(t *testing.T) {
-	t.Run("get robots file", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/public/robots.txt", nil)
-		response := httptest.NewRecorder()
-
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
-
-		assert.Equal(t, response.Code, http.StatusOK)
-		assert.Contains(t, response.Body.String(), "robots")
-	})
-
-	t.Run("get non-existing file should return 404", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/public/non-existing.txt", nil)
-		response := httptest.NewRecorder()
-
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
-
-		assert.Equal(t, response.Code, http.StatusNotFound)
-	})
-}
-
 func loginRequest(form url.Values) *http.Request {
 	request, _ := http.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")

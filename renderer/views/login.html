@@ -1,0 +1,24 @@
+
+{{define "content"}}
+  <div class="guest-form">
+    <form method="POST" action="/login">
+      <div class="field">
+        <label class="label">Email</label>
+        <div class="control">
+          <input class="input" type="email" name="email" placeholder="Email" value="">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Password</label>
+        <div class="control">
+          <input class="input" type="password" name="password" >
+        </div>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-link">Log In</button>
+        </div>
+      </div>
+    </form>
+  </div>
+{{end}}

@@ -6,11 +6,10 @@
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>{{block "title" .}}{{end}}</title>
       <link rel="stylesheet" href="/public/bulma/bulma.min.css">
-      <link rel="stylesheet" href="/public/style.css?{{.Ver}}">
+      <link rel="stylesheet" href="/public/style.css">
     </head>
     <body>
 
-      {{if .Data.user}}
         <nav class="navbar is-info" role="navigation" aria-label="main navigation">
           <div class="container">
             <div class="navbar-brand">
@@ -27,7 +26,6 @@
               <div class="navbar-end">
                 <div class="navbar-item has-dropdown is-hoverable">
                   <a class="navbar-link">
-                    {{.Data.user.Name}}
                   </a>
                   <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="/profile">
@@ -35,8 +33,7 @@
                     </a>
                     <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                       <form id="logout-form" method="POST" action="/logout">
-                        {{.Data.csrf}}
-                        {{.Lang.T "Log Out"}}
+                        Log Out
                       </form>
                     </a>
                   </div>
@@ -45,7 +42,6 @@
             </div>
           </div>
         </nav>
-      {{end}}
 
       <section class="section">
         <div class="container">
@@ -53,7 +49,7 @@
         </div>
       </section>
 
-      <script type="text/javascript" src="/public/script.js?{{.Ver}}"></script>
+      <script type="text/javascript" src="/public/script.js"></script>
       {{block "additional_scripts" .}}{{end}}
 
     </body>

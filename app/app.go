@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/alcalbg/gotdd/middleware"
-	"github.com/alcalbg/gotdd/render"
+	"github.com/alcalbg/gotdd/renderer"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -53,22 +53,22 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the public directory
-	srv.Router.PathPrefix("/public/").Handler(render.ServeFiles())
+	srv.Router.PathPrefix("/public/").Handler(renderer.ServeFiles(nil))
 
 	return srv
 }
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := render.NewTemplate("home.html")
-		t.Render(w, r, http.StatusOK)
+		t := renderer.NewHTMLRenderer("home.html", nil)
+		t.Render(w, http.StatusOK)
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := render.NewTemplate("login.html")
-		t.Render(w, r, http.StatusOK)
+		t := renderer.NewHTMLRenderer("login.html", nil)
+		t.Render(w, http.StatusOK)
 	})
 }
 
