@@ -37,7 +37,7 @@ type Server struct {
 
 func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
 	srv := &Server{}
-	srv.lang = lang.NewTranslator(lang.En)
+	srv.lang = lang.NewTranslator(lang.En) // TODO: move this to session/user/store
 	srv.session = s
 	srv.userRepository = userRepository
 
@@ -80,7 +80,7 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 		}
 		stat, _ := f.Stat()
 		if stat.IsDir() {
-			srv.notFound(w, r)
+			srv.notFound(w, r) // do not show directory listing
 			return
 		}
 		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
