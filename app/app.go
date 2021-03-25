@@ -70,12 +70,16 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 	fs := http.FS(filesystem)
 	filesrv := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := fs.Open(path.Clean(r.URL.Path))
+		f, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
 			srv.notFound(w, r)
 			return
 		}
-		//stat, _ := f.Stat()
+		stat, _ := f.Stat()
+		if stat.IsDir() {
+			srv.notFound(w, r)
+			return
+		}
 		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
 		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
 		filesrv.ServeHTTP(w, r)
