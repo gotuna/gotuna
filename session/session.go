@@ -68,3 +68,16 @@ func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
 
 	return nil
 }
+
+func (s Session) IsGuest(r *http.Request) bool {
+	sid, err := s.GetUserSID(r)
+	if err != nil {
+		return true
+	}
+
+	if sid == GuestSID {
+		return true
+	}
+
+	return false
+}

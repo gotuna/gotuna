@@ -16,10 +16,12 @@ func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
 	ses := session.NewSession(sessionStoreSpy)
 
+	assert.Equal(t, ses.IsGuest(request), true)
+
 	sid, err := ses.GetUserSID(request)
 	assert.Error(t, err)
 	assert.Equal(t, sid, session.GuestSID)
-	assert.Equal(t, sessionStoreSpy.GetCalls, 1)
+
 	assert.Equal(t, sessionStoreSpy.SaveCalls, 0)
 }
 

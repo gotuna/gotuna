@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
+func AuthRedirector(s *session.Session) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -20,13 +20,13 @@ func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
 				return
 			}
 
-			sid, _ := session.GetUserSID(r)
+			guest := s.IsGuest(r)
 
-			if sid == "" && path != "/login" && path != "/register" {
+			if guest && path != "/login" && path != "/register" {
 				http.Redirect(w, r, "/login", http.StatusFound)
 			}
 
-			if sid != "" && (path == "/login" || path == "/register") {
+			if !guest && (path == "/login" || path == "/register") {
 				http.Redirect(w, r, "/", http.StatusFound)
 			}
 

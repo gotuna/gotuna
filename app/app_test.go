@@ -101,7 +101,7 @@ func TestLogin(t *testing.T) {
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
-	t.Run("submit login bad password", func(t *testing.T) {
+	t.Run("submit login with bad password", func(t *testing.T) {
 		data := url.Values{}
 		data.Set("email", doubles.UserStub().Email)
 		data.Set("password", "bad")
@@ -118,10 +118,12 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.UserStub().Email)
 		data.Set("password", "pass123")
 
+		srv := doubles.NewServerWithCookieStoreStub()
+
 		// step1: after successful login, user is redirected to the home page
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		doubles.NewServerWithCookieStoreStub().Router.ServeHTTP(response, request)
+		srv.Router.ServeHTTP(response, request)
 		assert.Redirects(t, response, "/", http.StatusFound)
 		gotCookies := response.Result().Cookies()
 
@@ -131,7 +133,7 @@ func TestLogin(t *testing.T) {
 		for _, c := range gotCookies {
 			request.AddCookie(c)
 		}
-		doubles.NewServerWithCookieStoreStub().Router.ServeHTTP(response, request)
+		srv.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
 	})
 }
