@@ -1,6 +1,7 @@
 package middleware_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -9,6 +10,7 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRedirections(t *testing.T) {
@@ -41,8 +43,9 @@ func TestRedirections(t *testing.T) {
 		assert.Redirects(t, response, "/", http.StatusFound)
 	})
 
-	t.Run("requests to public resources should skip checks early", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/public/file.zip", nil)
+	t.Run("requests to static resources should skip checks early", func(t *testing.T) {
+		staticFile := fmt.Sprintf("%sfile.zip", util.StaticPath)
+		request, _ := http.NewRequest(http.MethodGet, staticFile, nil)
 		response := httptest.NewRecorder()
 
 		sessionStore := doubles.NewGorillaSessionStoreSpy(session.GuestSID)

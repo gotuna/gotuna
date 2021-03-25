@@ -86,14 +86,14 @@ func UserStub() app.User {
 	}
 }
 
-func NewFileSystemStub(files map[string]string) *filesystemStub {
+func NewFileSystemStub(files map[string][]byte) *filesystemStub {
 	return &filesystemStub{
 		files: files,
 	}
 }
 
 type filesystemStub struct {
-	files map[string]string
+	files map[string][]byte
 }
 
 func (f *filesystemStub) Open(name string) (fs.File, error) {

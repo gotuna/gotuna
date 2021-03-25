@@ -1,7 +1,6 @@
 package renderer_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,8 +9,6 @@ import (
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
 )
-
-const testViewFile = "test.html"
 
 const html_layout = `{{- define "app" -}}
 <!DOCTYPE html>
@@ -33,14 +30,15 @@ const html_parsed = `<!DOCTYPE html>
 
 func TestRenderingTemplates(t *testing.T) {
 
-	files := map[string]string{}
-	files[fmt.Sprintf("%s/%s", renderer.BaseDir, renderer.LayoutFile)] = html_layout
-	files[fmt.Sprintf("%s/%s", renderer.BaseDir, testViewFile)] = html_content
+	fs := map[string][]byte{
+		"layout.html":  []byte(html_layout),
+		"content.html": []byte(html_content),
+	}
 
 	w := httptest.NewRecorder()
 
-	htmlRenderer := renderer.NewHTMLRenderer(testViewFile)
-	htmlRenderer.Mount(doubles.NewFileSystemStub(files))
+	htmlRenderer := renderer.NewHTMLRenderer("layout.html", "content.html")
+	htmlRenderer.Mount(doubles.NewFileSystemStub(fs))
 	htmlRenderer.Set("customvar", "Billy")
 
 	htmlRenderer.Render(w, http.StatusOK)

@@ -1,20 +1,16 @@
 package renderer
 
 import (
-	"embed"
 	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"strings"
+
+	"github.com/alcalbg/gotdd/views"
 )
 
-const BaseDir = "views"
-const LayoutFile = "app.html"
 const ContentTypeHTML = "text/html; charset=utf-8"
-
-//go:embed views/*
-var embededViews embed.FS
 
 var funcs = template.FuncMap{
 	"uppercase": func(v string) string {
@@ -22,10 +18,10 @@ var funcs = template.FuncMap{
 	},
 }
 
-func NewHTMLRenderer(filename string) Renderer {
+func NewHTMLRenderer(patterns ...string) Renderer {
 	return &htmlRenderer{
-		filename: filename,
-		fs:       embededViews,
+		patterns: patterns,
+		fs:       views.EmbededViews,
 		Data:     make(map[string]interface{}),
 	}
 }
@@ -37,7 +33,7 @@ type Renderer interface {
 }
 
 type htmlRenderer struct {
-	filename string
+	patterns []string
 	fs       fs.FS
 	Data     map[string]interface{}
 }
@@ -50,11 +46,7 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) {
 	w.Header().Set("Content-type", ContentTypeHTML)
 	w.WriteHeader(statusCode)
 
-	tmpl := template.Must(template.New("app").Funcs(funcs).ParseFS(t.fs,
-		fmt.Sprintf("%s/%s", BaseDir, LayoutFile),
-		fmt.Sprintf("%s/%s", BaseDir, t.filename),
-	),
-	)
+	tmpl := template.Must(template.New("app").Funcs(funcs).ParseFS(t.fs, t.patterns...))
 
 	err := tmpl.Execute(w, t)
 	if err != nil {

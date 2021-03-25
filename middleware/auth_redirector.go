@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
 )
 
@@ -14,7 +15,7 @@ func AuthRedirector(session *session.Session) mux.MiddlewareFunc {
 
 			path := r.URL.Path
 
-			if strings.HasPrefix(path, "/public/") {
+			if strings.HasPrefix(path, util.StaticPath) {
 				next.ServeHTTP(w, r)
 				return
 			}

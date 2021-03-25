@@ -1,7 +1,6 @@
 package app
 
 import (
-	"embed"
 	"io/fs"
 	"log"
 	"net/http"
@@ -12,12 +11,11 @@ import (
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/renderer"
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/static"
+	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
-
-//go:embed public/*
-var embededPublic embed.FS
 
 type User struct {
 	SID          string
@@ -59,20 +57,24 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Use(middleware.Logger(logger))
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
-	// serve files from the public directory
-	srv.Router.PathPrefix("/public/").Handler(ServeFiles(embededPublic))
+	// serve files from the static directory
+	srv.Router.PathPrefix(util.StaticPath).
+		Handler(http.StripPrefix(util.StaticPath,
+			srv.ServeFiles(static.EmbededStatic)))
 
 	return srv
 }
 
-func ServeFiles(filesystem fs.FS) http.Handler {
+func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 	fs := http.FS(filesystem)
 	filesrv := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
 			//NotFoundHandler(w, r)
-			w.WriteHeader(http.StatusNotFound)
+			srv.notFound().ServeHTTP(w, r)
+
+			//w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		//stat, _ := f.Stat()
@@ -84,14 +86,14 @@ func ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("home.html")
+		t := renderer.NewHTMLRenderer("app.html", "home.html")
 		t.Render(w, http.StatusOK)
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("login.html")
+		t := renderer.NewHTMLRenderer("app.html", "login.html")
 		t.Render(w, http.StatusOK)
 	})
 }

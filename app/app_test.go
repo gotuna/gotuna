@@ -29,10 +29,6 @@ func TestRoutes(t *testing.T) {
 		{"123", "/login", http.MethodGet, http.StatusFound},
 		{"", "/register", http.MethodGet, http.StatusOK},
 		{"123", "/register", http.MethodGet, http.StatusFound},
-		{"123", "/public/robots.txt", http.MethodGet, http.StatusOK},
-		{"", "/public/robots.txt", http.MethodGet, http.StatusOK},
-		{"123", "/public/non-existing.txt", http.MethodGet, http.StatusNotFound},
-		{"", "/public/non-existing.txt", http.MethodGet, http.StatusNotFound},
 	}
 
 	for _, r := range routes {
@@ -54,13 +50,16 @@ func TestRoutes(t *testing.T) {
 
 func TestServingStaticFiles(t *testing.T) {
 
-	files := map[string]string{}
-	files["public/image.jpg"] = ""
+	srv := doubles.NewServerStub()
 
-	fileServer := app.ServeFiles(doubles.NewFileSystemStub(files))
+	files := map[string][]byte{
+		"somedir/image.jpg": nil,
+	}
 
-	t.Run("return a valid static file", func(t *testing.T) {
-		r, _ := http.NewRequest(http.MethodGet, "public/image.jpg", nil)
+	fileServer := srv.ServeFiles(doubles.NewFileSystemStub(files))
+
+	t.Run("return valid static file", func(t *testing.T) {
+		r, _ := http.NewRequest(http.MethodGet, "somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
 		fileServer.ServeHTTP(w, r)
 
