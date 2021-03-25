@@ -11,45 +11,24 @@ import (
 	"github.com/alcalbg/gotdd/test/doubles"
 )
 
-func TestRenderingLayoutWithBlockContent(t *testing.T) {
+func TestRenderingWithCustomData(t *testing.T) {
 
-	const html_layout = `{{- define "app" -}}
-<!DOCTYPE html>
-  <html>
-	<body>
-		<div class="container">{{block "content" .}}{{end}}</div>
-	</body>
-	</html>
-{{- end -}}`
-
-	const html_content = `{{define "content"}} {{.Data.customvar}} {{end}}`
-
-	const html_parsed = `<!DOCTYPE html>
-  <html>
-	<body>
-		<div class="container"> Billy </div>
-	</body>
-	</html>`
-
-	fs := map[string][]byte{
-		"layout.html":  []byte(html_layout),
-		"content.html": []byte(html_content),
-	}
+	template := `{{define "app"}}Hello, my name is {{.Data.username }}{{end}}`
+	rendered := `Hello, my name is Milos`
 
 	w := httptest.NewRecorder()
 
-	htmlRenderer := renderer.NewHTMLRenderer(nil, "layout.html", "content.html")
-	htmlRenderer.Mount(doubles.NewFileSystemStub(fs))
-	htmlRenderer.Set("customvar", "Billy")
+	rndr := getHTMLRenderer(template)
+	rndr.Set("username", "Milos")
 
-	err := htmlRenderer.Render(w, http.StatusOK)
+	err := rndr.Render(w, http.StatusOK)
 	assert.NoError(t, err)
-	assert.Equal(t, w.Result().Header.Get("Content-type"), renderer.ContentTypeHTML)
+	assert.Equal(t, w.Body.String(), rendered)
 	assert.Equal(t, w.Code, http.StatusOK)
-	assert.Equal(t, w.Body.String(), html_parsed)
+	assert.Equal(t, w.Result().Header.Get("Content-type"), renderer.ContentTypeHTML)
 }
 
-func TestRenderingWithTranslation(t *testing.T) {
+func TestUsingTranslation(t *testing.T) {
 
 	lang := lang.NewTranslator(map[string]string{"car": "auto"})
 
@@ -58,44 +37,67 @@ func TestRenderingWithTranslation(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	htmlRenderer := renderer.NewHTMLRenderer(lang, "view.html")
-	htmlRenderer.Mount(
+	rndr := renderer.NewHTMLRenderer(lang, "view.html")
+	rndr.Mount(
 		doubles.NewFileSystemStub(
 			map[string][]byte{"view.html": []byte(template)}))
 
-	err := htmlRenderer.Render(w, 200)
-	assert.NoError(t, err)
+	rndr.Render(w, http.StatusOK)
 	assert.Equal(t, w.Body.String(), rendered)
 }
 
-func TestRenderingBadTemplateShouldThrowError(t *testing.T) {
+func TestBadTemplateShouldThrowError(t *testing.T) {
 
 	template := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
 
 	w := httptest.NewRecorder()
 
-	htmlRenderer := renderer.NewHTMLRenderer(nil, "view.html")
-	htmlRenderer.Mount(
-		doubles.NewFileSystemStub(
-			map[string][]byte{"view.html": []byte(template)}))
+	rndr := getHTMLRenderer(template)
 
-	err := htmlRenderer.Render(w, 200)
+	err := rndr.Render(w, http.StatusOK)
 	assert.Error(t, err)
 }
 
-func TestRenderingHelperFunctions(t *testing.T) {
+func TestUsingHelperFunctions(t *testing.T) {
 
 	template := `{{- define "app" -}} {{uppercase "hello"}} {{- end -}}`
 	rendered := `HELLO`
 
 	w := httptest.NewRecorder()
 
-	htmlRenderer := renderer.NewHTMLRenderer(nil, "view.html")
-	htmlRenderer.Mount(
+	rndr := getHTMLRenderer(template)
+
+	rndr.Render(w, http.StatusOK)
+	assert.Equal(t, w.Body.String(), rendered)
+}
+
+func TestLayoutWithSubContentBlock(t *testing.T) {
+
+	const html_layout = `{{define "app"}}<div id="wrapper">{{block "sub" .}}{{end}}</div>{{end}}`
+	const html_subcontent = `{{define "sub"}}<span>Subcontent</span>{{end}}`
+	const html_final = `<div id="wrapper"><span>Subcontent</span></div>`
+
+	fs := map[string][]byte{
+		"layout.html":  []byte(html_layout),
+		"content.html": []byte(html_subcontent),
+	}
+
+	w := httptest.NewRecorder()
+
+	rndr := renderer.NewHTMLRenderer(nil, "layout.html", "content.html")
+	rndr.Mount(doubles.NewFileSystemStub(fs))
+
+	rndr.Render(w, http.StatusOK)
+	assert.Equal(t, w.Body.String(), html_final)
+}
+
+func getHTMLRenderer(template string) renderer.Renderer {
+	rndr := renderer.NewHTMLRenderer(nil, "view.html")
+
+	// mount a fake filesystem with a single view.html file
+	rndr.Mount(
 		doubles.NewFileSystemStub(
 			map[string][]byte{"view.html": []byte(template)}))
 
-	err := htmlRenderer.Render(w, 200)
-	assert.NoError(t, err)
-	assert.Equal(t, w.Body.String(), rendered)
+	return rndr
 }
