@@ -53,7 +53,7 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) error {
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
-		return fmt.Errorf("error rendering template %v", err)
+		return fmt.Errorf("error rendering %v", err)
 	}
 
 	return nil

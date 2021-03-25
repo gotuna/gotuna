@@ -82,3 +82,20 @@ func TestRenderingBadTemplateShouldThrowError(t *testing.T) {
 	err := htmlRenderer.Render(w, 200)
 	assert.Error(t, err)
 }
+
+func TestRenderingHelperFunctions(t *testing.T) {
+
+	template := `{{- define "app" -}} {{uppercase "hello"}} {{- end -}}`
+	rendered := `HELLO`
+
+	w := httptest.NewRecorder()
+
+	htmlRenderer := renderer.NewHTMLRenderer(nil, "view.html")
+	htmlRenderer.Mount(
+		doubles.NewFileSystemStub(
+			map[string][]byte{"view.html": []byte(template)}))
+
+	err := htmlRenderer.Render(w, 200)
+	assert.NoError(t, err)
+	assert.Equal(t, w.Body.String(), rendered)
+}

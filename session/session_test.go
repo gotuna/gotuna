@@ -38,6 +38,7 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 	sid, err := ses.GetUserSID(request)
 	assert.NoError(t, err)
 	assert.Equal(t, sid, doubles.UserStub().SID)
+	assert.Equal(t, ses.IsGuest(request), false)
 	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
 }
 
