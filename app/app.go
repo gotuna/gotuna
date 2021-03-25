@@ -8,6 +8,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/alcalbg/gotdd/lang"
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/renderer"
 	"github.com/alcalbg/gotdd/session"
@@ -31,10 +32,12 @@ type Server struct {
 	Router         *mux.Router
 	session        *session.Session
 	userRepository UserRepository
+	lang           lang.Translator
 }
 
 func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
 	srv := &Server{}
+	srv.lang = lang.NewTranslator(lang.En)
 	srv.session = s
 	srv.userRepository = userRepository
 
@@ -88,14 +91,14 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("app.html", "home.html")
+		t := renderer.NewHTMLRenderer(srv.lang, "app.html", "home.html")
 		t.Render(w, http.StatusOK)
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer("app.html", "login.html")
+		t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
 		t.Render(w, http.StatusOK)
 	})
 }
@@ -108,14 +111,14 @@ func (srv Server) loginSubmit() http.Handler {
 
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
-			t := renderer.NewHTMLRenderer("app.html", "login.html")
+			t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
 			t.Render(w, http.StatusUnauthorized)
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			t := renderer.NewHTMLRenderer("app.html", "login.html")
+			t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
 			t.Render(w, http.StatusUnauthorized)
 			return
 		}
