@@ -49,7 +49,10 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) error {
 	w.Header().Set("Content-type", ContentTypeHTML)
 	w.WriteHeader(statusCode)
 
-	tmpl := template.Must(template.New("app").Funcs(funcs).ParseFS(t.fs, t.patterns...))
+	tmpl := template.Must(
+		template.New("app").
+			Funcs(funcs).
+			ParseFS(t.fs, t.patterns...))
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
