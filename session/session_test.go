@@ -55,5 +55,6 @@ func TestDestroyActiveSession(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, sid, session.GuestSID)
 	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
+	assert.Equal(t, sessionStoreSpy.Session.Options.MaxAge, -1)
 
 }

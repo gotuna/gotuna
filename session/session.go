@@ -42,7 +42,7 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 func (s Session) GetUserSID(r *http.Request) (string, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return GuestSID, errors.New("Cannot get a session from the store")
+		return GuestSID, errors.New("Cannot get session from the store")
 	}
 
 	sid, ok := session.Values[UserSIDKey].(string)
@@ -56,10 +56,11 @@ func (s Session) GetUserSID(r *http.Request) (string, error) {
 func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("Cannot get a session from the store")
+		return errors.New("Cannot get session from the store")
 	}
 
 	delete(session.Values, UserSIDKey)
+	session.Options.MaxAge = -1
 
 	if err = s.Store.Save(r, w, session); err != nil {
 		return errors.New("Cannot store to session")

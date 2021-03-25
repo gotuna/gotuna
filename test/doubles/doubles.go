@@ -22,11 +22,11 @@ func NewGorillaSessionStoreSpy(userSID string) *GorillaSessionStoreSpy {
 	userSession := sessions.NewSession(&GorillaSessionStoreSpy{}, "")
 	userSession.Values[session.UserSIDKey] = userSID
 
-	return &GorillaSessionStoreSpy{session: userSession}
+	return &GorillaSessionStoreSpy{Session: userSession}
 }
 
 type GorillaSessionStoreSpy struct {
-	session   *sessions.Session
+	Session   *sessions.Session
 	GetCalls  int
 	NewCalls  int
 	SaveCalls int
@@ -34,12 +34,12 @@ type GorillaSessionStoreSpy struct {
 
 func (spy *GorillaSessionStoreSpy) Get(r *http.Request, name string) (*sessions.Session, error) {
 	spy.GetCalls++
-	return spy.session, nil
+	return spy.Session, nil
 }
 
 func (spy *GorillaSessionStoreSpy) New(r *http.Request, name string) (*sessions.Session, error) {
 	spy.NewCalls++
-	return spy.session, nil
+	return spy.Session, nil
 }
 
 func (spy *GorillaSessionStoreSpy) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {

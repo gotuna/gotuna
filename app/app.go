@@ -39,11 +39,12 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.userRepository = userRepository
 
 	srv.Router = mux.NewRouter()
-	srv.Router.NotFoundHandler = srv.notFound()
+	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
 
 	srv.Router.Handle("/", srv.home()).Methods(http.MethodGet)
 	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet)
 	srv.Router.Handle("/login", srv.loginSubmit()).Methods(http.MethodPost)
+	srv.Router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
 	srv.Router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
 	//bad := func() http.Handler {
@@ -71,10 +72,7 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		_, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
-			//NotFoundHandler(w, r)
-			srv.notFound().ServeHTTP(w, r)
-
-			//w.WriteHeader(http.StatusNotFound)
+			srv.notFound(w, r)
 			return
 		}
 		//stat, _ := f.Stat()
@@ -106,13 +104,15 @@ func (srv Server) loginSubmit() http.Handler {
 
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			t := renderer.NewHTMLRenderer("app.html", "login.html")
+			t.Render(w, http.StatusUnauthorized)
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			w.WriteHeader(http.StatusUnauthorized)
+			t := renderer.NewHTMLRenderer("app.html", "login.html")
+			t.Render(w, http.StatusUnauthorized)
 			return
 		}
 
@@ -120,12 +120,16 @@ func (srv Server) loginSubmit() http.Handler {
 		srv.session.SetUserSID(w, r, user.SID)
 
 		http.Redirect(w, r, "/", http.StatusFound)
-		return
 	})
 }
 
-func (srv Server) notFound() http.Handler {
+func (srv Server) logout() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound)
+		srv.session.DestroySession(w, r)
+		http.Redirect(w, r, "/login", http.StatusFound)
 	})
+}
+
+func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
 }

@@ -76,6 +76,9 @@ func TestServingStaticFiles(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
+
+	htmlNeedle := `action="/login"`
+
 	t.Run("show login template", func(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
@@ -83,7 +86,7 @@ func TestLogin(t *testing.T) {
 		doubles.NewServerStub().Router.ServeHTTP(response, request)
 
 		assert.Equal(t, response.Code, http.StatusOK)
-		assert.Contains(t, response.Body.String(), `action="/login"`)
+		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
 	t.Run("submit login with non-existing user", func(t *testing.T) {
@@ -95,6 +98,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		doubles.NewServerStub().Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
+		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
 	t.Run("submit login bad password", func(t *testing.T) {
@@ -106,6 +110,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		doubles.NewServerStub().Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
+		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
 	t.Run("submit successful login and go to the home page", func(t *testing.T) {
@@ -129,6 +134,35 @@ func TestLogin(t *testing.T) {
 		doubles.NewServerWithCookieStoreStub().Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
 	})
+}
+
+func TestLogout(t *testing.T) {
+
+	user := doubles.UserStub()
+
+	srv := app.NewServer(
+		doubles.NewLoggerStub(),
+		session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
+		doubles.NewUserRepositoryStub(user),
+	)
+
+	// first, let's make sure we're logged in
+	request, _ := http.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+	srv.Router.ServeHTTP(response, request)
+	assert.Equal(t, response.Code, http.StatusOK)
+
+	// try to log out
+	request, _ = http.NewRequest(http.MethodPost, "/logout", nil)
+	response = httptest.NewRecorder()
+	srv.Router.ServeHTTP(response, request)
+	assert.Redirects(t, response, "/login", http.StatusFound)
+
+	// make sure we can't reach home page anymore
+	request, _ = http.NewRequest(http.MethodGet, "/", nil)
+	response = httptest.NewRecorder()
+	srv.Router.ServeHTTP(response, request)
+	assert.Redirects(t, response, "/login", http.StatusFound)
 }
 
 func loginRequest(form url.Values) *http.Request {
