@@ -44,14 +44,6 @@ func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository 
 	srv.Mux.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
 	srv.Mux.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
-	//bad := func() http.Handler {
-	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//		var x map[string]int
-	//		x["y"] = 1 // will produce nil map panic
-	//	})
-	//}
-	//srv.Mux.Handle("/bad", bad())
-
 	srv.Mux.Use(middleware.Logger(logger))
 	srv.Mux.Use(middleware.AuthRedirector(srv.session))
 
