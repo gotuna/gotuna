@@ -18,10 +18,10 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	rndr := getHTMLRenderer(template)
-	rndr.Set("username", "Milos")
+	err := getHTMLRenderer(template).
+		Set("username", "Milos").
+		Render(w, "view.html")
 
-	err := rndr.Render(w, http.StatusOK)
 	assert.NoError(t, err)
 	assert.Equal(t, w.Body.String(), rendered)
 	assert.Equal(t, w.Code, http.StatusOK)
@@ -37,12 +37,12 @@ func TestUsingTranslation(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	rndr := renderer.NewHTMLRenderer(lang, "view.html")
-	rndr.Mount(
-		doubles.NewFileSystemStub(
-			map[string][]byte{"view.html": []byte(template)}))
+	renderer.NewHTMLRenderer(lang).
+		Mount(
+			doubles.NewFileSystemStub(
+				map[string][]byte{"view.html": []byte(template)})).
+		Render(w, "view.html")
 
-	rndr.Render(w, http.StatusOK)
 	assert.Equal(t, w.Body.String(), rendered)
 }
 
@@ -52,9 +52,8 @@ func TestBadTemplateShouldThrowError(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	rndr := getHTMLRenderer(template)
+	err := getHTMLRenderer(template).Render(w, "view.html")
 
-	err := rndr.Render(w, http.StatusOK)
 	assert.Error(t, err)
 }
 
@@ -65,9 +64,8 @@ func TestUsingHelperFunctions(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	rndr := getHTMLRenderer(template)
+	getHTMLRenderer(template).Render(w, "view.html")
 
-	rndr.Render(w, http.StatusOK)
 	assert.Equal(t, w.Body.String(), rendered)
 }
 
@@ -84,15 +82,15 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	rndr := renderer.NewHTMLRenderer(nil, "layout.html", "content.html")
-	rndr.Mount(doubles.NewFileSystemStub(fs))
+	renderer.NewHTMLRenderer(nil).
+		Mount(doubles.NewFileSystemStub(fs)).
+		Render(w, "layout.html", "content.html")
 
-	rndr.Render(w, http.StatusOK)
 	assert.Equal(t, w.Body.String(), html_final)
 }
 
 func getHTMLRenderer(template string) renderer.Renderer {
-	rndr := renderer.NewHTMLRenderer(nil, "view.html")
+	rndr := renderer.NewHTMLRenderer(nil)
 
 	// mount a fake filesystem with a single view.html file
 	rndr.Mount(

@@ -19,40 +19,38 @@ var funcs = template.FuncMap{
 	},
 }
 
-func NewHTMLRenderer(translator lang.Translator, patterns ...string) Renderer {
+func NewHTMLRenderer(translator lang.Translator) Renderer {
 	return &htmlRenderer{
-		patterns: patterns,
-		fs:       views.EmbededViews,
-		Data:     make(map[string]interface{}),
-		Lang:     translator,
+		fs:   views.EmbededViews,
+		Data: make(map[string]interface{}),
+		Lang: translator,
 	}
 }
 
 type Renderer interface {
-	Render(w http.ResponseWriter, statusCode int) error
-	Set(key string, data interface{})
-	Mount(fs fs.FS)
+	Render(w http.ResponseWriter, patterns ...string) error
+	Set(key string, data interface{}) Renderer
+	Mount(fs fs.FS) Renderer
 }
 
 type htmlRenderer struct {
-	patterns []string
-	fs       fs.FS
-	Data     map[string]interface{}
-	Lang     lang.Translator
+	fs   fs.FS
+	Data map[string]interface{}
+	Lang lang.Translator
 }
 
-func (t *htmlRenderer) Set(key string, data interface{}) {
+func (t *htmlRenderer) Set(key string, data interface{}) Renderer {
 	t.Data[key] = data
+	return t
 }
 
-func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) error {
+func (t htmlRenderer) Render(w http.ResponseWriter, patterns ...string) error {
 	w.Header().Set("Content-type", ContentTypeHTML)
-	w.WriteHeader(statusCode)
 
 	tmpl := template.Must(
 		template.New("app").
 			Funcs(funcs).
-			ParseFS(t.fs, t.patterns...))
+			ParseFS(t.fs, patterns...))
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
@@ -62,6 +60,7 @@ func (t htmlRenderer) Render(w http.ResponseWriter, statusCode int) error {
 	return nil
 }
 
-func (t *htmlRenderer) Mount(fs fs.FS) {
+func (t *htmlRenderer) Mount(fs fs.FS) Renderer {
 	t.fs = fs
+	return t
 }

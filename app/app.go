@@ -32,14 +32,15 @@ type Server struct {
 	Router         *mux.Router
 	session        *session.Session
 	userRepository UserRepository
-	lang           lang.Translator
+	renderer       renderer.Renderer
 }
 
 func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
+
 	srv := &Server{}
-	srv.lang = lang.NewTranslator(lang.En) // TODO: move this to session/user/store
 	srv.session = s
 	srv.userRepository = userRepository
+	srv.renderer = renderer.NewHTMLRenderer(lang.NewTranslator(lang.En)) // TODO: move this to session/user/store
 
 	srv.Router = mux.NewRouter()
 	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
@@ -91,15 +92,13 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer(srv.lang, "app.html", "home.html")
-		t.Render(w, http.StatusOK)
+		srv.renderer.Render(w, "app.html", "home.html")
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
-		t.Render(w, http.StatusOK)
+		srv.renderer.Render(w, "app.html", "login.html")
 	})
 }
 
@@ -111,15 +110,15 @@ func (srv Server) loginSubmit() http.Handler {
 
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
-			t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
-			t.Render(w, http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			srv.renderer.Render(w, "app.html", "login.html")
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			t := renderer.NewHTMLRenderer(srv.lang, "app.html", "login.html")
-			t.Render(w, http.StatusUnauthorized)
+			w.WriteHeader(http.StatusUnauthorized)
+			srv.renderer.Render(w, "app.html", "login.html")
 			return
 		}
 
