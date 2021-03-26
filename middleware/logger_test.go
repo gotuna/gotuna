@@ -35,15 +35,6 @@ func TestRecoveringFromPanic(t *testing.T) {
 		x["y"] = 1 // this code will panic with: assignment to entry in nil map
 	})
 
-	// basic whoops html template
-	//	whoopsTmpl := templating.GetEngine(i18n.NewTranslator(nil)).
-	//		Mount(
-	//			doubles.NewFileSystemStub(
-	//				map[string][]byte{
-	//					"app.html":   []byte(`{{define "app"}}{{block "sub" .}}{{end}}{{end}}`),
-	//					"error.html": []byte(`{{define "sub"}}{{.Data.error}}<hr>{{.Data.stacktrace}}{{end}}`),
-	//				}))
-
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 

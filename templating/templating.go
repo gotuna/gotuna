@@ -15,7 +15,7 @@ import (
 type TemplatingEngine interface {
 	Render(w http.ResponseWriter, r *http.Request, patterns ...string)
 	Set(key string, data interface{}) TemplatingEngine
-	AddError(errorKey, description string) TemplatingEngine
+	SetError(errorKey, description string) TemplatingEngine
 	GetErrors() map[string]string
 	Mount(fs fs.FS) TemplatingEngine
 }
@@ -51,7 +51,7 @@ func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine
 	return t
 }
 
-func (t *nativeHtmlTemplates) AddError(errorKey, description string) TemplatingEngine {
+func (t *nativeHtmlTemplates) SetError(errorKey, description string) TemplatingEngine {
 	t.Errors[errorKey] = description
 	return t
 }

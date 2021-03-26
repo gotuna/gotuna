@@ -50,15 +50,21 @@ func TestUsingTranslation(t *testing.T) {
 	assert.Equal(t, w.Body.String(), rendered)
 }
 
-//func TestBadTemplateShouldPanic(t *testing.T) {
-//
-//	template := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
-//
-//	r, _ := http.NewRequest(http.MethodGet, "/", nil)
-//	w := httptest.NewRecorder()
-//
-//	doubles.NewStubTemplatingEngine(template).Render(w, r, "view.html")
-//}
+func TestBadTemplateShouldPanic(t *testing.T) {
+
+	template := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
+
+	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	defer func() {
+		recover()
+	}()
+
+	doubles.NewStubTemplatingEngine(template).Render(w, r, "view.html")
+
+	t.Errorf("templating engine should panic")
+}
 
 func TestUsingHelperFunctions(t *testing.T) {
 
@@ -120,8 +126,8 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	want := `some error / other error`
 
 	engine := doubles.NewStubTemplatingEngine(tmpl).
-		AddError("error1", "some error").
-		AddError("error2", "other error")
+		SetError("error1", "some error").
+		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), want)

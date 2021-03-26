@@ -20,7 +20,7 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 			defer func() {
 				if err := recover(); err != nil {
 					stacktrace := string(debug.Stack())
-					// log error and stack trace to console
+
 					logger.Printf("PANIC RECOVERED: %v", err)
 					logger.Println(stacktrace)
 

@@ -21,3 +21,5 @@ func (c language) T(key string, p ...interface{}) string {
 
 	return fmt.Sprintf(c.set[key], p...)
 }
+
+// TODO: date formatting

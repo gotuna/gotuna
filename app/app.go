@@ -113,10 +113,10 @@ func (srv Server) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.AddError("email", srv.lang.T("This field is required"))
+			tmpl.SetError("email", srv.lang.T("This field is required"))
 		}
 		if password == "" {
-			tmpl.AddError("password", srv.lang.T("This field is required"))
+			tmpl.SetError("password", srv.lang.T("This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -126,7 +126,7 @@ func (srv Server) login() http.Handler {
 
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
-			tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -134,7 +134,7 @@ func (srv Server) login() http.Handler {
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
