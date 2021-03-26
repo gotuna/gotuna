@@ -27,13 +27,10 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 					//fmt.Println(err, stacktrace)
 
 					w.WriteHeader(http.StatusInternalServerError)
-
-					tmpl := templating.GetEngine(i18n.NewTranslator(i18n.En)) // TODO
-					tmpl.
-						Set("error", err).
-						Set("stacktrace", stacktrace).
-						Render(w, r, "app.html", "error.html")
-					return
+					templating.GetEngine(i18n.NewTranslator(i18n.En)). // TODO lang
+												Set("error", err).
+												Set("stacktrace", string(debug.Stack())).
+												Render(w, r, "app.html", "error.html")
 				}
 			}()
 
@@ -42,18 +39,4 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 			logger.Printf("%s %s %s %s", start.Format(time.RFC3339), r.Method, r.URL.Path, time.Since(start))
 		})
 	}
-}
-
-func whoops(err interface{}) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		w.WriteHeader(http.StatusInternalServerError)
-
-		tmpl := templating.GetEngine(i18n.NewTranslator(i18n.En)) // TODO
-		tmpl.
-			Set("error", err).
-			Set("stacktrace", string(debug.Stack())).
-			Render(w, r, "app.html", "error.html")
-
-	})
 }
