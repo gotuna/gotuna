@@ -115,9 +115,13 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 	return tmpfile, nil
 }
 
+var StubTemplate = `{{define "app"}}{{end}}`
+
 func NewStubTemplatingEngine(template string) templating.TemplatingEngine {
 	return templating.GetNativeTemplatingEngine(i18n.NewTranslator(nil)).
 		Mount(
 			NewFileSystemStub(
-				map[string][]byte{"view.html": []byte(template)}))
+				map[string][]byte{
+					"view.html": []byte(template),
+				}))
 }

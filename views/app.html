@@ -5,8 +5,8 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>{{block "title" .}}{{end}}</title>
-      <link rel="stylesheet" href="/static/bulma/bulma.min.css">
-      <link rel="stylesheet" href="/static/style.css">
+      <link rel="stylesheet" href="/public/bulma/bulma.min.css">
+      <link rel="stylesheet" href="/public/style.css?{{.Ver}}">
     </head>
     <body>
 
@@ -26,6 +26,7 @@
               <div class="navbar-end">
                 <div class="navbar-item has-dropdown is-hoverable">
                   <a class="navbar-link">
+                    {{.Data.user.Name}}
                   </a>
                   <div class="navbar-dropdown is-right">
                     <a class="navbar-item" href="/profile">
@@ -33,7 +34,7 @@
                     </a>
                     <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                       <form id="logout-form" method="POST" action="/logout">
-                        Log Out
+                        {{lang "Log Out"}}
                       </form>
                     </a>
                   </div>
@@ -49,7 +50,7 @@
         </div>
       </section>
 
-      <script type="text/javascript" src="/static/script.js"></script>
+      <script type="text/javascript" src="/public/script.js?{{.Ver}}"></script>
       {{block "additional_scripts" .}}{{end}}
 
     </body>

@@ -13,31 +13,37 @@ import (
 )
 
 type TemplatingEngine interface {
-	Render(w http.ResponseWriter, patterns ...string) error
+	Render(w http.ResponseWriter, r *http.Request, patterns ...string)
 	Set(key string, data interface{}) TemplatingEngine
+	AddError(errorKey, description string) TemplatingEngine
+	GetErrors() map[string]string
 	Mount(fs fs.FS) TemplatingEngine
 }
 
-func GetNativeTemplatingEngine(translator i18n.Translator) TemplatingEngine {
+func GetNativeTemplatingEngine(lang i18n.Translator) TemplatingEngine {
 
 	var funcs = template.FuncMap{
-		"lang": translator.Translate,
+		"lang": lang.T,
 		"uppercase": func(v string) string {
 			return strings.ToUpper(v)
 		},
 	}
 
 	return &nativeHtmlTemplates{
-		fs:    views.EmbededViews,
-		funcs: funcs,
-		Data:  make(map[string]interface{}),
+		fs:     views.EmbededViews,
+		funcs:  funcs,
+		Data:   make(map[string]interface{}),
+		Errors: make(map[string]string),
 	}
 }
 
 type nativeHtmlTemplates struct {
-	fs    fs.FS
-	funcs template.FuncMap
-	Data  map[string]interface{}
+	fs      fs.FS
+	funcs   template.FuncMap
+	Data    map[string]interface{}
+	Errors  map[string]string
+	Request *http.Request
+	Ver     string
 }
 
 func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine {
@@ -45,8 +51,21 @@ func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine
 	return t
 }
 
-func (t nativeHtmlTemplates) Render(w http.ResponseWriter, patterns ...string) error {
+func (t *nativeHtmlTemplates) AddError(errorKey, description string) TemplatingEngine {
+	t.Errors[errorKey] = description
+	return t
+}
+
+func (t nativeHtmlTemplates) GetErrors() map[string]string {
+	return t.Errors
+}
+
+func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
+
 	w.Header().Set("Content-type", util.ContentTypeHTML)
+
+	t.Request = r
+	t.Ver = "22" // TODO: fix this
 
 	tmpl := template.Must(
 		template.New("app").
@@ -55,10 +74,8 @@ func (t nativeHtmlTemplates) Render(w http.ResponseWriter, patterns ...string) e
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
-		return fmt.Errorf("error rendering %v", err)
+		panic(fmt.Errorf("error rendering %v", err))
 	}
-
-	return nil
 }
 
 func (t *nativeHtmlTemplates) Mount(fs fs.FS) TemplatingEngine {

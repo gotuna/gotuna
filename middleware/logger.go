@@ -6,11 +6,11 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/alcalbg/gotdd/util"
+	"github.com/alcalbg/gotdd/templating"
 	"github.com/gorilla/mux"
 )
 
-func Logger(logger *log.Logger) mux.MiddlewareFunc {
+func Logger(logger *log.Logger, tmpl templating.TemplatingEngine) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -18,14 +18,20 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 
 			defer func() {
 				if err := recover(); err != nil {
+					stacktrace := string(debug.Stack())
 					// log error and stack trace to console
 					logger.Printf("PANIC RECOVERED: %v", err)
-					logger.Println(string(debug.Stack()))
+					logger.Println(stacktrace)
 
-					//fmt.Println(err, string(debug.Stack()))
+					//fmt.Println(err, stacktrace)
 
 					w.WriteHeader(http.StatusInternalServerError)
-					w.Write([]byte(util.DefaultError))
+
+					tmpl.
+						Set("error", err).
+						Set("stacktrace", stacktrace).
+						Render(w, r, "app.html", "error.html")
+
 					return
 				}
 			}()

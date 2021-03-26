@@ -1,4 +1,6 @@
+{{define "title"}}{{.Data.title}}{{end}}
 
 {{define "content"}}
-error
+  <p>{{.Data.title}}</p>
+  <a href="/">{{lang "Home"}}</a>
 {{end}}

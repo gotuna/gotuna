@@ -32,6 +32,7 @@ type Server struct {
 	Router         *mux.Router
 	session        *session.Session
 	userRepository UserRepository
+	lang           i18n.Translator
 	tmpl           templating.TemplatingEngine
 }
 
@@ -40,14 +41,14 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv := &Server{}
 	srv.session = s
 	srv.userRepository = userRepository
-	srv.tmpl = templating.GetNativeTemplatingEngine(i18n.NewTranslator(i18n.En)) // TODO: move this to session/user/store
+	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
+	srv.tmpl = templating.GetNativeTemplatingEngine(srv.lang)
 
 	srv.Router = mux.NewRouter()
 	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
 
 	srv.Router.Handle("/", srv.home()).Methods(http.MethodGet)
-	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet)
-	srv.Router.Handle("/login", srv.loginSubmit()).Methods(http.MethodPost)
+	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
 	srv.Router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
 	srv.Router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
@@ -59,7 +60,7 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	//}
 	//srv.Router.Handle("/bad", bad())
 
-	srv.Router.Use(middleware.Logger(logger))
+	srv.Router.Use(middleware.Logger(logger, srv.tmpl))
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the static directory
@@ -92,33 +93,48 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.tmpl.Render(w, "app.html", "home.html")
+		srv.tmpl.
+			Set("message", srv.lang.T("Home")).
+			Render(w, r, "app.html", "home.html")
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.tmpl.Render(w, "app.html", "login.html")
-	})
-}
 
-func (srv Server) loginSubmit() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			srv.tmpl.Render(w, r, "app.html", "login.html")
+			return
+		}
 
 		email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 		password := r.FormValue("password")
 
+		if email == "" {
+			srv.tmpl.AddError("email", srv.lang.T("This field is required"))
+		}
+		if password == "" {
+			srv.tmpl.AddError("password", srv.lang.T("This field is required"))
+		}
+		if len(srv.tmpl.GetErrors()) > 0 {
+			w.WriteHeader(http.StatusUnauthorized)
+			srv.tmpl.Render(w, r, "app.html", "login.html")
+			return
+		}
+
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
+			srv.tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.tmpl.Render(w, "app.html", "login.html")
+			srv.tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
+			srv.tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.tmpl.Render(w, "app.html", "login.html")
+			srv.tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
@@ -138,4 +154,11 @@ func (srv Server) logout() http.Handler {
 
 func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func (srv Server) whoops() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		srv.tmpl.Render(w, r, "app.html", "error.html")
+		w.WriteHeader(http.StatusInternalServerError)
+	})
 }
