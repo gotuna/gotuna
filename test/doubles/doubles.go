@@ -10,7 +10,9 @@ import (
 	"os"
 
 	"github.com/alcalbg/gotdd/app"
+	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/templating"
 	"github.com/gorilla/sessions"
 )
 
@@ -111,4 +113,11 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 	tmpfile.Seek(0, 0)
 
 	return tmpfile, nil
+}
+
+func NewStubTemplatingEngine(template string) templating.TemplatingEngine {
+	return templating.GetNativeTemplatingEngine(i18n.NewTranslator(nil)).
+		Mount(
+			NewFileSystemStub(
+				map[string][]byte{"view.html": []byte(template)}))
 }

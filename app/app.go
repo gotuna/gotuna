@@ -8,11 +8,11 @@ import (
 	"path"
 	"strings"
 
-	"github.com/alcalbg/gotdd/lang"
+	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
-	"github.com/alcalbg/gotdd/renderer"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/static"
+	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -32,7 +32,7 @@ type Server struct {
 	Router         *mux.Router
 	session        *session.Session
 	userRepository UserRepository
-	renderer       renderer.Renderer
+	tmpl           templating.TemplatingEngine
 }
 
 func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
@@ -40,7 +40,7 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv := &Server{}
 	srv.session = s
 	srv.userRepository = userRepository
-	srv.renderer = renderer.NewHTMLRenderer(lang.NewTranslator(lang.En)) // TODO: move this to session/user/store
+	srv.tmpl = templating.GetNativeTemplatingEngine(i18n.NewTranslator(i18n.En)) // TODO: move this to session/user/store
 
 	srv.Router = mux.NewRouter()
 	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
@@ -92,13 +92,13 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.renderer.Render(w, "app.html", "home.html")
+		srv.tmpl.Render(w, "app.html", "home.html")
 	})
 }
 
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.renderer.Render(w, "app.html", "login.html")
+		srv.tmpl.Render(w, "app.html", "login.html")
 	})
 }
 
@@ -111,14 +111,14 @@ func (srv Server) loginSubmit() http.Handler {
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.renderer.Render(w, "app.html", "login.html")
+			srv.tmpl.Render(w, "app.html", "login.html")
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.renderer.Render(w, "app.html", "login.html")
+			srv.tmpl.Render(w, "app.html", "login.html")
 			return
 		}
 

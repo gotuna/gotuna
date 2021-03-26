@@ -1,4 +1,4 @@
-package lang
+package i18n
 
 var En = map[string]string{
 	"Email":                "Email",
