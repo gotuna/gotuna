@@ -12,7 +12,6 @@ import (
 	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/session"
-	"github.com/alcalbg/gotdd/static"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
@@ -34,12 +33,14 @@ type Server struct {
 	session        *session.Session
 	userRepository UserRepository
 	lang           i18n.Translator
+	fs             fs.FS
 }
 
-func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
+func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository UserRepository) *Server {
 
 	srv := &Server{}
 	srv.session = s
+	srv.fs = fs
 	srv.userRepository = userRepository
 	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
 
@@ -66,13 +67,13 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	// serve files from the static directory
 	srv.Router.PathPrefix(util.StaticPath).
 		Handler(http.StripPrefix(util.StaticPath,
-			srv.ServeFiles(static.EmbededStatic)))
+			srv.serveFiles()))
 
 	return srv
 }
 
-func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
-	fs := http.FS(filesystem)
+func (srv Server) serveFiles() http.Handler {
+	fs := http.FS(srv.fs)
 	filesrv := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f, err := fs.Open(path.Clean(r.URL.Path))

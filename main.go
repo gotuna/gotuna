@@ -9,6 +9,7 @@ import (
 
 	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/static"
 	"github.com/gorilla/sessions"
 )
 
@@ -41,9 +42,11 @@ func main() {
 	port := ":8888"
 
 	gorillaSessionStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
+	fs := static.EmbededStatic
 
 	srv := app.NewServer(
 		log.New(os.Stdout, "", 0),
+		fs,
 		session.NewSession(gorillaSessionStore),
 		NewMemoryUserRepository(),
 	)

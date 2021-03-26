@@ -12,6 +12,7 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRoutes(t *testing.T) {
@@ -39,6 +40,7 @@ func TestRoutes(t *testing.T) {
 
 			app.NewServer(
 				doubles.NewLoggerStub(),
+				doubles.NewFileSystemStub(nil),
 				session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
 				doubles.NewUserRepositoryStub(app.User{}),
 			).Router.ServeHTTP(response, request)
@@ -48,20 +50,23 @@ func TestRoutes(t *testing.T) {
 	}
 }
 
-func TestServingStaticFiles(t *testing.T) {
-
-	srv := doubles.NewServerStub()
+func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	files := map[string][]byte{
 		"somedir/image.jpg": nil,
 	}
 
-	fileServer := srv.ServeFiles(doubles.NewFileSystemStub(files))
+	srv := app.NewServer(
+		doubles.NewLoggerStub(),
+		doubles.NewFileSystemStub(files),
+		session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+		doubles.NewUserRepositoryStub(doubles.UserStub()),
+	)
 
 	t.Run("return valid static file", func(t *testing.T) {
-		r, _ := http.NewRequest(http.MethodGet, "somedir/image.jpg", nil)
+		r, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%ssomedir/image.jpg", util.StaticPath), nil)
 		w := httptest.NewRecorder()
-		fileServer.ServeHTTP(w, r)
+		srv.Router.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusOK)
 	})
@@ -69,10 +74,11 @@ func TestServingStaticFiles(t *testing.T) {
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
-		fileServer.ServeHTTP(w, r)
+		srv.Router.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusNotFound)
 	})
+
 }
 
 func TestLogin(t *testing.T) {
@@ -144,6 +150,7 @@ func TestLogout(t *testing.T) {
 
 	srv := app.NewServer(
 		doubles.NewLoggerStub(),
+		doubles.NewFileSystemStub(nil),
 		session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
 		doubles.NewUserRepositoryStub(user),
 	)
