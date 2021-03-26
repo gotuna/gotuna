@@ -19,7 +19,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 	template := `{{define "app"}}Hello, my name is {{.Data.username }}{{end}}`
 	rendered := `Hello, my name is Milos`
 
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	doubles.NewStubTemplatingEngine(template).
@@ -38,7 +38,7 @@ func TestUsingTranslation(t *testing.T) {
 	template := `{{define "app"}}Hello, this is my {{lang "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
 
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	templating.GetEngine(lang).
@@ -54,7 +54,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 
 	template := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
 
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	defer func() {
@@ -71,7 +71,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 	template := `{{- define "app" -}} {{uppercase "hello"}} {{- end -}}`
 	rendered := `HELLO`
 
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	doubles.NewStubTemplatingEngine(template).Render(w, r, "view.html")
@@ -90,7 +90,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 		"content.html": []byte(htmlSubcontent),
 	}
 
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	templating.GetEngine(i18n.NewTranslator(nil)).
@@ -119,7 +119,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 }
 
 func TestErrorsCanBeAdded(t *testing.T) {
-	r, _ := http.NewRequest(http.MethodGet, "/", nil)
+	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	tmpl := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
@@ -133,3 +133,19 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	assert.Equal(t, w.Body.String(), want)
 	assert.Equal(t, len(engine.GetErrors()), 2)
 }
+
+//func TestFlashMessagesAreIncluded(t *testing.T) {
+//	r := &http.Request{}
+//	w := httptest.NewRecorder()
+//
+//	ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
+//	ses.AddFlash(w, r, "flash one")
+//	ses.AddFlash(w, r, "flash two")
+//
+//	tmpl := `{{define "app"}}{{range $el := .Flashes}}* {{$el.Message}}<br>{{end}}{{end}}`
+//	want := `* flash one<br>* flash two`
+//
+//	doubles.NewStubTemplatingEngine(tmpl).Render(w, r, "view.html")
+//
+//	assert.Equal(t, w.Body.String(), want)
+//}

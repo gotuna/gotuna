@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alcalbg/gotdd/i18n"
+	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/util"
 	"github.com/alcalbg/gotdd/views"
 )
@@ -43,6 +44,7 @@ type nativeHtmlTemplates struct {
 	Data    map[string]interface{}
 	Errors  map[string]string
 	Request *http.Request
+	Flashes []session.FlashMessage
 	Ver     string
 }
 
@@ -63,6 +65,8 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
 	w.Header().Set("Content-type", util.ContentTypeHTML)
+
+	//t.Flashes = session.GetFlashes(w, r)
 
 	t.Request = r
 	t.Ver = "22" // TODO: fix this
