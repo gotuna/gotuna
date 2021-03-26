@@ -117,8 +117,8 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 
 var StubTemplate = `{{define "app"}}{{end}}`
 
-func NewStubTemplatingEngine(template string) templating.TemplatingEngine {
-	return templating.GetEngine(i18n.NewTranslator(i18n.En)).
+func NewStubTemplatingEngine(template string, session *session.Session) templating.TemplatingEngine {
+	return templating.GetEngine(i18n.NewTranslator(i18n.En), session).
 		MountFS(
 			NewFileSystemStub(
 				map[string][]byte{

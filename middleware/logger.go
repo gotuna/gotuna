@@ -27,7 +27,7 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 					//fmt.Println(err, stacktrace)
 
 					w.WriteHeader(http.StatusInternalServerError)
-					templating.GetEngine(i18n.NewTranslator(i18n.En)). // TODO lang
+					templating.GetEngine(i18n.NewTranslator(i18n.En), nil). // TODO lang
 												Set("error", err).
 												Set("stacktrace", string(debug.Stack())).
 												Render(w, r, "app.html", "error.html")

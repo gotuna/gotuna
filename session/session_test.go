@@ -69,22 +69,22 @@ func TestFlashMessages(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	// request1: no flash messages
-	messages, err := ses.Flashes(response, request, "flash message")
+	messages, err := ses.Flashes(response, request)
 	assert.NoError(t, err)
 	assert.Equal(t, len(messages), 0)
 
 	// request2: add flash messages
-	messages, err = ses.Flashes(response, request, "flash message")
+	messages, err = ses.Flashes(response, request)
 	ses.AddFlash(response, request, "flash message one")
 	ses.AddFlash(response, request, "flash message two")
 
 	// request3: pop flash messages
-	messages, err = ses.Flashes(response, request, "flash message")
+	messages, err = ses.Flashes(response, request)
 	assert.NoError(t, err)
 	assert.Equal(t, len(messages), 2)
 
 	// request4: no flash messages
-	messages, err = ses.Flashes(response, request, "flash message")
+	messages, err = ses.Flashes(response, request)
 	assert.NoError(t, err)
 	assert.Equal(t, len(messages), 0)
 }

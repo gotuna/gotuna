@@ -97,7 +97,7 @@ func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string
 	return s.Store.Save(r, w, session)
 }
 
-func (s Session) Flashes(w http.ResponseWriter, r *http.Request, message string) ([]FlashMessage, error) {
+func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
 		return nil, errors.New("cannot get session from the store")

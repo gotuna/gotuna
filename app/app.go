@@ -93,7 +93,7 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(srv.lang).
+		templating.GetEngine(srv.lang, srv.session).
 			Set("message", srv.lang.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -102,7 +102,7 @@ func (srv Server) home() http.Handler {
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(srv.lang)
+		tmpl := templating.GetEngine(srv.lang, srv.session)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -156,7 +156,7 @@ func (srv Server) logout() http.Handler {
 
 func (srv Server) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(srv.lang).
+		templating.GetEngine(srv.lang, srv.session).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -164,7 +164,7 @@ func (srv Server) profile() http.Handler {
 func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(srv.lang).
+	templating.GetEngine(srv.lang, srv.session).
 		Set("title", srv.lang.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }

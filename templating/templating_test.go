@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/alcalbg/gotdd/i18n"
+	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
@@ -22,7 +23,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template).
+	doubles.NewStubTemplatingEngine(template, nil).
 		Set("username", "Milos").
 		Render(w, r, "view.html")
 
@@ -41,7 +42,7 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(lang).
+	templating.GetEngine(lang, nil).
 		MountFS(
 			doubles.NewFileSystemStub(
 				map[string][]byte{"view.html": []byte(template)})).
@@ -61,7 +62,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 		recover()
 	}()
 
-	doubles.NewStubTemplatingEngine(template).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(template, nil).Render(w, r, "view.html")
 
 	t.Errorf("templating engine should panic")
 }
@@ -74,7 +75,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(template, nil).Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
 }
@@ -93,7 +94,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(i18n.NewTranslator(nil)).
+	templating.GetEngine(i18n.NewTranslator(nil), nil).
 		MountFS(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 
@@ -114,7 +115,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	tmpl := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
-	doubles.NewStubTemplatingEngine(tmpl).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(tmpl, nil).Render(w, r, "view.html")
 	assert.Equal(t, w.Body.String(), want)
 }
 
@@ -125,7 +126,7 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	tmpl := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
 	want := `some error / other error`
 
-	engine := doubles.NewStubTemplatingEngine(tmpl).
+	engine := doubles.NewStubTemplatingEngine(tmpl, nil).
 		SetError("error1", "some error").
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
@@ -134,18 +135,18 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	assert.Equal(t, len(engine.GetErrors()), 2)
 }
 
-//func TestFlashMessagesAreIncluded(t *testing.T) {
-//	r := &http.Request{}
-//	w := httptest.NewRecorder()
-//
-//	ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
-//	ses.AddFlash(w, r, "flash one")
-//	ses.AddFlash(w, r, "flash two")
-//
-//	tmpl := `{{define "app"}}{{range $el := .Flashes}}* {{$el.Message}}<br>{{end}}{{end}}`
-//	want := `* flash one<br>* flash two`
-//
-//	doubles.NewStubTemplatingEngine(tmpl).Render(w, r, "view.html")
-//
-//	assert.Equal(t, w.Body.String(), want)
-//}
+func TestFlashMessagesAreIncluded(t *testing.T) {
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+
+	ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
+	ses.AddFlash(w, r, "flash one")
+	ses.AddFlash(w, r, "flash two")
+
+	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
+	want := ` * flash one * flash two`
+
+	doubles.NewStubTemplatingEngine(tmpl, ses).Render(w, r, "view.html")
+
+	assert.Equal(t, w.Body.String(), want)
+}

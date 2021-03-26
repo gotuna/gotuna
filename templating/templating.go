@@ -21,7 +21,7 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(lang i18n.Translator) TemplatingEngine {
+func GetEngine(lang i18n.Translator, ses *session.Session) TemplatingEngine {
 
 	var funcs = template.FuncMap{
 		"lang": lang.T,
@@ -31,10 +31,11 @@ func GetEngine(lang i18n.Translator) TemplatingEngine {
 	}
 
 	return &nativeHtmlTemplates{
-		fs:     views.EmbededViews,
-		funcs:  funcs,
-		Data:   make(map[string]interface{}),
-		Errors: make(map[string]string),
+		fs:      views.EmbededViews,
+		funcs:   funcs,
+		Data:    make(map[string]interface{}),
+		Errors:  make(map[string]string),
+		session: ses,
 	}
 }
 
@@ -44,6 +45,7 @@ type nativeHtmlTemplates struct {
 	Data    map[string]interface{}
 	Errors  map[string]string
 	Request *http.Request
+	session *session.Session
 	Flashes []session.FlashMessage
 	Ver     string
 }
@@ -66,7 +68,9 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 
 	w.Header().Set("Content-type", util.ContentTypeHTML)
 
-	//t.Flashes = session.GetFlashes(w, r)
+	if t.session != nil {
+		t.Flashes, _ = t.session.Flashes(w, r)
+	}
 
 	t.Request = r
 	t.Ver = "22" // TODO: fix this
