@@ -48,6 +48,7 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.Router.Handle("/", srv.home()).Methods(http.MethodGet)
 	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
 	srv.Router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
+	srv.Router.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
 	srv.Router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
 	//bad := func() http.Handler {
@@ -150,6 +151,13 @@ func (srv Server) logout() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		srv.session.DestroySession(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
+	})
+}
+
+func (srv Server) profile() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		templating.GetEngine(srv.lang).
+			Render(w, r, "app.html", "profile.html")
 	})
 }
 
