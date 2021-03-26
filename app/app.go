@@ -155,4 +155,8 @@ func (srv Server) logout() http.Handler {
 
 func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
+
+	templating.GetEngine(srv.lang).
+		Set("title", srv.lang.T("Not found")).
+		Render(w, r, "app.html", "4xx.html")
 }
