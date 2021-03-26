@@ -10,6 +10,7 @@
   </head>
   <body>
 
+    {{if not .IsGuest}}
     <nav class="navbar is-info" role="navigation" aria-label="main navigation">
       <div class="container">
         <div class="navbar-brand">
@@ -43,6 +44,7 @@
         </div>
       </div>
     </nav>
+    {{end}}
 
     <div style="position:absolute;width:100%">
       {{range $e := .Flashes}}

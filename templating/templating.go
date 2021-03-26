@@ -47,6 +47,7 @@ type nativeHtmlTemplates struct {
 	Request *http.Request
 	session *session.Session
 	Flashes []session.FlashMessage
+	IsGuest bool
 	Ver     string
 }
 
@@ -70,6 +71,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 
 	if t.session != nil {
 		t.Flashes, _ = t.session.Flashes(w, r)
+		t.IsGuest = t.session.IsGuest(r)
 	}
 
 	t.Request = r

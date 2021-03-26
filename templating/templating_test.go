@@ -150,3 +150,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 	assert.Equal(t, w.Body.String(), want)
 }
+
+func TestIsGuestIsEvaluated(t *testing.T) {
+	// TODO
+}
