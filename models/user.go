@@ -25,7 +25,7 @@ type inMemoryUserRepository struct {
 	users []User
 }
 
-func (repo *inMemoryUserRepository) GetUserByEmail(email string) (User, error) {
+func (repo inMemoryUserRepository) GetUserByEmail(email string) (User, error) {
 	for _, user := range repo.users {
 		if user.Email == email {
 			return user, nil

@@ -135,12 +135,12 @@ func (srv Server) login() http.Handler {
 
 		// user is ok, save to session
 		if err := srv.session.SetUserSID(w, r, user.SID); err != nil {
-			errorHandler(err).ServeHTTP(w, r)
+			srv.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
 
 		if err := srv.session.AddFlash(w, r, srv.lang.T("Welcome"), "is-success", true); err != nil {
-			errorHandler(err).ServeHTTP(w, r)
+			srv.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
 
@@ -170,7 +170,7 @@ func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 		Render(w, r, "app.html", "4xx.html")
 }
 
-func errorHandler(err error) http.Handler {
+func (srv Server) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		templating.GetEngine(i18n.NewTranslator(i18n.En), nil). // TODO lang
