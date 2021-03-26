@@ -59,5 +59,32 @@ func TestDestroyActiveSession(t *testing.T) {
 	assert.Equal(t, sid, session.GuestSID)
 	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
 	assert.Equal(t, sessionStoreSpy.Session.Options.MaxAge, -1)
+}
 
+func TestFlashMessages(t *testing.T) {
+
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)
+	ses := session.NewSession(sessionStoreSpy)
+	request := &http.Request{}
+	response := httptest.NewRecorder()
+
+	// request1: no flash messages
+	messages, err := ses.Flashes(response, request, "flash message")
+	assert.NoError(t, err)
+	assert.Equal(t, len(messages), 0)
+
+	// request2: add flash messages
+	messages, err = ses.Flashes(response, request, "flash message")
+	ses.AddFlash(response, request, "flash message one")
+	ses.AddFlash(response, request, "flash message two")
+
+	// request3: pop flash messages
+	messages, err = ses.Flashes(response, request, "flash message")
+	assert.NoError(t, err)
+	assert.Equal(t, len(messages), 2)
+
+	// request4: no flash messages
+	messages, err = ses.Flashes(response, request, "flash message")
+	assert.NoError(t, err)
+	assert.Equal(t, len(messages), 0)
 }

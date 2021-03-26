@@ -8,11 +8,16 @@ import (
 )
 
 const GuestSID = ""
-const UserSIDKey = "user_sid"
+const UserSIDKey = "_user_sid"
+const flashKey = "_flash"
 const sessionName = "app_session"
 
 type Session struct {
 	Store sessions.Store
+}
+
+type FlashMessage struct {
+	Message string
 }
 
 // NewSession returns new session with requested store
@@ -32,17 +37,13 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 
 	session.Values[UserSIDKey] = sid
 
-	if err = s.Store.Save(r, w, session); err != nil {
-		return errors.New("Cannot store to session")
-	}
-
-	return nil
+	return s.Store.Save(r, w, session)
 }
 
 func (s Session) GetUserSID(r *http.Request) (string, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return GuestSID, errors.New("Cannot get session from the store")
+		return GuestSID, errors.New("cannot get session from the store")
 	}
 
 	sid, ok := session.Values[UserSIDKey].(string)
@@ -56,17 +57,13 @@ func (s Session) GetUserSID(r *http.Request) (string, error) {
 func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("Cannot get session from the store")
+		return errors.New("cannot get session from the store")
 	}
 
 	delete(session.Values, UserSIDKey)
 	session.Options.MaxAge = -1
 
-	if err = s.Store.Save(r, w, session); err != nil {
-		return errors.New("Cannot store to session")
-	}
-
-	return nil
+	return s.Store.Save(r, w, session)
 }
 
 func (s Session) IsGuest(r *http.Request) bool {
@@ -80,4 +77,38 @@ func (s Session) IsGuest(r *http.Request) bool {
 	}
 
 	return false
+}
+
+func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string) error {
+	session, err := s.Store.Get(r, sessionName)
+	if err != nil {
+		return errors.New("cannot get session from the store")
+	}
+
+	var flashes []FlashMessage
+
+	if v, ok := session.Values[flashKey]; ok {
+		flashes = v.([]FlashMessage)
+	}
+	session.Values[flashKey] = append(flashes, FlashMessage{
+		Message: message,
+	})
+
+	return s.Store.Save(r, w, session)
+}
+
+func (s Session) Flashes(w http.ResponseWriter, r *http.Request, message string) ([]FlashMessage, error) {
+	session, err := s.Store.Get(r, sessionName)
+	if err != nil {
+		return nil, errors.New("cannot get session from the store")
+	}
+
+	messages, ok := session.Values[flashKey].([]FlashMessage)
+	if !ok {
+		messages = []FlashMessage{}
+	}
+
+	delete(session.Values, flashKey)
+
+	return messages, s.Store.Save(r, w, session)
 }
