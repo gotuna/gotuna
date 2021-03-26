@@ -11,6 +11,7 @@ import (
 
 	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
+	"github.com/alcalbg/gotdd/models"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
@@ -18,25 +19,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type User struct {
-	SID          string
-	Email        string
-	PasswordHash string
-}
-
-type UserRepository interface {
-	GetUserByEmail(email string) (User, error)
-}
-
 type Server struct {
-	Router         *mux.Router
+	Mux            *mux.Router
 	session        *session.Session
-	userRepository UserRepository
+	userRepository models.UserRepository
 	lang           i18n.Translator
 	fs             fs.FS
 }
 
-func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository UserRepository) *Server {
+func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) *Server {
 
 	srv := &Server{}
 	srv.session = s
@@ -44,14 +35,14 @@ func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository 
 	srv.userRepository = userRepository
 	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
 
-	srv.Router = mux.NewRouter()
-	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
+	srv.Mux = mux.NewRouter()
+	srv.Mux.NotFoundHandler = http.HandlerFunc(srv.notFound)
 
-	srv.Router.Handle("/", srv.home()).Methods(http.MethodGet)
-	srv.Router.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
-	srv.Router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
-	srv.Router.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
-	srv.Router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
+	srv.Mux.Handle("/", srv.home()).Methods(http.MethodGet)
+	srv.Mux.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
+	srv.Mux.Handle("/logout", srv.logout()).Methods(http.MethodPost)
+	srv.Mux.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
+	srv.Mux.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
 	//bad := func() http.Handler {
 	//	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -59,13 +50,13 @@ func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository 
 	//		x["y"] = 1 // will produce nil map panic
 	//	})
 	//}
-	//srv.Router.Handle("/bad", bad())
+	//srv.Mux.Handle("/bad", bad())
 
-	srv.Router.Use(middleware.Logger(logger))
-	srv.Router.Use(middleware.AuthRedirector(srv.session))
+	srv.Mux.Use(middleware.Logger(logger))
+	srv.Mux.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the static directory
-	srv.Router.PathPrefix(util.StaticPath).
+	srv.Mux.PathPrefix(util.StaticPath).
 		Handler(http.StripPrefix(util.StaticPath,
 			srv.serveFiles()))
 

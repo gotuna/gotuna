@@ -11,6 +11,7 @@ import (
 
 	"github.com/alcalbg/gotdd/app"
 	"github.com/alcalbg/gotdd/i18n"
+	"github.com/alcalbg/gotdd/models"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/gorilla/sessions"
@@ -49,17 +50,17 @@ func (spy *GorillaSessionStoreSpy) Save(r *http.Request, w http.ResponseWriter, 
 	return nil
 }
 
-func NewUserRepositoryStub(user app.User) UserRepositoryStub {
+func NewUserRepositoryStub(user models.User) UserRepositoryStub {
 	return UserRepositoryStub{user}
 }
 
 type UserRepositoryStub struct {
-	user app.User
+	user models.User
 }
 
-func (u UserRepositoryStub) GetUserByEmail(email string) (app.User, error) {
+func (u UserRepositoryStub) GetUserByEmail(email string) (models.User, error) {
 	if u.user.Email != email {
-		return app.User{}, errors.New("no user")
+		return models.User{}, errors.New("no user")
 	}
 	return u.user, nil
 }
@@ -82,8 +83,8 @@ func NewServerWithCookieStoreStub() *app.Server {
 	)
 }
 
-func UserStub() app.User {
-	return app.User{
+func UserStub() models.User {
+	return models.User{
 		SID:          "123",
 		Email:        "john@example.com",
 		PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123

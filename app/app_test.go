@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/alcalbg/gotdd/app"
+	"github.com/alcalbg/gotdd/models"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
@@ -42,8 +43,8 @@ func TestRoutes(t *testing.T) {
 				doubles.NewLoggerStub(),
 				doubles.NewFileSystemStub(nil),
 				session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
-				doubles.NewUserRepositoryStub(app.User{}),
-			).Router.ServeHTTP(response, request)
+				doubles.NewUserRepositoryStub(models.User{}),
+			).Mux.ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
 		})
@@ -66,7 +67,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 	t.Run("return valid static file", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%ssomedir/image.jpg", util.StaticPath), nil)
 		w := httptest.NewRecorder()
-		srv.Router.ServeHTTP(w, r)
+		srv.Mux.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusOK)
 	})
@@ -74,7 +75,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
-		srv.Router.ServeHTTP(w, r)
+		srv.Mux.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusNotFound)
 	})
@@ -89,7 +90,7 @@ func TestLogin(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
+		doubles.NewServerStub().Mux.ServeHTTP(response, request)
 
 		assert.Equal(t, response.Code, http.StatusOK)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
@@ -102,7 +103,7 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
+		doubles.NewServerStub().Mux.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
@@ -114,7 +115,7 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		doubles.NewServerStub().Router.ServeHTTP(response, request)
+		doubles.NewServerStub().Mux.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
@@ -129,7 +130,7 @@ func TestLogin(t *testing.T) {
 		// step1: after successful login, user is redirected to the home page
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		srv.Router.ServeHTTP(response, request)
+		srv.Mux.ServeHTTP(response, request)
 		assert.Redirects(t, response, "/", http.StatusFound)
 		gotCookies := response.Result().Cookies()
 
@@ -139,7 +140,7 @@ func TestLogin(t *testing.T) {
 		for _, c := range gotCookies {
 			request.AddCookie(c)
 		}
-		srv.Router.ServeHTTP(response, request)
+		srv.Mux.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
 	})
 }
@@ -158,19 +159,19 @@ func TestLogout(t *testing.T) {
 	// first, let's make sure we're logged in
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
-	srv.Router.ServeHTTP(response, request)
+	srv.Mux.ServeHTTP(response, request)
 	assert.Equal(t, response.Code, http.StatusOK)
 
 	// try to log out
 	request, _ = http.NewRequest(http.MethodPost, "/logout", nil)
 	response = httptest.NewRecorder()
-	srv.Router.ServeHTTP(response, request)
+	srv.Mux.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
 
 	// make sure we can't reach home page anymore
 	request, _ = http.NewRequest(http.MethodGet, "/", nil)
 	response = httptest.NewRecorder()
-	srv.Router.ServeHTTP(response, request)
+	srv.Mux.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
 }
 
