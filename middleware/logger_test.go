@@ -7,11 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
-	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
 )
 
 func TestLogging(t *testing.T) {
@@ -20,7 +17,7 @@ func TestLogging(t *testing.T) {
 
 	wlog := &bytes.Buffer{}
 	logger := log.New(wlog, "", 0)
-	middleware := middleware.Logger(logger, doubles.NewStubTemplatingEngine(doubles.StubTemplate))
+	middleware := middleware.Logger(logger)
 	handler := middleware(http.NotFoundHandler())
 
 	handler.ServeHTTP(response, request)
@@ -39,20 +36,20 @@ func TestRecoveringFromPanic(t *testing.T) {
 	})
 
 	// basic whoops html template
-	whoopsTmpl := templating.GetNativeTemplatingEngine(i18n.NewTranslator(nil)).
-		Mount(
-			doubles.NewFileSystemStub(
-				map[string][]byte{
-					"app.html":   []byte(`{{define "app"}}{{block "sub" .}}{{end}}{{end}}`),
-					"error.html": []byte(`{{define "sub"}}{{.Data.error}}<hr>{{.Data.stacktrace}}{{end}}`),
-				}))
+	//	whoopsTmpl := templating.GetNativeTemplatingEngine(i18n.NewTranslator(nil)).
+	//		Mount(
+	//			doubles.NewFileSystemStub(
+	//				map[string][]byte{
+	//					"app.html":   []byte(`{{define "app"}}{{block "sub" .}}{{end}}{{end}}`),
+	//					"error.html": []byte(`{{define "sub"}}{{.Data.error}}<hr>{{.Data.stacktrace}}{{end}}`),
+	//				}))
 
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
 	logger := log.New(wlog, "", 0)
-	middleware := middleware.Logger(logger, whoopsTmpl)
+	middleware := middleware.Logger(logger)
 	handler := middleware(badHandler)
 
 	handler.ServeHTTP(response, request)

@@ -33,7 +33,6 @@ type Server struct {
 	session        *session.Session
 	userRepository UserRepository
 	lang           i18n.Translator
-	tmpl           templating.TemplatingEngine
 }
 
 func NewServer(logger *log.Logger, s *session.Session, userRepository UserRepository) *Server {
@@ -42,7 +41,6 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	srv.session = s
 	srv.userRepository = userRepository
 	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
-	srv.tmpl = templating.GetNativeTemplatingEngine(srv.lang)
 
 	srv.Router = mux.NewRouter()
 	srv.Router.NotFoundHandler = http.HandlerFunc(srv.notFound)
@@ -60,7 +58,7 @@ func NewServer(logger *log.Logger, s *session.Session, userRepository UserReposi
 	//}
 	//srv.Router.Handle("/bad", bad())
 
-	srv.Router.Use(middleware.Logger(logger, srv.tmpl))
+	srv.Router.Use(middleware.Logger(logger))
 	srv.Router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the static directory
@@ -93,7 +91,8 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.tmpl.
+
+		templating.GetNativeTemplatingEngine(srv.lang).
 			Set("message", srv.lang.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -102,8 +101,10 @@ func (srv Server) home() http.Handler {
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		if r.Method == "GET" {
-			srv.tmpl.Render(w, r, "app.html", "login.html")
+		tmpl := templating.GetNativeTemplatingEngine(srv.lang)
+
+		if r.Method == http.MethodGet {
+			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
@@ -111,30 +112,30 @@ func (srv Server) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			srv.tmpl.AddError("email", srv.lang.T("This field is required"))
+			tmpl.AddError("email", srv.lang.T("This field is required"))
 		}
 		if password == "" {
-			srv.tmpl.AddError("password", srv.lang.T("This field is required"))
+			tmpl.AddError("password", srv.lang.T("This field is required"))
 		}
-		if len(srv.tmpl.GetErrors()) > 0 {
+		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.tmpl.Render(w, r, "app.html", "login.html")
+			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
 		user, err := srv.userRepository.GetUserByEmail(email)
 		if err != nil {
-			srv.tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.tmpl.Render(w, r, "app.html", "login.html")
+			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			srv.tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.AddError("email", srv.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
-			srv.tmpl.Render(w, r, "app.html", "login.html")
+			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
@@ -154,11 +155,4 @@ func (srv Server) logout() http.Handler {
 
 func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-}
-
-func (srv Server) whoops() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.tmpl.Render(w, r, "app.html", "error.html")
-		w.WriteHeader(http.StatusInternalServerError)
-	})
 }
