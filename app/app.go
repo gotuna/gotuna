@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"runtime/debug"
 	"strings"
 
 	"github.com/alcalbg/gotdd/i18n"
@@ -141,7 +142,15 @@ func (srv Server) login() http.Handler {
 		}
 
 		// user is ok, save to session
-		srv.session.SetUserSID(w, r, user.SID)
+		if err := srv.session.SetUserSID(w, r, user.SID); err != nil {
+			errorHandler(err).ServeHTTP(w, r)
+			return
+		}
+
+		if err := srv.session.AddFlash(w, r, srv.lang.T("Welcome"), "is-success", true); err != nil {
+			errorHandler(err).ServeHTTP(w, r)
+			return
+		}
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
@@ -167,4 +176,14 @@ func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
 	templating.GetEngine(srv.lang, srv.session).
 		Set("title", srv.lang.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
+}
+
+func errorHandler(err error) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		templating.GetEngine(i18n.NewTranslator(i18n.En), nil). // TODO lang
+									Set("error", err).
+									Set("stacktrace", string(debug.Stack())).
+									Render(w, r, "app.html", "error.html")
+	})
 }

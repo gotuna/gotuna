@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/gob"
 	"errors"
 	"net/http"
 
@@ -12,12 +13,18 @@ const UserSIDKey = "_user_sid"
 const flashKey = "_flash"
 const sessionName = "app_session"
 
+func init() {
+	gob.Register([]FlashMessage{})
+}
+
 type Session struct {
 	Store sessions.Store
 }
 
 type FlashMessage struct {
-	Message string
+	Message   string
+	Kind      string
+	AutoClose bool
 }
 
 // NewSession returns new session with requested store
@@ -79,7 +86,7 @@ func (s Session) IsGuest(r *http.Request) bool {
 	return false
 }
 
-func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string) error {
+func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string, kind string, autoclose bool) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
 		return errors.New("cannot get session from the store")
@@ -91,7 +98,9 @@ func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string
 		flashes = v.([]FlashMessage)
 	}
 	session.Values[flashKey] = append(flashes, FlashMessage{
-		Message: message,
+		Message:   message,
+		Kind:      kind,
+		AutoClose: autoclose,
 	})
 
 	return s.Store.Save(r, w, session)

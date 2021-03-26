@@ -20,4 +20,5 @@ var En = map[string]string{
 	"The information was successfully updated":          "The information was successfully updated",
 	"Login failed, please try again":                    "Login failed, please try again",
 	"Not found":                                         "Not found",
+	"Welcome":                                           "Welcome",
 }

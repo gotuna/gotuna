@@ -140,8 +140,8 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
-	ses.AddFlash(w, r, "flash one")
-	ses.AddFlash(w, r, "flash two")
+	ses.AddFlash(w, r, "flash one", "", false)
+	ses.AddFlash(w, r, "flash two", "", false)
 
 	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
