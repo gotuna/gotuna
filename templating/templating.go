@@ -17,7 +17,7 @@ type TemplatingEngine interface {
 	Set(key string, data interface{}) TemplatingEngine
 	SetError(errorKey, description string) TemplatingEngine
 	GetErrors() map[string]string
-	Mount(fs fs.FS) TemplatingEngine
+	MountFS(fs fs.FS) TemplatingEngine
 }
 
 func GetEngine(lang i18n.Translator) TemplatingEngine {
@@ -78,7 +78,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func (t *nativeHtmlTemplates) Mount(fs fs.FS) TemplatingEngine {
+func (t *nativeHtmlTemplates) MountFS(fs fs.FS) TemplatingEngine {
 	t.fs = fs
 	return t
 }
