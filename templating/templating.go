@@ -20,7 +20,7 @@ type TemplatingEngine interface {
 	Mount(fs fs.FS) TemplatingEngine
 }
 
-func GetNativeTemplatingEngine(lang i18n.Translator) TemplatingEngine {
+func GetEngine(lang i18n.Translator) TemplatingEngine {
 
 	var funcs = template.FuncMap{
 		"lang": lang.T,

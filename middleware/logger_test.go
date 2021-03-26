@@ -36,7 +36,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 	})
 
 	// basic whoops html template
-	//	whoopsTmpl := templating.GetNativeTemplatingEngine(i18n.NewTranslator(nil)).
+	//	whoopsTmpl := templating.GetEngine(i18n.NewTranslator(nil)).
 	//		Mount(
 	//			doubles.NewFileSystemStub(
 	//				map[string][]byte{

@@ -28,7 +28,7 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 
 					w.WriteHeader(http.StatusInternalServerError)
 
-					tmpl := templating.GetNativeTemplatingEngine(i18n.NewTranslator(i18n.En)) // TODO
+					tmpl := templating.GetEngine(i18n.NewTranslator(i18n.En)) // TODO
 					tmpl.
 						Set("error", err).
 						Set("stacktrace", stacktrace).
@@ -49,7 +49,7 @@ func whoops(err interface{}) http.Handler {
 
 		w.WriteHeader(http.StatusInternalServerError)
 
-		tmpl := templating.GetNativeTemplatingEngine(i18n.NewTranslator(i18n.En)) // TODO
+		tmpl := templating.GetEngine(i18n.NewTranslator(i18n.En)) // TODO
 		tmpl.
 			Set("error", err).
 			Set("stacktrace", string(debug.Stack())).

@@ -92,7 +92,7 @@ func (srv Server) ServeFiles(filesystem fs.FS) http.Handler {
 func (srv Server) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetNativeTemplatingEngine(srv.lang).
+		templating.GetEngine(srv.lang).
 			Set("message", srv.lang.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -101,7 +101,7 @@ func (srv Server) home() http.Handler {
 func (srv Server) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetNativeTemplatingEngine(srv.lang)
+		tmpl := templating.GetEngine(srv.lang)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
