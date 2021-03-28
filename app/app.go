@@ -19,74 +19,74 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Server struct {
+type App struct {
 	session        *session.Session
 	userRepository models.UserRepository
 	lang           i18n.Translator
 	fs             fs.FS
 }
 
-func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) http.Handler {
+func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) http.Handler {
 
-	srv := &Server{}
-	srv.session = s
-	srv.fs = fs
-	srv.userRepository = userRepository
-	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
+	app := &App{}
+	app.session = s
+	app.fs = fs
+	app.userRepository = userRepository
+	app.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
 
 	router := mux.NewRouter()
-	router.NotFoundHandler = http.HandlerFunc(srv.notFound)
+	router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
-	router.Handle("/", srv.home()).Methods(http.MethodGet)
-	router.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
-	router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
-	router.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
-	router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/", app.home()).Methods(http.MethodGet)
+	router.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/logout", app.logout()).Methods(http.MethodPost)
+	router.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
 	router.Use(middleware.Logger(logger))
-	router.Use(middleware.AuthRedirector(srv.session))
+	router.Use(middleware.AuthRedirector(app.session))
 
 	// serve files from the static directory
 	router.PathPrefix(util.StaticPath).
 		Handler(http.StripPrefix(util.StaticPath,
-			srv.serveFiles()))
+			app.serveFiles()))
 
 	return router
 }
 
-func (srv Server) serveFiles() http.Handler {
-	fs := http.FS(srv.fs)
-	filesrv := http.FileServer(fs)
+func (app App) serveFiles() http.Handler {
+	fs := http.FS(app.fs)
+	fileapp := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
-			srv.notFound(w, r)
+			app.notFound(w, r)
 			return
 		}
 		stat, _ := f.Stat()
 		if stat.IsDir() {
-			srv.notFound(w, r) // do not show directory listing
+			app.notFound(w, r) // do not show directory listing
 			return
 		}
 		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
 		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
-		filesrv.ServeHTTP(w, r)
+		fileapp.ServeHTTP(w, r)
 	})
 }
 
-func (srv Server) home() http.Handler {
+func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(srv.lang, srv.session).
-			Set("message", srv.lang.T("Home")).
+		templating.GetEngine(app.lang, app.session).
+			Set("message", app.lang.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
 }
 
-func (srv Server) login() http.Handler {
+func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(srv.lang, srv.session)
+		tmpl := templating.GetEngine(app.lang, app.session)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -97,10 +97,10 @@ func (srv Server) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.SetError("email", srv.lang.T("This field is required"))
+			tmpl.SetError("email", app.lang.T("This field is required"))
 		}
 		if password == "" {
-			tmpl.SetError("password", srv.lang.T("This field is required"))
+			tmpl.SetError("password", app.lang.T("This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -108,9 +108,9 @@ func (srv Server) login() http.Handler {
 			return
 		}
 
-		user, err := srv.userRepository.GetUserByEmail(email)
+		user, err := app.userRepository.GetUserByEmail(email)
 		if err != nil {
-			tmpl.SetError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", app.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -118,20 +118,20 @@ func (srv Server) login() http.Handler {
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			tmpl.SetError("email", srv.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", app.lang.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
 		// user is ok, save to session
-		if err := srv.session.SetUserSID(w, r, user.SID); err != nil {
-			srv.errorHandler(err).ServeHTTP(w, r)
+		if err := app.session.SetUserSID(w, r, user.SID); err != nil {
+			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
 
-		if err := srv.session.AddFlash(w, r, srv.lang.T("Welcome"), "is-success", true); err != nil {
-			srv.errorHandler(err).ServeHTTP(w, r)
+		if err := app.session.AddFlash(w, r, app.lang.T("Welcome"), "is-success", true); err != nil {
+			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
 
@@ -139,29 +139,29 @@ func (srv Server) login() http.Handler {
 	})
 }
 
-func (srv Server) logout() http.Handler {
+func (app App) logout() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		srv.session.DestroySession(w, r)
+		app.session.DestroySession(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
 
-func (srv Server) profile() http.Handler {
+func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(srv.lang, srv.session).
+		templating.GetEngine(app.lang, app.session).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
 
-func (srv Server) notFound(w http.ResponseWriter, r *http.Request) {
+func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(srv.lang, srv.session).
-		Set("title", srv.lang.T("Not found")).
+	templating.GetEngine(app.lang, app.session).
+		Set("title", app.lang.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
 
-func (srv Server) errorHandler(err error) http.Handler {
+func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		templating.GetEngine(i18n.NewTranslator(i18n.En), nil). // TODO lang

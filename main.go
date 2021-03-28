@@ -20,7 +20,7 @@ func main() {
 	gorillaSessionStore := sessions.NewCookieStore([]byte(os.Getenv("APP_KEY")))
 	fs := static.EmbededStatic
 
-	srv := app.NewServer(
+	app := app.NewApp(
 		log.New(os.Stdout, "", 0),
 		fs,
 		session.NewSession(gorillaSessionStore),
@@ -29,7 +29,7 @@ func main() {
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
-	if err := http.ListenAndServe(port, srv); err != nil {
+	if err := http.ListenAndServe(port, app); err != nil {
 		log.Fatalf("could not listen on port 5000 %v", err)
 	}
 }

@@ -65,8 +65,8 @@ func (u UserRepositoryStub) GetUserByEmail(email string) (models.User, error) {
 	return u.user, nil
 }
 
-func NewServerStub() http.Handler {
-	return app.NewServer(
+func NewAppStub() http.Handler {
+	return app.NewApp(
 		NewLoggerStub(),
 		NewFileSystemStub(nil),
 		session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
@@ -74,8 +74,8 @@ func NewServerStub() http.Handler {
 	)
 }
 
-func NewServerWithCookieStoreStub() http.Handler {
-	return app.NewServer(
+func NewAppWithCookieStoreStub() http.Handler {
+	return app.NewApp(
 		NewLoggerStub(),
 		NewFileSystemStub(nil),
 		session.NewSession(sessions.NewCookieStore([]byte("abc"))),
