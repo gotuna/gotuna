@@ -65,7 +65,7 @@ func (u UserRepositoryStub) GetUserByEmail(email string) (models.User, error) {
 	return u.user, nil
 }
 
-func NewServerStub() *app.Server {
+func NewServerStub() http.Handler {
 	return app.NewServer(
 		NewLoggerStub(),
 		NewFileSystemStub(nil),
@@ -74,7 +74,7 @@ func NewServerStub() *app.Server {
 	)
 }
 
-func NewServerWithCookieStoreStub() *app.Server {
+func NewServerWithCookieStoreStub() http.Handler {
 	return app.NewServer(
 		NewLoggerStub(),
 		NewFileSystemStub(nil),

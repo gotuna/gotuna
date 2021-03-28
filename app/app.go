@@ -20,14 +20,13 @@ import (
 )
 
 type Server struct {
-	Mux            *mux.Router
 	session        *session.Session
 	userRepository models.UserRepository
 	lang           i18n.Translator
 	fs             fs.FS
 }
 
-func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) *Server {
+func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) http.Handler {
 
 	srv := &Server{}
 	srv.session = s
@@ -35,24 +34,24 @@ func NewServer(logger *log.Logger, fs fs.FS, s *session.Session, userRepository 
 	srv.userRepository = userRepository
 	srv.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
 
-	srv.Mux = mux.NewRouter()
-	srv.Mux.NotFoundHandler = http.HandlerFunc(srv.notFound)
+	router := mux.NewRouter()
+	router.NotFoundHandler = http.HandlerFunc(srv.notFound)
 
-	srv.Mux.Handle("/", srv.home()).Methods(http.MethodGet)
-	srv.Mux.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
-	srv.Mux.Handle("/logout", srv.logout()).Methods(http.MethodPost)
-	srv.Mux.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
-	srv.Mux.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/", srv.home()).Methods(http.MethodGet)
+	router.Handle("/login", srv.login()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/logout", srv.logout()).Methods(http.MethodPost)
+	router.Handle("/profile", srv.profile()).Methods(http.MethodGet, http.MethodPost)
+	router.Handle("/register", srv.login()).Methods(http.MethodGet, http.MethodPost)
 
-	srv.Mux.Use(middleware.Logger(logger))
-	srv.Mux.Use(middleware.AuthRedirector(srv.session))
+	router.Use(middleware.Logger(logger))
+	router.Use(middleware.AuthRedirector(srv.session))
 
 	// serve files from the static directory
-	srv.Mux.PathPrefix(util.StaticPath).
+	router.PathPrefix(util.StaticPath).
 		Handler(http.StripPrefix(util.StaticPath,
 			srv.serveFiles()))
 
-	return srv
+	return router
 }
 
 func (srv Server) serveFiles() http.Handler {

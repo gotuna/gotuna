@@ -29,7 +29,7 @@ func main() {
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
-	if err := http.ListenAndServe(port, srv.Mux); err != nil {
+	if err := http.ListenAndServe(port, srv); err != nil {
 		log.Fatalf("could not listen on port 5000 %v", err)
 	}
 }
