@@ -21,10 +21,10 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(lang i18n.Translator, ses *session.Session) TemplatingEngine {
+func GetEngine(t i18n.Translator, ses *session.Session) TemplatingEngine {
 
 	var funcs = template.FuncMap{
-		"lang": lang.T,
+		"t": t.T,
 		"uppercase": func(v string) string {
 			return strings.ToUpper(v)
 		},

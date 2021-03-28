@@ -34,15 +34,15 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 func TestUsingTranslation(t *testing.T) {
 
-	lang := i18n.NewTranslator(map[string]string{"car": "auto"})
+	translator := i18n.NewTranslator(map[string]string{"car": "auto"})
 
-	template := `{{define "app"}}Hello, this is my {{lang "car"}}{{end}}`
+	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(lang, nil).
+	templating.GetEngine(translator, nil).
 		MountFS(
 			doubles.NewFileSystemStub(
 				map[string][]byte{"view.html": []byte(template)})).

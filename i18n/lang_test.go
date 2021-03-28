@@ -15,10 +15,10 @@ func TestTranslations(t *testing.T) {
 		"The %s color has a value of %d": "El color %s tiene un valor de %d",
 	}
 
-	lang := i18n.NewTranslator(fakeSet)
+	translator := i18n.NewTranslator(fakeSet)
 
-	assert.Equal(t, "Die welt", lang.T("The world"))
-	assert.Equal(t, "Pagina 2 di 4", lang.T("Page %d of %d", 2, 4))
-	assert.Equal(t, "El color Rojo tiene un valor de 10", lang.T("The %s color has a value of %d", "Rojo", 10))
-	assert.Equal(t, "^Unknown string", lang.T("Unknown string"))
+	assert.Equal(t, "Die welt", translator.T("The world"))
+	assert.Equal(t, "Pagina 2 di 4", translator.T("Page %d of %d", 2, 4))
+	assert.Equal(t, "El color Rojo tiene un valor de 10", translator.T("The %s color has a value of %d", "Rojo", 10))
+	assert.Equal(t, "^Unknown string", translator.T("Unknown string"))
 }
