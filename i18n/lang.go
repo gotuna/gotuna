@@ -2,11 +2,11 @@ package i18n
 
 import "fmt"
 
-type Translator interface {
+type Locale interface {
 	T(s string, p ...interface{}) string
 }
 
-func NewTranslator(set map[string]string) Translator {
+func NewLocale(set map[string]string) Locale {
 	return &language{set: set}
 }
 

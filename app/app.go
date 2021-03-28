@@ -22,7 +22,7 @@ import (
 type App struct {
 	session        *session.Session
 	userRepository models.UserRepository
-	lang           i18n.Translator
+	locale         i18n.Locale
 	fs             fs.FS
 }
 
@@ -32,7 +32,7 @@ func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository mod
 	app.session = s
 	app.fs = fs
 	app.userRepository = userRepository
-	app.lang = i18n.NewTranslator(i18n.En) // TODO: move this to session/user/store
+	app.locale = i18n.NewLocale(i18n.En) // TODO: move this to session/user/store
 
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(app.notFound)
@@ -77,8 +77,8 @@ func (app App) serveFiles() http.Handler {
 func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(app.lang, app.session).
-			Set("message", app.lang.T("Home")).
+		templating.GetEngine(app.locale, app.session).
+			Set("message", app.locale.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
 }
@@ -86,7 +86,7 @@ func (app App) home() http.Handler {
 func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(app.lang, app.session)
+		tmpl := templating.GetEngine(app.locale, app.session)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -97,10 +97,10 @@ func (app App) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.SetError("email", app.lang.T("This field is required"))
+			tmpl.SetError("email", app.locale.T("This field is required"))
 		}
 		if password == "" {
-			tmpl.SetError("password", app.lang.T("This field is required"))
+			tmpl.SetError("password", app.locale.T("This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -110,7 +110,7 @@ func (app App) login() http.Handler {
 
 		user, err := app.userRepository.GetUserByEmail(email)
 		if err != nil {
-			tmpl.SetError("email", app.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", app.locale.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -118,7 +118,7 @@ func (app App) login() http.Handler {
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			tmpl.SetError("email", app.lang.T("Login failed, please try again"))
+			tmpl.SetError("email", app.locale.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -130,7 +130,7 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		if err := app.session.AddFlash(w, r, app.lang.T("Welcome"), "is-success", true); err != nil {
+		if err := app.session.AddFlash(w, r, app.locale.T("Welcome"), "is-success", true); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
@@ -148,7 +148,7 @@ func (app App) logout() http.Handler {
 
 func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(app.lang, app.session).
+		templating.GetEngine(app.locale, app.session).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -156,15 +156,15 @@ func (app App) profile() http.Handler {
 func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(app.lang, app.session).
-		Set("title", app.lang.T("Not found")).
+	templating.GetEngine(app.locale, app.session).
+		Set("title", app.locale.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
 
 func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		templating.GetEngine(i18n.NewTranslator(i18n.En), nil). // TODO lang
+		templating.GetEngine(i18n.NewLocale(i18n.En), nil). // TODO lang
 									Set("error", err).
 									Set("stacktrace", string(debug.Stack())).
 									Render(w, r, "app.html", "error.html")
