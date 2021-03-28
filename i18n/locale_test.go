@@ -9,13 +9,13 @@ import (
 
 func TestTranslations(t *testing.T) {
 
-	var fakeSet = map[string]string{
+	var localeStub = map[string]string{
 		"The world":                      "Die welt",
 		"Page %d of %d":                  "Pagina %d di %d",
 		"The %s color has a value of %d": "El color %s tiene un valor de %d",
 	}
 
-	locale := i18n.NewLocale(fakeSet)
+	locale := i18n.NewLocale(localeStub)
 
 	assert.Equal(t, "Die welt", locale.T("The world"))
 	assert.Equal(t, "Pagina 2 di 4", locale.T("Page %d of %d", 2, 4))
