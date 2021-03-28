@@ -7,15 +7,15 @@ type Locale interface {
 }
 
 func NewLocale(set map[string]string) Locale {
-	return &language{set: set}
+	return &locale{set: set}
 }
 
-type language struct {
+type locale struct {
 	set map[string]string
 }
 
 // T is short for Translate
-func (c language) T(key string, p ...interface{}) string {
+func (c locale) T(key string, p ...interface{}) string {
 	if c.set[key] == "" {
 		return "^" + key // mark missing translations
 	}
