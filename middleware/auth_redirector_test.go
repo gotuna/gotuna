@@ -19,9 +19,12 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
-		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID))
+		options := util.Options{
+			Session:     session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			GuestRoutes: util.GuestRoutes,
+		}
 
-		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
+		middleware := middleware.AuthRedirector(options)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
@@ -33,9 +36,12 @@ func TestRedirections(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
+		options := util.Options{
+			Session:     session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)),
+			GuestRoutes: util.GuestRoutes,
+		}
 
-		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
+		middleware := middleware.AuthRedirector(options)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
@@ -49,9 +55,12 @@ func TestRedirections(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		sessionStore := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
-		ses := session.NewSession(sessionStore)
+		options := util.Options{
+			Session:     session.NewSession(sessionStore),
+			GuestRoutes: util.GuestRoutes,
+		}
 
-		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
+		middleware := middleware.AuthRedirector(options)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)

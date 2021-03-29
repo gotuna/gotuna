@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/util"
 	"github.com/alcalbg/gotdd/views"
@@ -21,16 +20,16 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(locale i18n.Locale, ses *session.Session, staticPrefix string) TemplatingEngine {
+func GetEngine(options util.Options) TemplatingEngine {
 
 	var funcs = template.FuncMap{
-		"t": locale.T,
+		"t": options.Locale.T,
 		"uppercase": func(s string) string {
 			return strings.ToUpper(s)
 		},
 		"static": func(file string) string {
 			hash := "b1a2"
-			return fmt.Sprintf("%s%s?%s", staticPrefix, file, hash)
+			return fmt.Sprintf("%s%s?%s", options.StaticPrefix, file, hash)
 		},
 	}
 
@@ -39,7 +38,7 @@ func GetEngine(locale i18n.Locale, ses *session.Session, staticPrefix string) Te
 		funcs:   funcs,
 		Data:    make(map[string]interface{}),
 		Errors:  make(map[string]string),
-		session: ses,
+		session: options.Session,
 	}
 }
 

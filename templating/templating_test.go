@@ -34,7 +34,9 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 func TestUsingTranslation(t *testing.T) {
 
-	locale := i18n.NewLocale(map[string]string{"car": "auto"})
+	options := util.Options{
+		Locale: i18n.NewLocale(map[string]string{"car": "auto"}),
+	}
 
 	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
@@ -42,7 +44,7 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(locale, nil, "/").
+	templating.GetEngine(options).
 		MountFS(
 			doubles.NewFileSystemStub(
 				map[string][]byte{"view.html": []byte(template)})).
@@ -94,7 +96,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(i18n.NewLocale(nil), nil, "/").
+	templating.GetEngine(util.OptionsWithDefaults(util.Options{})).
 		MountFS(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 

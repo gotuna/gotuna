@@ -13,6 +13,7 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRoutes(t *testing.T) {
@@ -38,13 +39,12 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			app.NewApp(
-				doubles.NewLoggerStub(),
-				doubles.NewFileSystemStub(nil),
-				session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
-				doubles.NewUserRepositoryStub(models.User{}),
-				"",
-			).ServeHTTP(response, request)
+			app.NewApp(util.Options{
+				Logger:         doubles.NewLoggerStub(),
+				FS:             doubles.NewFileSystemStub(nil),
+				Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
+				UserRepository: doubles.NewUserRepositoryStub(models.User{}),
+			}).ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
 		})
@@ -59,13 +59,12 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from root", func(t *testing.T) {
 
-		app := app.NewApp(
-			doubles.NewLoggerStub(),
-			doubles.NewFileSystemStub(files),
-			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			doubles.NewUserRepositoryStub(doubles.UserStub()),
-			"",
-		)
+		app := app.NewApp(util.Options{
+			Logger:         doubles.NewLoggerStub(),
+			FS:             doubles.NewFileSystemStub(files),
+			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
@@ -76,13 +75,13 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from prefixed path", func(t *testing.T) {
 
-		app := app.NewApp(
-			doubles.NewLoggerStub(),
-			doubles.NewFileSystemStub(files),
-			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			doubles.NewUserRepositoryStub(doubles.UserStub()),
-			"/publicprefix",
-		)
+		app := app.NewApp(util.Options{
+			Logger:         doubles.NewLoggerStub(),
+			FS:             doubles.NewFileSystemStub(files),
+			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
+			StaticPrefix:   "/publicprefix",
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
@@ -93,13 +92,12 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 
-		app := app.NewApp(
-			doubles.NewLoggerStub(),
-			doubles.NewFileSystemStub(files),
-			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			doubles.NewUserRepositoryStub(doubles.UserStub()),
-			"",
-		)
+		app := app.NewApp(util.Options{
+			Logger:         doubles.NewLoggerStub(),
+			FS:             doubles.NewFileSystemStub(files),
+			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
@@ -177,13 +175,12 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.UserStub()
 
-	app := app.NewApp(
-		doubles.NewLoggerStub(),
-		doubles.NewFileSystemStub(nil),
-		session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
-		doubles.NewUserRepositoryStub(user),
-		"",
-	)
+	app := app.NewApp(util.Options{
+		Logger:         doubles.NewLoggerStub(),
+		FS:             doubles.NewFileSystemStub(nil),
+		Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
+		UserRepository: doubles.NewUserRepositoryStub(user),
+	})
 
 	// first, let's make sure we're logged in
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)

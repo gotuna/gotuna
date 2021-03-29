@@ -1,18 +1,13 @@
 package app
 
 import (
-	"io/fs"
-	"log"
 	"net/http"
 	"os"
 	"path"
 	"runtime/debug"
 	"strings"
 
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
-	"github.com/alcalbg/gotdd/models"
-	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
@@ -20,27 +15,12 @@ import (
 )
 
 type App struct {
-	session        *session.Session
-	userRepository models.UserRepository
-	locale         i18n.Locale
-	fs             fs.FS
-	staticPrefix   string
+	options util.Options
 }
 
-func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository, staticPrefix string) http.Handler {
+func NewApp(options util.Options) http.Handler {
 
-	app := &App{}
-	app.session = s
-
-	// path prefix for static files
-	// e.g. "/public" or "http://cdn.example.com/assets"
-	app.staticPrefix = strings.TrimRight(staticPrefix, "/")
-
-	// file system for serving static files (embeded)
-	app.fs = fs
-
-	app.userRepository = userRepository
-	app.locale = i18n.NewLocale(i18n.En) // TODO: move this to session/user/store
+	app := &App{util.OptionsWithDefaults(options)}
 
 	router := mux.NewRouter()
 	router.NotFoundHandler = http.HandlerFunc(app.notFound)
@@ -51,19 +31,19 @@ func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository mod
 	router.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
 	router.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
-	router.Use(middleware.Logger(logger, app.locale, app.staticPrefix))
-	router.Use(middleware.AuthRedirector(app.session, util.GuestRoutes))
+	router.Use(middleware.Logger(app.options))
+	router.Use(middleware.AuthRedirector(app.options))
 
 	// serve files from the static directory
-	router.PathPrefix(app.staticPrefix).
-		Handler(http.StripPrefix(app.staticPrefix, app.serveFiles())).
+	router.PathPrefix(options.StaticPrefix).
+		Handler(http.StripPrefix(options.StaticPrefix, app.serveFiles())).
 		Methods(http.MethodGet)
 
 	return router
 }
 
 func (app App) serveFiles() http.Handler {
-	fs := http.FS(app.fs)
+	fs := http.FS(app.options.FS)
 	fileapp := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f, err := fs.Open(path.Clean(r.URL.Path))
@@ -87,8 +67,8 @@ func (app App) serveFiles() http.Handler {
 func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(app.locale, app.session, app.staticPrefix).
-			Set("message", app.locale.T("Home")).
+		templating.GetEngine(app.options).
+			Set("message", app.options.Locale.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
 }
@@ -96,7 +76,7 @@ func (app App) home() http.Handler {
 func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(app.locale, app.session, app.staticPrefix)
+		tmpl := templating.GetEngine(app.options)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -107,10 +87,10 @@ func (app App) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.SetError("email", app.locale.T("This field is required"))
+			tmpl.SetError("email", app.options.Locale.T("This field is required"))
 		}
 		if password == "" {
-			tmpl.SetError("password", app.locale.T("This field is required"))
+			tmpl.SetError("password", app.options.Locale.T("This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -118,9 +98,9 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		user, err := app.userRepository.GetUserByEmail(email)
+		user, err := app.options.UserRepository.GetUserByEmail(email)
 		if err != nil {
-			tmpl.SetError("email", app.locale.T("Login failed, please try again"))
+			tmpl.SetError("email", app.options.Locale.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -128,19 +108,19 @@ func (app App) login() http.Handler {
 
 		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 		if err != nil {
-			tmpl.SetError("email", app.locale.T("Login failed, please try again"))
+			tmpl.SetError("email", app.options.Locale.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
 		}
 
 		// user is ok, save to session
-		if err := app.session.SetUserSID(w, r, user.SID); err != nil {
+		if err := app.options.Session.SetUserSID(w, r, user.SID); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
 
-		if err := app.session.AddFlash(w, r, app.locale.T("Welcome"), "is-success", true); err != nil {
+		if err := app.options.Session.AddFlash(w, r, app.options.Locale.T("Welcome"), "is-success", true); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
@@ -151,14 +131,14 @@ func (app App) login() http.Handler {
 
 func (app App) logout() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.session.DestroySession(w, r)
+		app.options.Session.DestroySession(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
 
 func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(app.locale, app.session, app.staticPrefix).
+		templating.GetEngine(app.options).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -166,15 +146,15 @@ func (app App) profile() http.Handler {
 func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(app.locale, app.session, app.staticPrefix).
-		Set("title", app.locale.T("Not found")).
+	templating.GetEngine(app.options).
+		Set("title", app.options.Locale.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
 
 func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		templating.GetEngine(app.locale, app.session, app.staticPrefix).
+		templating.GetEngine(app.options).
 			Set("error", err).
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")

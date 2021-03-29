@@ -10,10 +10,10 @@ import (
 	"os"
 
 	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/models"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
+	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/sessions"
 )
 
@@ -66,23 +66,21 @@ func (u UserRepositoryStub) GetUserByEmail(email string) (models.User, error) {
 }
 
 func NewAppStub() http.Handler {
-	return app.NewApp(
-		NewLoggerStub(),
-		NewFileSystemStub(nil),
-		session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
-		NewUserRepositoryStub(UserStub()),
-		"",
-	)
+	return app.NewApp(util.Options{
+		Logger:         NewLoggerStub(),
+		FS:             NewFileSystemStub(nil),
+		Session:        session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
+		UserRepository: NewUserRepositoryStub(UserStub()),
+	})
 }
 
 func NewAppWithCookieStoreStub() http.Handler {
-	return app.NewApp(
-		NewLoggerStub(),
-		NewFileSystemStub(nil),
-		session.NewSession(sessions.NewCookieStore([]byte("abc"))),
-		NewUserRepositoryStub(UserStub()),
-		"",
-	)
+	return app.NewApp(util.Options{
+		Logger:         NewLoggerStub(),
+		FS:             NewFileSystemStub(nil),
+		Session:        session.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		UserRepository: NewUserRepositoryStub(UserStub()),
+	})
 }
 
 func UserStub() models.User {
@@ -123,7 +121,11 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 var StubTemplate = `{{define "app"}}{{end}}`
 
 func NewStubTemplatingEngine(template string, session *session.Session) templating.TemplatingEngine {
-	return templating.GetEngine(i18n.NewLocale(i18n.En), session, "/").
+	options := util.OptionsWithDefaults(util.Options{
+		Session: session,
+	})
+
+	return templating.GetEngine(options).
 		MountFS(
 			NewFileSystemStub(
 				map[string][]byte{

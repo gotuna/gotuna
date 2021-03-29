@@ -3,16 +3,16 @@ package middleware
 import (
 	"net/http"
 
-	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/mux"
 )
 
-func AuthRedirector(s *session.Session, guestRoutes map[string]string) mux.MiddlewareFunc {
+func AuthRedirector(options util.Options) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			path := r.URL.Path
-			_, isGuestRoute := guestRoutes[path]
+			_, isGuestRoute := options.GuestRoutes[path]
 
 			// serving static file?
 			if path != "/" && !isGuestRoute {
@@ -20,7 +20,7 @@ func AuthRedirector(s *session.Session, guestRoutes map[string]string) mux.Middl
 				return
 			}
 
-			guest := s.IsGuest(r)
+			guest := options.Session.IsGuest(r)
 
 			if guest && !isGuestRoute {
 				http.Redirect(w, r, "/login", http.StatusFound)
