@@ -25,8 +25,12 @@ func GetEngine(t i18n.Locale, ses *session.Session) TemplatingEngine {
 
 	var funcs = template.FuncMap{
 		"t": t.T,
-		"uppercase": func(v string) string {
-			return strings.ToUpper(v)
+		"uppercase": func(s string) string {
+			return strings.ToUpper(s)
+		},
+		"static": func(file string) string {
+			hash := "b1a2"
+			return fmt.Sprintf("%s%s?%s", util.StaticPath, file, hash)
 		},
 	}
 
@@ -48,7 +52,6 @@ type nativeHtmlTemplates struct {
 	session *session.Session
 	Flashes []session.FlashMessage
 	IsGuest bool
-	Ver     string
 }
 
 func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine {
@@ -75,7 +78,6 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 
 	t.Request = r
-	t.Ver = "22" // TODO: fix this
 
 	tmpl := template.Must(
 		template.New("app").

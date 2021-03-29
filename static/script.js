@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
   }
 
+
   // notifications - delete
   (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
     const $notification = $delete.parentNode;

@@ -44,7 +44,7 @@ func TestRedirections(t *testing.T) {
 	})
 
 	t.Run("requests to static resources should skip checks early", func(t *testing.T) {
-		staticFile := fmt.Sprintf("%sfile.zip", util.StaticPath)
+		staticFile := fmt.Sprintf("%s/file.zip", util.StaticPath)
 		request, _ := http.NewRequest(http.MethodGet, staticFile, nil)
 		response := httptest.NewRecorder()
 

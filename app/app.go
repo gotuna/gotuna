@@ -68,6 +68,8 @@ func (app App) serveFiles() http.Handler {
 			app.notFound(w, r) // do not show directory listing
 			return
 		}
+
+		// TODO: ModTime doesn't work for embed?
 		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
 		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
 		fileapp.ServeHTTP(w, r)

@@ -65,7 +65,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 	)
 
 	t.Run("return valid static file", func(t *testing.T) {
-		r, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%ssomedir/image.jpg", util.StaticPath), nil)
+		r, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/somedir/image.jpg", util.StaticPath), nil)
 		w := httptest.NewRecorder()
 		app.ServeHTTP(w, r)
 
