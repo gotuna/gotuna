@@ -14,7 +14,7 @@ func AuthRedirector(options util.Options) mux.MiddlewareFunc {
 			path := r.URL.Path
 			_, isGuestRoute := options.GuestRoutes[path]
 
-			// serving static file?
+			// serving a static file?
 			if path != "/" && !isGuestRoute {
 				next.ServeHTTP(w, r)
 				return
