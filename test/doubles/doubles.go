@@ -71,6 +71,7 @@ func NewAppStub() http.Handler {
 		NewFileSystemStub(nil),
 		session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
 		NewUserRepositoryStub(UserStub()),
+		"",
 	)
 }
 
@@ -80,6 +81,7 @@ func NewAppWithCookieStoreStub() http.Handler {
 		NewFileSystemStub(nil),
 		session.NewSession(sessions.NewCookieStore([]byte("abc"))),
 		NewUserRepositoryStub(UserStub()),
+		"",
 	)
 }
 
@@ -121,7 +123,7 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 var StubTemplate = `{{define "app"}}{{end}}`
 
 func NewStubTemplatingEngine(template string, session *session.Session) templating.TemplatingEngine {
-	return templating.GetEngine(i18n.NewLocale(i18n.En), session).
+	return templating.GetEngine(i18n.NewLocale(i18n.En), session, "/").
 		MountFS(
 			NewFileSystemStub(
 				map[string][]byte{

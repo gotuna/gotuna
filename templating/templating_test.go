@@ -42,7 +42,7 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(locale, nil).
+	templating.GetEngine(locale, nil, "/").
 		MountFS(
 			doubles.NewFileSystemStub(
 				map[string][]byte{"view.html": []byte(template)})).
@@ -94,7 +94,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(i18n.NewLocale(nil), nil).
+	templating.GetEngine(i18n.NewLocale(nil), nil, "/").
 		MountFS(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 

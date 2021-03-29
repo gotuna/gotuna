@@ -24,12 +24,14 @@ type App struct {
 	userRepository models.UserRepository
 	locale         i18n.Locale
 	fs             fs.FS
+	staticPrefix   string
 }
 
-func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository) http.Handler {
+func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository models.UserRepository, staticPrefix string) http.Handler {
 
 	app := &App{}
 	app.session = s
+	app.staticPrefix = staticPrefix
 	app.fs = fs
 	app.userRepository = userRepository
 	app.locale = i18n.NewLocale(i18n.En) // TODO: move this to session/user/store
@@ -43,13 +45,13 @@ func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository mod
 	router.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
 	router.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
-	router.Use(middleware.Logger(logger))
-	router.Use(middleware.AuthRedirector(app.session))
+	router.Use(middleware.Logger(logger, app.locale, app.staticPrefix))
+	router.Use(middleware.AuthRedirector(app.session, util.GuestRoutes))
 
 	// serve files from the static directory
-	router.PathPrefix(util.StaticPath).
-		Handler(http.StripPrefix(util.StaticPath,
-			app.serveFiles()))
+	router.PathPrefix(app.staticPrefix).
+		Handler(http.StripPrefix(app.staticPrefix, app.serveFiles())).
+		Methods(http.MethodGet)
 
 	return router
 }
@@ -79,7 +81,7 @@ func (app App) serveFiles() http.Handler {
 func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(app.locale, app.session).
+		templating.GetEngine(app.locale, app.session, app.staticPrefix).
 			Set("message", app.locale.T("Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -88,7 +90,7 @@ func (app App) home() http.Handler {
 func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(app.locale, app.session)
+		tmpl := templating.GetEngine(app.locale, app.session, app.staticPrefix)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -150,7 +152,7 @@ func (app App) logout() http.Handler {
 
 func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(app.locale, app.session).
+		templating.GetEngine(app.locale, app.session, app.staticPrefix).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -158,7 +160,7 @@ func (app App) profile() http.Handler {
 func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(app.locale, app.session).
+	templating.GetEngine(app.locale, app.session, app.staticPrefix).
 		Set("title", app.locale.T("Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
@@ -166,9 +168,9 @@ func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		templating.GetEngine(i18n.NewLocale(i18n.En), nil). // TODO lang
-									Set("error", err).
-									Set("stacktrace", string(debug.Stack())).
-									Render(w, r, "app.html", "error.html")
+		templating.GetEngine(app.locale, app.session, app.staticPrefix).
+			Set("error", err).
+			Set("stacktrace", string(debug.Stack())).
+			Render(w, r, "app.html", "error.html")
 	})
 }

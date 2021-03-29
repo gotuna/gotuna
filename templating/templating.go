@@ -21,16 +21,16 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(t i18n.Locale, ses *session.Session) TemplatingEngine {
+func GetEngine(locale i18n.Locale, ses *session.Session, staticPrefix string) TemplatingEngine {
 
 	var funcs = template.FuncMap{
-		"t": t.T,
+		"t": locale.T,
 		"uppercase": func(s string) string {
 			return strings.ToUpper(s)
 		},
 		"static": func(file string) string {
 			hash := "b1a2"
-			return fmt.Sprintf("%s%s?%s", util.StaticPath, file, hash)
+			return fmt.Sprintf("%s%s?%s", staticPrefix, file, hash)
 		},
 	}
 

@@ -1,7 +1,6 @@
 package middleware_test
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,12 +15,13 @@ import (
 func TestRedirections(t *testing.T) {
 
 	t.Run("guest is redirected to the login page", func(t *testing.T) {
+
 		request, _ := http.NewRequest(http.MethodGet, "/", nil)
 		response := httptest.NewRecorder()
 
 		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID))
 
-		middleware := middleware.AuthRedirector(ses)
+		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
@@ -35,7 +35,7 @@ func TestRedirections(t *testing.T) {
 
 		ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
 
-		middleware := middleware.AuthRedirector(ses)
+		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
@@ -44,14 +44,14 @@ func TestRedirections(t *testing.T) {
 	})
 
 	t.Run("requests to static resources should skip checks early", func(t *testing.T) {
-		staticFile := fmt.Sprintf("%s/file.zip", util.StaticPath)
+		staticFile := "/file.zip"
 		request, _ := http.NewRequest(http.MethodGet, staticFile, nil)
 		response := httptest.NewRecorder()
 
 		sessionStore := doubles.NewGorillaSessionStoreSpy(session.GuestSID)
 		ses := session.NewSession(sessionStore)
 
-		middleware := middleware.AuthRedirector(ses)
+		middleware := middleware.AuthRedirector(ses, util.GuestRoutes)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)

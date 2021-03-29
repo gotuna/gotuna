@@ -13,7 +13,6 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
-	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRoutes(t *testing.T) {
@@ -34,7 +33,7 @@ func TestRoutes(t *testing.T) {
 	}
 
 	for _, r := range routes {
-		t.Run(fmt.Sprintf("test route %s", r.route), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test route %s for %s", r.route, r.userSID), func(t *testing.T) {
 
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
@@ -44,6 +43,7 @@ func TestRoutes(t *testing.T) {
 				doubles.NewFileSystemStub(nil),
 				session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
 				doubles.NewUserRepositoryStub(models.User{}),
+				"",
 			).ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
@@ -57,15 +57,34 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	app := app.NewApp(
-		doubles.NewLoggerStub(),
-		doubles.NewFileSystemStub(files),
-		session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-		doubles.NewUserRepositoryStub(doubles.UserStub()),
-	)
+	t.Run("return valid static file from root", func(t *testing.T) {
 
-	t.Run("return valid static file", func(t *testing.T) {
-		r, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/somedir/image.jpg", util.StaticPath), nil)
+		app := app.NewApp(
+			doubles.NewLoggerStub(),
+			doubles.NewFileSystemStub(files),
+			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			doubles.NewUserRepositoryStub(doubles.UserStub()),
+			"",
+		)
+
+		r, _ := http.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
+		w := httptest.NewRecorder()
+		app.ServeHTTP(w, r)
+
+		assert.Equal(t, w.Code, http.StatusOK)
+	})
+
+	t.Run("return valid static file from prefixed path", func(t *testing.T) {
+
+		app := app.NewApp(
+			doubles.NewLoggerStub(),
+			doubles.NewFileSystemStub(files),
+			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			doubles.NewUserRepositoryStub(doubles.UserStub()),
+			"/publicprefix",
+		)
+
+		r, _ := http.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
 		app.ServeHTTP(w, r)
 
@@ -73,6 +92,15 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 	})
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
+
+		app := app.NewApp(
+			doubles.NewLoggerStub(),
+			doubles.NewFileSystemStub(files),
+			session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
+			doubles.NewUserRepositoryStub(doubles.UserStub()),
+			"",
+		)
+
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
 		app.ServeHTTP(w, r)
@@ -154,6 +182,7 @@ func TestLogout(t *testing.T) {
 		doubles.NewFileSystemStub(nil),
 		session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
 		doubles.NewUserRepositoryStub(user),
+		"",
 	)
 
 	// first, let's make sure we're logged in

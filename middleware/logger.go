@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func Logger(logger *log.Logger) mux.MiddlewareFunc {
+func Logger(logger *log.Logger, locale i18n.Locale, staticPrefix string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -27,7 +27,7 @@ func Logger(logger *log.Logger) mux.MiddlewareFunc {
 					//fmt.Println(err, stacktrace)
 
 					w.WriteHeader(http.StatusInternalServerError)
-					templating.GetEngine(i18n.NewLocale(i18n.En), nil). // TODO lang
+					templating.GetEngine(locale, nil, staticPrefix). // TODO lang per user
 												Set("error", err).
 												Set("stacktrace", string(debug.Stack())).
 												Render(w, r, "app.html", "error.html")

@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/test/assert"
 )
@@ -17,7 +18,8 @@ func TestLogging(t *testing.T) {
 
 	wlog := &bytes.Buffer{}
 	logger := log.New(wlog, "", 0)
-	middleware := middleware.Logger(logger)
+	locale := i18n.NewLocale(i18n.En)
+	middleware := middleware.Logger(logger, locale, "")
 	handler := middleware(http.NotFoundHandler())
 
 	handler.ServeHTTP(response, request)
@@ -40,7 +42,8 @@ func TestRecoveringFromPanic(t *testing.T) {
 
 	wlog := &bytes.Buffer{}
 	logger := log.New(wlog, "", 0)
-	middleware := middleware.Logger(logger)
+	locale := i18n.NewLocale(i18n.En)
+	middleware := middleware.Logger(logger, locale, "")
 	handler := middleware(badHandler)
 
 	handler.ServeHTTP(response, request)

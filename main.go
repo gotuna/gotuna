@@ -25,6 +25,7 @@ func main() {
 		fs,
 		session.NewSession(gorillaSessionStore),
 		models.NewInMemoryUserRepository(),
+		"",
 	)
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
