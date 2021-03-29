@@ -10,7 +10,6 @@ import (
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,24 +21,23 @@ func NewApp(options util.Options) http.Handler {
 
 	app := &App{util.OptionsWithDefaults(options)}
 
-	router := mux.NewRouter()
-	router.NotFoundHandler = http.HandlerFunc(app.notFound)
+	app.Router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
-	router.Handle("/", app.home()).Methods(http.MethodGet)
-	router.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
-	router.Handle("/logout", app.logout()).Methods(http.MethodPost)
-	router.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
-	router.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
+	app.Router.Handle("/", app.home()).Methods(http.MethodGet)
+	app.Router.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
+	app.Router.Handle("/logout", app.logout()).Methods(http.MethodPost)
+	app.Router.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
+	app.Router.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
-	router.Use(middleware.Logger(app.Options))
-	router.Use(middleware.AuthRedirector(app.Options))
+	app.Router.Use(middleware.Logger(app.Options))
+	app.Router.Use(middleware.AuthRedirector(app.Options))
 
 	// serve files from the static directory
-	router.PathPrefix(app.StaticPrefix).
+	app.Router.PathPrefix(app.StaticPrefix).
 		Handler(http.StripPrefix(app.StaticPrefix, app.serveFiles())).
 		Methods(http.MethodGet)
 
-	return router
+	return app.Router
 }
 
 func (app App) serveFiles() http.Handler {

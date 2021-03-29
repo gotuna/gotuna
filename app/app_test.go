@@ -9,11 +9,11 @@ import (
 	"testing"
 
 	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/models"
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
 	"github.com/alcalbg/gotdd/util"
+	"github.com/gorilla/sessions"
 )
 
 func TestRoutes(t *testing.T) {
@@ -39,12 +39,9 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			app.NewApp(util.Options{
-				Logger:         doubles.NewLoggerStub(),
-				FS:             doubles.NewFileSystemStub(nil),
-				Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
-				UserRepository: doubles.NewUserRepositoryStub(models.User{}),
-			}).ServeHTTP(response, request)
+			app.NewApp(util.OptionsWithDefaults(util.Options{
+				Session: session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
+			})).ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
 		})
@@ -59,12 +56,9 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from root", func(t *testing.T) {
 
-		app := app.NewApp(util.Options{
-			Logger:         doubles.NewLoggerStub(),
-			FS:             doubles.NewFileSystemStub(files),
-			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
-		})
+		app := app.NewApp(util.OptionsWithDefaults(util.Options{
+			FS: doubles.NewFileSystemStub(files),
+		}))
 
 		r, _ := http.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
@@ -75,13 +69,10 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from prefixed path", func(t *testing.T) {
 
-		app := app.NewApp(util.Options{
-			Logger:         doubles.NewLoggerStub(),
-			FS:             doubles.NewFileSystemStub(files),
-			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
-			StaticPrefix:   "/publicprefix",
-		})
+		app := app.NewApp(util.OptionsWithDefaults(util.Options{
+			FS:           doubles.NewFileSystemStub(files),
+			StaticPrefix: "/publicprefix",
+		}))
 
 		r, _ := http.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
@@ -92,12 +83,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 
-		app := app.NewApp(util.Options{
-			Logger:         doubles.NewLoggerStub(),
-			FS:             doubles.NewFileSystemStub(files),
-			Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(session.GuestSID)),
-			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
-		})
+		app := app.NewApp(util.OptionsWithDefaults(util.Options{}))
 
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
@@ -151,7 +137,10 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.UserStub().Email)
 		data.Set("password", "pass123")
 
-		app := doubles.NewAppWithCookieStoreStub()
+		app := app.NewApp(util.OptionsWithDefaults(util.Options{
+			Session:        session.NewSession(sessions.NewCookieStore([]byte("abc"))),
+			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
+		}))
 
 		// step1: after successful login, user is redirected to the home page
 		request := loginRequest(data)
@@ -175,12 +164,9 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.UserStub()
 
-	app := app.NewApp(util.Options{
-		Logger:         doubles.NewLoggerStub(),
-		FS:             doubles.NewFileSystemStub(nil),
-		Session:        session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
-		UserRepository: doubles.NewUserRepositoryStub(user),
-	})
+	app := app.NewApp(util.OptionsWithDefaults(util.Options{
+		Session: session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
+	}))
 
 	// first, let's make sure we're logged in
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)

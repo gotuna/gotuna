@@ -23,7 +23,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, nil).
+	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
 		Set("username", "Milos").
 		Render(w, r, "view.html")
 
@@ -64,7 +64,8 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 		recover()
 	}()
 
-	doubles.NewStubTemplatingEngine(template, nil).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+		Render(w, r, "view.html")
 
 	t.Errorf("templating engine should panic")
 }
@@ -77,7 +78,8 @@ func TestUsingHelperFunctions(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, nil).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+		Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
 }
@@ -114,10 +116,11 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	w := httptest.NewRecorder()
 	w.WriteHeader(http.StatusConflict)
 
-	tmpl := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
+	template := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
-	doubles.NewStubTemplatingEngine(tmpl, nil).Render(w, r, "view.html")
+	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+		Render(w, r, "view.html")
 	assert.Equal(t, w.Body.String(), want)
 }
 
@@ -125,10 +128,10 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	tmpl := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
+	template := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
 	want := `some error / other error`
 
-	engine := doubles.NewStubTemplatingEngine(tmpl, nil).
+	engine := doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
 		SetError("error1", "some error").
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
@@ -145,10 +148,15 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	ses.AddFlash(w, r, "flash one", "", false)
 	ses.AddFlash(w, r, "flash two", "", false)
 
-	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
+	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	doubles.NewStubTemplatingEngine(tmpl, ses).Render(w, r, "view.html")
+	options := util.OptionsWithDefaults(util.Options{
+		Session: ses,
+	})
+
+	doubles.NewStubTemplatingEngine(template, options).
+		Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), want)
 }
