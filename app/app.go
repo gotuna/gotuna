@@ -31,7 +31,7 @@ func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository mod
 
 	app := &App{}
 	app.session = s
-	app.staticPrefix = staticPrefix
+	app.staticPrefix = strings.TrimRight(staticPrefix, "/")
 	app.fs = fs
 	app.userRepository = userRepository
 	app.locale = i18n.NewLocale(i18n.En) // TODO: move this to session/user/store
