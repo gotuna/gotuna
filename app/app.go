@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/alcalbg/gotdd/middleware"
+	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
 	"golang.org/x/crypto/bcrypt"
@@ -118,7 +119,7 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		if err := app.Session.AddFlash(w, r, app.Locale.T("Welcome"), "is-success", true); err != nil {
+		if err := app.Session.Flash(w, r, session.NewFlash(app.Locale.T("Welcome"))); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}

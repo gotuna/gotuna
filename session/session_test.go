@@ -75,17 +75,18 @@ func TestFlashMessages(t *testing.T) {
 
 	// request2: add flash messages
 	messages, err = ses.Flashes(w, r)
-	ses.AddFlash(w, r, "flash message one", "", true)
-	ses.AddFlash(w, r, "flash message two", "is-active", false)
+	ses.Flash(w, r, session.NewFlash("flash message one"))
+	ses.Flash(w, r, session.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
 
 	// request3: pop flash messages
 	messages, err = ses.Flashes(w, r)
 	assert.NoError(t, err)
 	assert.Equal(t, len(messages), 2)
-	assert.Equal(t, messages[0].Kind, "")
+	assert.Equal(t, messages[0].Message, "flash message one")
+	assert.Equal(t, messages[0].Kind, "success")
 	assert.Equal(t, messages[0].AutoClose, true)
-	assert.Equal(t, messages[1].Kind, "is-active")
-	assert.Equal(t, messages[1].AutoClose, false)
+	assert.Equal(t, messages[1].Kind, "active")
+	assert.Equal(t, messages[1].AutoClose, true)
 
 	// request4: no flash messages
 	messages, err = ses.Flashes(w, r)

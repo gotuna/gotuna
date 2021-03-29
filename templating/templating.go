@@ -24,12 +24,12 @@ func GetEngine(options util.Options) TemplatingEngine {
 
 	var funcs = template.FuncMap{
 		"t": options.Locale.T,
-		"uppercase": func(s string) string {
-			return strings.ToUpper(s)
-		},
 		"static": func(file string) string {
 			hash := "b1a2"
 			return fmt.Sprintf("%s%s?%s", options.StaticPrefix, file, hash)
+		},
+		"uppercase": func(s string) string {
+			return strings.ToUpper(s)
 		},
 	}
 

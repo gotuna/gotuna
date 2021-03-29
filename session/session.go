@@ -27,6 +27,14 @@ type FlashMessage struct {
 	AutoClose bool
 }
 
+func NewFlash(message string) FlashMessage {
+	return FlashMessage{
+		Message:   message,
+		Kind:      "success",
+		AutoClose: true,
+	}
+}
+
 // NewSession returns new session with requested store
 func NewSession(store sessions.Store) *Session {
 	if store == nil {
@@ -86,7 +94,7 @@ func (s Session) IsGuest(r *http.Request) bool {
 	return false
 }
 
-func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string, kind string, autoclose bool) error {
+func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage FlashMessage) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
 		return errors.New("cannot get session from the store")
@@ -97,11 +105,7 @@ func (s Session) AddFlash(w http.ResponseWriter, r *http.Request, message string
 	if v, ok := session.Values[flashKey]; ok {
 		flashes = v.([]FlashMessage)
 	}
-	session.Values[flashKey] = append(flashes, FlashMessage{
-		Message:   message,
-		Kind:      kind,
-		AutoClose: autoclose,
-	})
+	session.Values[flashKey] = append(flashes, flashMessage)
 
 	return s.Store.Save(r, w, session)
 }
