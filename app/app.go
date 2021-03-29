@@ -31,8 +31,14 @@ func NewApp(logger *log.Logger, fs fs.FS, s *session.Session, userRepository mod
 
 	app := &App{}
 	app.session = s
+
+	// path prefix for static files
+	// e.g. "/public" or "http://cdn.example.com/assets"
 	app.staticPrefix = strings.TrimRight(staticPrefix, "/")
+
+	// file system for serving static files (embeded)
 	app.fs = fs
+
 	app.userRepository = userRepository
 	app.locale = i18n.NewLocale(i18n.En) // TODO: move this to session/user/store
 
