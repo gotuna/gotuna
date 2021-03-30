@@ -57,7 +57,7 @@ func Redirects(t *testing.T, r *httptest.ResponseRecorder, url string, code int)
 	}
 
 	if location.String() != url {
-		t.Errorf("response should redirect to %s got status %d", url, r.Code)
+		t.Errorf("response should redirect to %s got %s with status %d", url, location.String(), r.Code)
 	}
 
 	if r.Code != code {

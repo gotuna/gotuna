@@ -28,17 +28,18 @@ func NewApp(options util.Options) http.Handler {
 	app.Router.Use(middleware.Logger(app.Options))
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(middleware.Cors())
-	app.Router.Use(middleware.AuthRedirector(app.Options))
 
 	// logged in user
 	user := app.Router.NewRoute().Subrouter()
+	user.Use(middleware.Authenticate(app.Options, "/login"))
 	user.Handle("/", app.home()).Methods(http.MethodGet)
 	user.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
+	user.Handle("/logout", app.logout()).Methods(http.MethodPost)
 
 	// guests
 	auth := app.Router.NewRoute().Subrouter()
+	auth.Use(middleware.RedirectIfAuthenticated(app.Options, "/"))
 	auth.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
-	auth.Handle("/logout", app.logout()).Methods(http.MethodPost)
 	auth.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
 	// serve files from the static directory

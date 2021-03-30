@@ -16,11 +16,6 @@ import (
 
 const ContentTypeHTML = "text/html; charset=utf-8"
 
-var GuestRoutes = map[string]string{
-	"/login":    "login",
-	"/register": "register",
-}
-
 type Options struct {
 	Logger         *log.Logger
 	Router         *mux.Router
@@ -29,7 +24,6 @@ type Options struct {
 	UserRepository models.UserRepository
 	StaticPrefix   string
 	Locale         i18n.Locale
-	GuestRoutes    map[string]string
 }
 
 func OptionsWithDefaults(options Options) Options {
@@ -41,10 +35,6 @@ func OptionsWithDefaults(options Options) Options {
 
 	if options.Router == nil {
 		options.Router = mux.NewRouter()
-	}
-
-	if options.GuestRoutes == nil {
-		options.GuestRoutes = GuestRoutes
 	}
 
 	if options.Locale == nil {
