@@ -25,6 +25,7 @@ func NewApp(options util.Options) http.Handler {
 	app.Router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
 	// middlewares for all routes
+	app.Router.Use(middleware.Recoverer(app.Options))
 	app.Router.Use(middleware.Logger(app.Options))
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(middleware.Cors())

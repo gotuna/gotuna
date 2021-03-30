@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/util"
@@ -28,31 +27,4 @@ func TestLogging(t *testing.T) {
 
 	assert.Contains(t, wlog.String(), "GET")
 	assert.Contains(t, wlog.String(), "/sample")
-}
-
-func TestRecoveringFromPanic(t *testing.T) {
-
-	needle := "assignment to entry in nil map"
-
-	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var x map[string]int
-		x["y"] = 1 // this code will panic with: assignment to entry in nil map
-	})
-
-	request, _ := http.NewRequest(http.MethodGet, "/", nil)
-	response := httptest.NewRecorder()
-
-	wlog := &bytes.Buffer{}
-	options := util.Options{
-		Logger: log.New(wlog, "", 0),
-		Locale: i18n.NewLocale(i18n.En),
-	}
-	logger := middleware.Logger(options)
-	handler := logger(badHandler)
-
-	handler.ServeHTTP(response, request)
-
-	assert.Equal(t, response.Code, http.StatusInternalServerError)
-	assert.Contains(t, response.Body.String(), needle)
-	assert.Contains(t, wlog.String(), needle)
 }
