@@ -31,6 +31,7 @@ func TestRoutes(t *testing.T) {
 		{"123", "/login", http.MethodGet, http.StatusFound},
 		{"", "/register", http.MethodGet, http.StatusOK},
 		{"123", "/register", http.MethodGet, http.StatusFound},
+		{"123", "/profile", http.MethodGet, http.StatusOK},
 	}
 
 	for _, r := range routes {
@@ -157,6 +158,22 @@ func TestLogin(t *testing.T) {
 		}
 		app.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
+	})
+
+	t.Run("check CORS headers", func(t *testing.T) {
+
+		app := doubles.NewAppStub()
+
+		request, err := http.NewRequest(http.MethodOptions, "/login", nil)
+		assert.NoError(t, err)
+		response := httptest.NewRecorder()
+		app.ServeHTTP(response, request)
+
+		HeaderMap := response.HeaderMap
+
+		assert.Equal(t, response.Code, http.StatusNoContent)
+		assert.Equal(t, HeaderMap.Get("Access-Control-Allow-Origin"), "*")
+		assert.Contains(t, HeaderMap.Get("Access-Control-Allow-Methods"), "GET")
 	})
 }
 

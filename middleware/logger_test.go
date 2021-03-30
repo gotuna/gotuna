@@ -21,8 +21,8 @@ func TestLogging(t *testing.T) {
 	options := util.Options{
 		Logger: log.New(wlog, "", 0),
 	}
-	middleware := middleware.Logger(options)
-	handler := middleware(http.NotFoundHandler())
+	logger := middleware.Logger(options)
+	handler := logger(http.NotFoundHandler())
 
 	handler.ServeHTTP(response, request)
 
@@ -47,8 +47,8 @@ func TestRecoveringFromPanic(t *testing.T) {
 		Logger: log.New(wlog, "", 0),
 		Locale: i18n.NewLocale(i18n.En),
 	}
-	middleware := middleware.Logger(options)
-	handler := middleware(badHandler)
+	logger := middleware.Logger(options)
+	handler := logger(badHandler)
 
 	handler.ServeHTTP(response, request)
 

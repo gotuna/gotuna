@@ -24,8 +24,8 @@ func TestRedirections(t *testing.T) {
 			GuestRoutes: util.GuestRoutes,
 		}
 
-		middleware := middleware.AuthRedirector(options)
-		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		authRedirector := middleware.AuthRedirector(options)
+		handler := authRedirector(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
 
@@ -41,8 +41,8 @@ func TestRedirections(t *testing.T) {
 			GuestRoutes: util.GuestRoutes,
 		}
 
-		middleware := middleware.AuthRedirector(options)
-		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		authRedirector := middleware.AuthRedirector(options)
+		handler := authRedirector(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
 
@@ -60,8 +60,8 @@ func TestRedirections(t *testing.T) {
 			GuestRoutes: util.GuestRoutes,
 		}
 
-		middleware := middleware.AuthRedirector(options)
-		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		authRedirector := middleware.AuthRedirector(options)
+		handler := authRedirector(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 		handler.ServeHTTP(response, request)
 
