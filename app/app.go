@@ -27,6 +27,7 @@ func NewApp(options util.Options) http.Handler {
 	// middlewares for all routes
 	app.Router.Use(middleware.Recoverer(app.Options))
 	app.Router.Use(middleware.Logger(app.Options))
+	// TODO: csrf middleware
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(middleware.Cors())
 

@@ -24,3 +24,4 @@ func (c locale) T(key string, p ...interface{}) string {
 }
 
 // TODO: date formatting
+// TODO: pluralization
