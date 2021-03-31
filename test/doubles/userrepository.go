@@ -2,6 +2,7 @@ package doubles
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/alcalbg/gotdd/models"
 )
@@ -10,22 +11,52 @@ func UserStub() models.User {
 	return models.User{
 		SID:          "123",
 		Email:        "john@example.com",
-		PasswordHash: "$2a$10$19ogjdlTWc0dHBeC5i1qOeNP6oqwIgphXmtrpjFBt3b4ru5B5Cxfm", // pass123
+		PasswordHash: "pass123",
 	}
 }
 
-func NewUserRepositoryStub(user models.User) userRepositoryStub {
-	return userRepositoryStub{user}
+func NewUserRepositoryStub() *userRepositoryStub {
+	return &userRepositoryStub{
+		users: []models.User{UserStub()},
+	}
 }
 
-// implements UserRepository interface
 type userRepositoryStub struct {
-	user models.User
+	users         []models.User
+	inputEmail    string
+	inputPassword string
 }
 
-func (u userRepositoryStub) GetUserByEmail(email string) (models.User, error) {
-	if u.user.Email != email {
-		return models.User{}, errors.New("no user")
+func (u *userRepositoryStub) Set(key string, value interface{}) models.UserRepository {
+	if key == "email" {
+		u.inputEmail = value.(string)
 	}
-	return u.user, nil
+	if key == "password" {
+		u.inputPassword = value.(string)
+	}
+	return u
+}
+
+func (u userRepositoryStub) Authenticate() (models.User, error) {
+	user, err := u.getUserByEmail()
+	if err != nil {
+		return models.User{}, err
+	}
+
+	// this should be bcrypt.CompareHashAndPassword in real life
+	if user.PasswordHash != u.inputPassword {
+		return models.User{}, fmt.Errorf("passwords don't match %v", err)
+	}
+
+	return user, nil
+}
+
+func (u userRepositoryStub) getUserByEmail() (models.User, error) {
+	for _, user := range u.users {
+		if user.Email == u.inputEmail {
+			return user, nil
+		}
+	}
+
+	return models.User{}, errors.New("user not found")
 }

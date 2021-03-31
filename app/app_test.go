@@ -140,7 +140,7 @@ func TestLogin(t *testing.T) {
 
 		app := app.NewApp(util.OptionsWithDefaults(util.Options{
 			Session:        session.NewSession(sessions.NewCookieStore([]byte("abc"))),
-			UserRepository: doubles.NewUserRepositoryStub(doubles.UserStub()),
+			UserRepository: doubles.NewUserRepositoryStub(),
 		}))
 
 		// step1: after successful login, user is redirected to the home page

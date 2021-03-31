@@ -13,6 +13,6 @@ func NewAppStub() http.Handler {
 		Logger:         NewLoggerStub(),
 		FS:             NewFileSystemStub(nil),
 		Session:        session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
-		UserRepository: NewUserRepositoryStub(UserStub()),
+		UserRepository: NewUserRepositoryStub(),
 	})
 }

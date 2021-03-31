@@ -11,7 +11,6 @@ import (
 	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/templating"
 	"github.com/alcalbg/gotdd/util"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type App struct {
@@ -108,15 +107,9 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		user, err := app.UserRepository.GetUserByEmail(email)
-		if err != nil {
-			tmpl.SetError("email", app.Locale.T("Login failed, please try again"))
-			w.WriteHeader(http.StatusUnauthorized)
-			tmpl.Render(w, r, "app.html", "login.html")
-			return
-		}
-
-		err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+		app.UserRepository.Set("email", email)
+		app.UserRepository.Set("password", password)
+		user, err := app.UserRepository.Authenticate()
 		if err != nil {
 			tmpl.SetError("email", app.Locale.T("Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
