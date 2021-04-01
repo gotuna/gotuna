@@ -38,7 +38,7 @@ func OptionsWithDefaults(options Options) Options {
 	}
 
 	if options.Locale == nil {
-		options.Locale = i18n.NewLocale(i18n.En)
+		options.Locale = i18n.NewLocale(i18n.EnUS)
 	}
 
 	if options.FS == nil {

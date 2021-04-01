@@ -1,6 +1,6 @@
 package i18n
 
-var En = map[string]string{
+var EnUS = map[string]string{
 	"Email":                "Email",
 	"Password":             "Password",
 	"Log In":               "Log In",

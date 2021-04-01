@@ -1,6 +1,6 @@
 package i18n
 
-var Es = map[string]string{
+var EsES = map[string]string{
 	"Email":    "Email",
 	"Password": "Contraseña",
 }
