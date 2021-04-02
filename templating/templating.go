@@ -23,7 +23,7 @@ type TemplatingEngine interface {
 func GetEngine(options util.Options) TemplatingEngine {
 
 	translator := func(s string) string {
-		return options.Locale.T("en-US", s)
+		return options.Locale.T("en-US", s) // TODO: set per user
 	}
 
 	var funcs = template.FuncMap{
