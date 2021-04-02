@@ -159,22 +159,6 @@ func TestLogin(t *testing.T) {
 		app.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
 	})
-
-	t.Run("check CORS headers", func(t *testing.T) {
-
-		app := doubles.NewAppStub()
-
-		request, err := http.NewRequest(http.MethodOptions, "/login", nil)
-		assert.NoError(t, err)
-		response := httptest.NewRecorder()
-		app.ServeHTTP(response, request)
-
-		HeaderMap := response.HeaderMap
-
-		assert.Equal(t, response.Code, http.StatusNoContent)
-		assert.Equal(t, HeaderMap.Get("Access-Control-Allow-Origin"), "*")
-		assert.Contains(t, HeaderMap.Get("Access-Control-Allow-Methods"), "GET")
-	})
 }
 
 func TestLogout(t *testing.T) {
@@ -202,6 +186,22 @@ func TestLogout(t *testing.T) {
 	response = httptest.NewRecorder()
 	app.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
+}
+
+func TestCORS(t *testing.T) {
+
+	app := doubles.NewAppStub()
+
+	request, err := http.NewRequest(http.MethodOptions, "/login", nil)
+	assert.NoError(t, err)
+	response := httptest.NewRecorder()
+	app.ServeHTTP(response, request)
+
+	HeaderMap := response.HeaderMap
+
+	assert.Equal(t, response.Code, http.StatusNoContent)
+	assert.Equal(t, HeaderMap.Get("Access-Control-Allow-Origin"), "*")
+	assert.Contains(t, HeaderMap.Get("Access-Control-Allow-Methods"), "GET")
 }
 
 func loginRequest(form url.Values) *http.Request {

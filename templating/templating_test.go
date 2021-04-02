@@ -35,7 +35,11 @@ func TestRenderingWithCustomData(t *testing.T) {
 func TestUsingTranslation(t *testing.T) {
 
 	options := util.Options{
-		Locale: i18n.NewLocale(map[string]string{"car": "auto"}),
+		Locale: i18n.NewLocale(map[string]map[string]string{
+			"car": {
+				"en-US": "auto",
+			},
+		}),
 	}
 
 	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`

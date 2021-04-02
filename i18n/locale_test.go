@@ -9,7 +9,7 @@ import (
 
 func TestTranslations(t *testing.T) {
 
-	var translationsStub = map[string]map[string]string{
+	locale := i18n.NewLocale(map[string]map[string]string{
 		"The world": {
 			"en-US": "The world",
 			"de-DE": "Die welt",
@@ -22,9 +22,7 @@ func TestTranslations(t *testing.T) {
 			"en-US": "The %s color has a value of %d",
 			"es-ES": "El color %s tiene un valor de %d",
 		},
-	}
-
-	locale := i18n.NewLocale(translationsStub)
+	})
 
 	assert.Equal(t, "Die welt", locale.T("de-DE", "The world"))
 	assert.Equal(t, "Pagina 2 di 4", locale.T("it-IT", "Page %d of %d", 2, 4))

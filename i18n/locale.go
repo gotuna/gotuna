@@ -16,7 +16,6 @@ type locale struct {
 
 // T is short for Translate
 func (c locale) T(language string, key string, p ...interface{}) string {
-	fmt.Println(c.set[key])
 
 	if c.set[key][language] == "" {
 		return "^" + key // mark missing translations

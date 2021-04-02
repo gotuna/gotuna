@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd/i18n"
 	"github.com/alcalbg/gotdd/middleware"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/util"
@@ -26,10 +25,9 @@ func TestRecoveringFromPanic(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
-	options := util.Options{
-		Logger: log.New(wlog, "", 0),
-		Locale: i18n.NewLocale("en-US", i18n.Translations),
-	}
+	options := util.OptionsWithDefaults(util.Options{})
+	options.Logger = log.New(wlog, "", 0)
+
 	recoverer := middleware.Recoverer(options)
 	handler := recoverer(badHandler)
 
