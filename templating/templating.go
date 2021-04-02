@@ -22,8 +22,12 @@ type TemplatingEngine interface {
 
 func GetEngine(options util.Options) TemplatingEngine {
 
+	translator := func(s string) string {
+		return options.Locale.T("en-US", s)
+	}
+
 	var funcs = template.FuncMap{
-		"t": options.Locale.T,
+		"t": translator,
 		"static": func(file string) string {
 			hash := "b1a2"
 			return fmt.Sprintf("%s%s?%s", options.StaticPrefix, file, hash)

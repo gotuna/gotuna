@@ -3,24 +3,26 @@ package i18n
 import "fmt"
 
 type Locale interface {
-	T(s string, p ...interface{}) string
+	T(language string, s string, p ...interface{}) string
 }
 
-func NewLocale(set map[string]string) Locale {
-	return &locale{set: set}
+func NewLocale(set map[string]map[string]string) Locale {
+	return &locale{set}
 }
 
 type locale struct {
-	set map[string]string
+	set map[string]map[string]string
 }
 
 // T is short for Translate
-func (c locale) T(key string, p ...interface{}) string {
-	if c.set[key] == "" {
+func (c locale) T(language string, key string, p ...interface{}) string {
+	fmt.Println(c.set[key])
+
+	if c.set[key][language] == "" {
 		return "^" + key // mark missing translations
 	}
 
-	return fmt.Sprintf(c.set[key], p...)
+	return fmt.Sprintf(c.set[key][language], p...)
 }
 
 // TODO: date formatting

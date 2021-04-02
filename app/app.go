@@ -77,7 +77,7 @@ func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		templating.GetEngine(app.Options).
-			Set("message", app.Locale.T("Home")).
+			Set("message", app.Locale.T("en-US", "Home")).
 			Render(w, r, "app.html", "home.html")
 	})
 }
@@ -96,10 +96,10 @@ func (app App) login() http.Handler {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.SetError("email", app.Locale.T("This field is required"))
+			tmpl.SetError("email", app.Locale.T("en-US", "This field is required"))
 		}
 		if password == "" {
-			tmpl.SetError("password", app.Locale.T("This field is required"))
+			tmpl.SetError("password", app.Locale.T("en-US", "This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -111,7 +111,7 @@ func (app App) login() http.Handler {
 		app.UserRepository.Set("password", password)
 		user, err := app.UserRepository.Authenticate()
 		if err != nil {
-			tmpl.SetError("email", app.Locale.T("Login failed, please try again"))
+			tmpl.SetError("email", app.Locale.T("en-US", "Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -123,7 +123,7 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		if err := app.Session.Flash(w, r, session.NewFlash(app.Locale.T("Welcome"))); err != nil {
+		if err := app.Session.Flash(w, r, session.NewFlash(app.Locale.T("en-US", "Welcome"))); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
@@ -150,7 +150,7 @@ func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
 	templating.GetEngine(app.Options).
-		Set("title", app.Locale.T("Not found")).
+		Set("title", app.Locale.T("en-US", "Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
 

@@ -15,7 +15,7 @@
       <div class="container">
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
-            Home
+            {{t "Home"}}
           </a>
           <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarmenu">
             <span aria-hidden="true"></span>
@@ -31,7 +31,7 @@
               </a>
               <div class="navbar-dropdown is-right">
                 <a class="navbar-item" href="/profile">
-                  Profile
+                  {{t "Profile"}}
                 </a>
                 <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                   <form id="logout-form" method="POST" action="/logout">
