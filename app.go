@@ -1,6 +1,7 @@
 package gotdd
 
 import (
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -25,7 +26,7 @@ type App struct {
 func NewApp(app App) App {
 
 	if app.Logger == nil {
-		app.Logger = log.New(os.Stdout, "", 0)
+		app.Logger = log.New(io.Discard, "", 0)
 	}
 
 	if app.Locale == nil {
