@@ -10,7 +10,7 @@ import (
 
 	"github.com/alcalbg/gotdd"
 	"github.com/alcalbg/gotdd/cmd/main"
-	"github.com/alcalbg/gotdd/cmd/views"
+	"github.com/alcalbg/gotdd/cmd/main/views"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
 	"github.com/gorilla/sessions"
