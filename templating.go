@@ -6,8 +6,6 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
-
-	"github.com/alcalbg/gotdd/views"
 )
 
 const ContentTypeHTML = "text/html; charset=utf-8"
@@ -17,13 +15,13 @@ type TemplatingEngine interface {
 	Set(key string, data interface{}) TemplatingEngine
 	SetError(errorKey, description string) TemplatingEngine
 	GetErrors() map[string]string
-	MountFS(fs fs.FS) TemplatingEngine
+	MountViews(views fs.FS) TemplatingEngine
 }
 
 func (app App) GetEngine() TemplatingEngine {
 
 	if app.Locale == nil {
-		app.Locale = NewLocale(Translations)
+		app.Locale = NewLocale(map[string]map[string]string{})
 	}
 
 	translator := func(s string) string {
@@ -42,7 +40,7 @@ func (app App) GetEngine() TemplatingEngine {
 	}
 
 	return &nativeHtmlTemplates{
-		fs:      views.EmbededViews,
+		views:   app.Views,
 		funcs:   funcs,
 		Data:    make(map[string]interface{}),
 		Errors:  make(map[string]string),
@@ -51,7 +49,7 @@ func (app App) GetEngine() TemplatingEngine {
 }
 
 type nativeHtmlTemplates struct {
-	fs      fs.FS
+	views   fs.FS
 	funcs   template.FuncMap
 	Data    map[string]interface{}
 	Errors  map[string]string
@@ -89,7 +87,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	tmpl := template.Must(
 		template.New("app").
 			Funcs(t.funcs).
-			ParseFS(t.fs, patterns...))
+			ParseFS(t.views, patterns...))
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
@@ -97,7 +95,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func (t *nativeHtmlTemplates) MountFS(fs fs.FS) TemplatingEngine {
-	t.fs = fs
+func (t *nativeHtmlTemplates) MountViews(views fs.FS) TemplatingEngine {
+	t.views = views
 	return t
 }

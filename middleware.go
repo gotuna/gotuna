@@ -38,7 +38,7 @@ func (app App) Logging() mux.MiddlewareFunc {
 	}
 }
 
-func (app App) Recoverer() mux.MiddlewareFunc {
+func (app App) Recoverer(destination string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -49,13 +49,9 @@ func (app App) Recoverer() mux.MiddlewareFunc {
 					app.Logger.Printf("PANIC RECOVERED: %v", err)
 					app.Logger.Println(stacktrace)
 
-					//fmt.Println(err, stacktrace)
-
-					w.WriteHeader(http.StatusInternalServerError)
-					app.GetEngine(). // TODO lang per user
-								Set("error", err).
-								Set("stacktrace", string(debug.Stack())).
-								Render(w, r, "app.html", "error.html")
+					// TODO: when templates are broken, redirecton can't work properly
+					http.Redirect(w, r, destination, http.StatusInternalServerError)
+					return
 				}
 			}()
 

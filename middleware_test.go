@@ -13,7 +13,7 @@ import (
 )
 
 func TestCORS(t *testing.T) {
-	request, _ := http.NewRequest(http.MethodOptions, "/sample", nil)
+	request := httptest.NewRequest(http.MethodOptions, "/sample", nil)
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{}
@@ -27,7 +27,7 @@ func TestCORS(t *testing.T) {
 }
 
 func TestLogging(t *testing.T) {
-	request, _ := http.NewRequest(http.MethodGet, "/sample", nil)
+	request := httptest.NewRequest(http.MethodGet, "/sample", nil)
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
@@ -49,13 +49,14 @@ func TestLogging(t *testing.T) {
 func TestRecoveringFromPanic(t *testing.T) {
 
 	needle := "assignment to entry in nil map"
+	destination := "/error"
 
 	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var x map[string]int
 		x["y"] = 1 // this code will panic with: assignment to entry in nil map
 	})
 
-	request, _ := http.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
@@ -63,19 +64,18 @@ func TestRecoveringFromPanic(t *testing.T) {
 		Logger: log.New(wlog, "", 0),
 	}
 
-	recoverer := app.Recoverer()
+	recoverer := app.Recoverer(destination)
 	handler := recoverer(badHandler)
 
 	handler.ServeHTTP(response, request)
 
-	assert.Equal(t, response.Code, http.StatusInternalServerError)
-	assert.Contains(t, response.Body.String(), needle)
+	assert.Redirects(t, response, destination, http.StatusInternalServerError)
 	assert.Contains(t, wlog.String(), needle)
 }
 
 func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 
-	request, _ := http.NewRequest(http.MethodGet, "/", nil)
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{
@@ -92,7 +92,7 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 
 func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 
-	request, _ := http.NewRequest(http.MethodGet, "/login", nil)
+	request := httptest.NewRequest(http.MethodGet, "/login", nil)
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{

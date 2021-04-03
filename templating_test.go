@@ -42,7 +42,7 @@ func TestUsingTranslation(t *testing.T) {
 		}),
 	}
 	templatingEngineStub := app.GetEngine().
-		MountFS(
+		MountViews(
 			doubles.NewFileSystemStub(
 				map[string][]byte{
 					"view.html": []byte(template),
@@ -102,7 +102,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	doubles.NewStubTemplatingEngine(htmlLayout).
-		MountFS(doubles.NewFileSystemStub(fs)).
+		MountViews(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 
 	assert.Equal(t, w.Body.String(), htmlFinal)
@@ -113,7 +113,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 		"email": {"user@example.com"},
 	}
 
-	r, _ := http.NewRequest(http.MethodPost, "/test", strings.NewReader(form.Encode()))
+	r := httptest.NewRequest(http.MethodPost, "/test", strings.NewReader(form.Encode()))
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	w := httptest.NewRecorder()
@@ -159,7 +159,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 		Session: ses,
 	}
 	templatingEngineStub := app.GetEngine().
-		MountFS(
+		MountViews(
 			doubles.NewFileSystemStub(
 				map[string][]byte{
 					"view.html": []byte(template),

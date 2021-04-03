@@ -10,9 +10,10 @@ import (
 type App struct {
 	Logger         *log.Logger
 	Router         *mux.Router
-	FS             fs.FS
+	Static         fs.FS
+	StaticPrefix   string
+	Views          fs.FS
 	Session        *Session
 	UserRepository UserRepository
-	StaticPrefix   string
 	Locale         Locale
 }
