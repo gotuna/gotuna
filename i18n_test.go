@@ -1,15 +1,15 @@
-package i18n_test
+package gotdd_test
 
 import (
 	"testing"
 
-	"github.com/alcalbg/gotdd/i18n"
+	"github.com/alcalbg/gotdd"
 	"github.com/alcalbg/gotdd/test/assert"
 )
 
 func TestTranslations(t *testing.T) {
 
-	locale := i18n.NewLocale(map[string]map[string]string{
+	locale := gotdd.NewLocale(map[string]map[string]string{
 		"The world": {
 			"en-US": "The world",
 			"de-DE": "Die welt",

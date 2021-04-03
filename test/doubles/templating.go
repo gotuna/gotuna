@@ -1,12 +1,9 @@
 package doubles
 
-import (
-	"github.com/alcalbg/gotdd/templating"
-	"github.com/alcalbg/gotdd/util"
-)
+import "github.com/alcalbg/gotdd"
 
-func NewStubTemplatingEngine(template string, options util.Options) templating.TemplatingEngine {
-	return templating.GetEngine(options).
+func NewStubTemplatingEngine(template string, options gotdd.Options) gotdd.TemplatingEngine {
+	return gotdd.GetEngine(options).
 		MountFS(
 			NewFileSystemStub(
 				map[string][]byte{

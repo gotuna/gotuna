@@ -1,4 +1,4 @@
-package util
+package gotdd
 
 import (
 	"io/fs"
@@ -6,9 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/alcalbg/gotdd/i18n"
-	"github.com/alcalbg/gotdd/models"
-	"github.com/alcalbg/gotdd/session"
 	"github.com/alcalbg/gotdd/static"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
@@ -20,17 +17,17 @@ type Options struct {
 	Logger         *log.Logger
 	Router         *mux.Router
 	FS             fs.FS
-	Session        *session.Session
-	UserRepository models.UserRepository
+	Session        *Session
+	UserRepository UserRepository
 	StaticPrefix   string
-	Locale         i18n.Locale
+	Locale         Locale
 }
 
 func OptionsWithDefaults(options Options) Options {
 	keyPairs := os.Getenv("APP_KEY")
 
 	if options.Session == nil {
-		options.Session = session.NewSession(sessions.NewCookieStore([]byte(keyPairs)))
+		options.Session = NewSession(sessions.NewCookieStore([]byte(keyPairs)))
 	}
 
 	if options.Router == nil {
@@ -38,7 +35,7 @@ func OptionsWithDefaults(options Options) Options {
 	}
 
 	if options.Locale == nil {
-		options.Locale = i18n.NewLocale(i18n.Translations)
+		options.Locale = NewLocale(Translations)
 	}
 
 	if options.FS == nil {

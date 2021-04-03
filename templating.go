@@ -1,4 +1,4 @@
-package templating
+package gotdd
 
 import (
 	"fmt"
@@ -7,8 +7,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/alcalbg/gotdd/session"
-	"github.com/alcalbg/gotdd/util"
 	"github.com/alcalbg/gotdd/views"
 )
 
@@ -20,7 +18,7 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(options util.Options) TemplatingEngine {
+func GetEngine(options Options) TemplatingEngine {
 
 	translator := func(s string) string {
 		return options.Locale.T("en-US", s) // TODO: set per user
@@ -52,8 +50,8 @@ type nativeHtmlTemplates struct {
 	Data    map[string]interface{}
 	Errors  map[string]string
 	Request *http.Request
-	session *session.Session
-	Flashes []session.FlashMessage
+	session *Session
+	Flashes []FlashMessage
 	IsGuest bool
 }
 
@@ -73,7 +71,7 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
-	w.Header().Set("Content-type", util.ContentTypeHTML)
+	w.Header().Set("Content-type", ContentTypeHTML)
 
 	if t.session != nil {
 		t.Flashes, _ = t.session.Flashes(w, r)

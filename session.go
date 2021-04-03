@@ -1,4 +1,4 @@
-package session
+package gotdd
 
 import (
 	"encoding/gob"

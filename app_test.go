@@ -1,4 +1,4 @@
-package app_test
+package gotdd_test
 
 import (
 	"fmt"
@@ -8,11 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/session"
+	"github.com/alcalbg/gotdd"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
-	"github.com/alcalbg/gotdd/util"
 	"github.com/gorilla/sessions"
 )
 
@@ -40,8 +38,8 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			app.NewApp(util.OptionsWithDefaults(util.Options{
-				Session: session.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
+			gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
 			})).ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
@@ -57,7 +55,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from root", func(t *testing.T) {
 
-		app := app.NewApp(util.OptionsWithDefaults(util.Options{
+		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
 			FS: doubles.NewFileSystemStub(files),
 		}))
 
@@ -70,7 +68,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from prefixed path", func(t *testing.T) {
 
-		app := app.NewApp(util.OptionsWithDefaults(util.Options{
+		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
 			FS:           doubles.NewFileSystemStub(files),
 			StaticPrefix: "/publicprefix",
 		}))
@@ -84,7 +82,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 
-		app := app.NewApp(util.OptionsWithDefaults(util.Options{}))
+		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{}))
 
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
@@ -138,8 +136,8 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.UserStub().Email)
 		data.Set("password", "pass123")
 
-		app := app.NewApp(util.OptionsWithDefaults(util.Options{
-			Session:        session.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 		}))
 
@@ -165,8 +163,8 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.UserStub()
 
-	app := app.NewApp(util.OptionsWithDefaults(util.Options{
-		Session: session.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
+	app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
 	}))
 
 	// first, let's make sure we're logged in
@@ -186,22 +184,6 @@ func TestLogout(t *testing.T) {
 	response = httptest.NewRecorder()
 	app.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
-}
-
-func TestCORS(t *testing.T) {
-
-	app := doubles.NewAppStub()
-
-	request, err := http.NewRequest(http.MethodOptions, "/login", nil)
-	assert.NoError(t, err)
-	response := httptest.NewRecorder()
-	app.ServeHTTP(response, request)
-
-	HeaderMap := response.HeaderMap
-
-	assert.Equal(t, response.Code, http.StatusNoContent)
-	assert.Equal(t, HeaderMap.Get("Access-Control-Allow-Origin"), "*")
-	assert.Contains(t, HeaderMap.Get("Access-Control-Allow-Methods"), "GET")
 }
 
 func loginRequest(form url.Values) *http.Request {

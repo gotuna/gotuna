@@ -1,4 +1,4 @@
-package models_test
+package gotdd_test
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package app
+package gotdd
 
 import (
 	"net/http"
@@ -6,40 +6,35 @@ import (
 	"path"
 	"runtime/debug"
 	"strings"
-
-	"github.com/alcalbg/gotdd/middleware"
-	"github.com/alcalbg/gotdd/session"
-	"github.com/alcalbg/gotdd/templating"
-	"github.com/alcalbg/gotdd/util"
 )
 
 type App struct {
-	util.Options
+	Options
 }
 
-func NewApp(options util.Options) http.Handler {
+func NewApp(options Options) http.Handler {
 
-	app := &App{util.OptionsWithDefaults(options)}
+	app := &App{OptionsWithDefaults(options)}
 
 	app.Router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
 	// middlewares for all routes
-	app.Router.Use(middleware.Recoverer(app.Options))
-	app.Router.Use(middleware.Logger(app.Options))
+	app.Router.Use(Recoverer(app.Options))
+	app.Router.Use(Logger(app.Options))
 	// TODO: csrf middleware
 	app.Router.Methods(http.MethodOptions)
-	app.Router.Use(middleware.Cors())
+	app.Router.Use(Cors())
 
 	// logged in user
 	user := app.Router.NewRoute().Subrouter()
-	user.Use(middleware.Authenticate(app.Options, "/login"))
+	user.Use(Authenticate(app.Options, "/login"))
 	user.Handle("/", app.home()).Methods(http.MethodGet)
 	user.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", app.logout()).Methods(http.MethodPost)
 
 	// guests
 	auth := app.Router.NewRoute().Subrouter()
-	auth.Use(middleware.RedirectIfAuthenticated(app.Options, "/"))
+	auth.Use(RedirectIfAuthenticated(app.Options, "/"))
 	auth.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
 	auth.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
@@ -76,7 +71,7 @@ func (app App) serveFiles() http.Handler {
 func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		templating.GetEngine(app.Options).
+		GetEngine(app.Options).
 			Set("message", app.Locale.T("en-US", "Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -85,7 +80,7 @@ func (app App) home() http.Handler {
 func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := templating.GetEngine(app.Options)
+		tmpl := GetEngine(app.Options)
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -123,7 +118,7 @@ func (app App) login() http.Handler {
 			return
 		}
 
-		if err := app.Session.Flash(w, r, session.NewFlash(app.Locale.T("en-US", "Welcome"))); err != nil {
+		if err := app.Session.Flash(w, r, NewFlash(app.Locale.T("en-US", "Welcome"))); err != nil {
 			app.errorHandler(err).ServeHTTP(w, r)
 			return
 		}
@@ -141,7 +136,7 @@ func (app App) logout() http.Handler {
 
 func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		templating.GetEngine(app.Options).
+		GetEngine(app.Options).
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -149,7 +144,7 @@ func (app App) profile() http.Handler {
 func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	templating.GetEngine(app.Options).
+	GetEngine(app.Options).
 		Set("title", app.Locale.T("en-US", "Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
@@ -157,7 +152,7 @@ func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		templating.GetEngine(app.Options).
+		GetEngine(app.Options).
 			Set("error", err).
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")

@@ -5,16 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/alcalbg/gotdd/app"
+	"github.com/alcalbg/gotdd"
 	"github.com/alcalbg/gotdd/test/doubles"
-	"github.com/alcalbg/gotdd/util"
 )
 
 func main() {
 
 	port := ":8888"
 
-	app := app.NewApp(util.Options{
+	app := gotdd.NewApp(gotdd.Options{
 		UserRepository: doubles.NewUserRepositoryStub(),
 	})
 

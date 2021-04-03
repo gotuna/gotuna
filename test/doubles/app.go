@@ -3,16 +3,14 @@ package doubles
 import (
 	"net/http"
 
-	"github.com/alcalbg/gotdd/app"
-	"github.com/alcalbg/gotdd/session"
-	"github.com/alcalbg/gotdd/util"
+	"github.com/alcalbg/gotdd"
 )
 
 func NewAppStub() http.Handler {
-	return app.NewApp(util.Options{
+	return gotdd.NewApp(gotdd.Options{
 		Logger:         NewLoggerStub(),
 		FS:             NewFileSystemStub(nil),
-		Session:        session.NewSession(NewGorillaSessionStoreSpy(session.GuestSID)),
+		Session:        gotdd.NewSession(NewGorillaSessionStoreSpy(gotdd.GuestSID)),
 		UserRepository: NewUserRepositoryStub(),
 	})
 }

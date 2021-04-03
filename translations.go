@@ -1,4 +1,4 @@
-package i18n
+package gotdd
 
 var Translations = map[string]map[string]string{
 	"Email": {

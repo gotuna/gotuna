@@ -1,4 +1,4 @@
-package templating_test
+package gotdd_test
 
 import (
 	"net/http"
@@ -7,12 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alcalbg/gotdd/i18n"
-	"github.com/alcalbg/gotdd/session"
-	"github.com/alcalbg/gotdd/templating"
+	"github.com/alcalbg/gotdd"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
-	"github.com/alcalbg/gotdd/util"
 )
 
 func TestRenderingWithCustomData(t *testing.T) {
@@ -23,19 +20,19 @@ func TestRenderingWithCustomData(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
 		Set("username", "Milos").
 		Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
 	assert.Equal(t, w.Code, http.StatusOK)
-	assert.Equal(t, w.Result().Header.Get("Content-type"), util.ContentTypeHTML)
+	assert.Equal(t, w.Result().Header.Get("Content-type"), gotdd.ContentTypeHTML)
 }
 
 func TestUsingTranslation(t *testing.T) {
 
-	options := util.Options{
-		Locale: i18n.NewLocale(map[string]map[string]string{
+	options := gotdd.Options{
+		Locale: gotdd.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
 			},
@@ -48,7 +45,7 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(options).
+	gotdd.GetEngine(options).
 		MountFS(
 			doubles.NewFileSystemStub(
 				map[string][]byte{"view.html": []byte(template)})).
@@ -68,7 +65,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 		recover()
 	}()
 
-	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
 		Render(w, r, "view.html")
 
 	t.Errorf("templating engine should panic")
@@ -82,7 +79,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
 		Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
@@ -102,7 +99,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templating.GetEngine(util.OptionsWithDefaults(util.Options{})).
+	gotdd.GetEngine(gotdd.OptionsWithDefaults(gotdd.Options{})).
 		MountFS(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 
@@ -123,7 +120,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	template := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
-	doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
 		Render(w, r, "view.html")
 	assert.Equal(t, w.Body.String(), want)
 }
@@ -135,7 +132,7 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	template := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
 	want := `some error / other error`
 
-	engine := doubles.NewStubTemplatingEngine(template, util.OptionsWithDefaults(util.Options{})).
+	engine := doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
 		SetError("error1", "some error").
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
@@ -148,14 +145,14 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses := session.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
-	ses.Flash(w, r, session.FlashMessage{Kind: "success", Message: "flash one"})
-	ses.Flash(w, r, session.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
+	ses := gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
+	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash one"})
+	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 
 	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	options := util.OptionsWithDefaults(util.Options{
+	options := gotdd.OptionsWithDefaults(gotdd.Options{
 		Session: ses,
 	})
 

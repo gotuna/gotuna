@@ -1,4 +1,4 @@
-package models
+package gotdd
 
 type User struct {
 	SID          string

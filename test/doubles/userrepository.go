@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/alcalbg/gotdd/models"
+	"github.com/alcalbg/gotdd"
 )
 
-func UserStub() models.User {
-	return models.User{
+func UserStub() gotdd.User {
+	return gotdd.User{
 		SID:          "123",
 		Email:        "john@example.com",
 		PasswordHash: "pass123",
@@ -17,17 +17,17 @@ func UserStub() models.User {
 
 func NewUserRepositoryStub() *userRepositoryStub {
 	return &userRepositoryStub{
-		users: []models.User{UserStub()},
+		users: []gotdd.User{UserStub()},
 	}
 }
 
 type userRepositoryStub struct {
-	users         []models.User
+	users         []gotdd.User
 	inputEmail    string
 	inputPassword string
 }
 
-func (u *userRepositoryStub) Set(key string, value interface{}) models.UserRepository {
+func (u *userRepositoryStub) Set(key string, value interface{}) gotdd.UserRepository {
 	if key == "email" {
 		u.inputEmail = value.(string)
 	}
@@ -37,26 +37,26 @@ func (u *userRepositoryStub) Set(key string, value interface{}) models.UserRepos
 	return u
 }
 
-func (u userRepositoryStub) Authenticate() (models.User, error) {
+func (u userRepositoryStub) Authenticate() (gotdd.User, error) {
 	user, err := u.getUserByEmail()
 	if err != nil {
-		return models.User{}, err
+		return gotdd.User{}, err
 	}
 
 	// this should be bcrypt.CompareHashAndPassword in real life
 	if user.PasswordHash != u.inputPassword {
-		return models.User{}, fmt.Errorf("passwords don't match %v", err)
+		return gotdd.User{}, fmt.Errorf("passwords don't match %v", err)
 	}
 
 	return user, nil
 }
 
-func (u userRepositoryStub) getUserByEmail() (models.User, error) {
+func (u userRepositoryStub) getUserByEmail() (gotdd.User, error) {
 	for _, user := range u.users {
 		if user.Email == u.inputEmail {
 			return user, nil
 		}
 	}
 
-	return models.User{}, errors.New("user not found")
+	return gotdd.User{}, errors.New("user not found")
 }
