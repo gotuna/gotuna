@@ -40,6 +40,7 @@ func TestRoutes(t *testing.T) {
 
 			app := gotdd.NewApp(gotdd.App{
 				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
+				FS:      doubles.NewFileSystemStub(map[string][]byte{}),
 			})
 			app.Router.ServeHTTP(response, request)
 
@@ -83,7 +84,9 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 
-		app := gotdd.NewApp(gotdd.App{})
+		app := gotdd.NewApp(gotdd.App{
+			FS: doubles.NewFileSystemStub(files),
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
@@ -103,6 +106,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		app := gotdd.NewApp(gotdd.App{
+			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 		})
 		app.Router.ServeHTTP(response, request)
@@ -119,6 +123,7 @@ func TestLogin(t *testing.T) {
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
 		app := gotdd.NewApp(gotdd.App{
+			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 		})
 		app.Router.ServeHTTP(response, request)
@@ -134,6 +139,7 @@ func TestLogin(t *testing.T) {
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
 		app := gotdd.NewApp(gotdd.App{
+			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 		})
 		app.Router.ServeHTTP(response, request)

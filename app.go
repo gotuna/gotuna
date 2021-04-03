@@ -9,9 +9,7 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/alcalbg/gotdd/static"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 )
 
 type App struct {
@@ -26,31 +24,15 @@ type App struct {
 
 func NewApp(app App) App {
 
-	if app.Router == nil {
-		app.Router = mux.NewRouter()
-	}
-
 	if app.Logger == nil {
 		app.Logger = log.New(os.Stdout, "", 0)
-	}
-
-	if app.Session == nil {
-		keyPairs := os.Getenv("APP_KEY")
-		app.Session = NewSession(sessions.NewCookieStore([]byte(keyPairs)))
-	}
-
-	if app.FS == nil {
-		app.FS = static.EmbededStatic
 	}
 
 	if app.Locale == nil {
 		app.Locale = NewLocale(Translations)
 	}
 
-	// path prefix for static files
-	// e.g. "/public" or "http://cdn.example.com/assets"
-	app.StaticPrefix = strings.TrimRight(app.StaticPrefix, "/")
-
+	app.Router = mux.NewRouter()
 	app.Router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
 	// middlewares for all routes
@@ -72,6 +54,10 @@ func NewApp(app App) App {
 	auth.Use(app.RedirectIfAuthenticated("/"))
 	auth.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
 	auth.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
+
+	// path prefix for static files
+	// e.g. "/public" or "http://cdn.example.com/assets"
+	app.StaticPrefix = strings.TrimRight(app.StaticPrefix, "/")
 
 	// serve files from the static directory
 	app.Router.PathPrefix(app.StaticPrefix).
