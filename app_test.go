@@ -38,9 +38,10 @@ func TestRoutes(t *testing.T) {
 			request, _ := http.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+			app := gotdd.NewApp(gotdd.App{
 				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
-			})).ServeHTTP(response, request)
+			})
+			app.Router.ServeHTTP(response, request)
 
 			assert.Equal(t, response.Code, r.status)
 		})
@@ -55,38 +56,38 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	t.Run("return valid static file from root", func(t *testing.T) {
 
-		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+		app := gotdd.NewApp(gotdd.App{
 			FS: doubles.NewFileSystemStub(files),
-		}))
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
-		app.ServeHTTP(w, r)
+		app.Router.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusOK)
 	})
 
 	t.Run("return valid static file from prefixed path", func(t *testing.T) {
 
-		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+		app := gotdd.NewApp(gotdd.App{
 			FS:           doubles.NewFileSystemStub(files),
 			StaticPrefix: "/publicprefix",
-		}))
+		})
 
 		r, _ := http.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
-		app.ServeHTTP(w, r)
+		app.Router.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusOK)
 	})
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
 
-		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{}))
+		app := gotdd.NewApp(gotdd.App{})
 
 		r, _ := http.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
-		app.ServeHTTP(w, r)
+		app.Router.ServeHTTP(w, r)
 
 		assert.Equal(t, w.Code, http.StatusNotFound)
 	})
@@ -101,7 +102,10 @@ func TestLogin(t *testing.T) {
 		request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		doubles.NewAppStub().ServeHTTP(response, request)
+		app := gotdd.NewApp(gotdd.App{
+			UserRepository: doubles.NewUserRepositoryStub(),
+		})
+		app.Router.ServeHTTP(response, request)
 
 		assert.Equal(t, response.Code, http.StatusOK)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
@@ -114,7 +118,10 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		doubles.NewAppStub().ServeHTTP(response, request)
+		app := gotdd.NewApp(gotdd.App{
+			UserRepository: doubles.NewUserRepositoryStub(),
+		})
+		app.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
@@ -126,7 +133,10 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		doubles.NewAppStub().ServeHTTP(response, request)
+		app := gotdd.NewApp(gotdd.App{
+			UserRepository: doubles.NewUserRepositoryStub(),
+		})
+		app.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusUnauthorized)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
@@ -136,15 +146,15 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.UserStub().Email)
 		data.Set("password", "pass123")
 
-		app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+		app := gotdd.NewApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
-		}))
+		})
 
 		// step1: after successful login, user is redirected to the home page
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		app.ServeHTTP(response, request)
+		app.Router.ServeHTTP(response, request)
 		assert.Redirects(t, response, "/", http.StatusFound)
 		gotCookies := response.Result().Cookies()
 
@@ -154,7 +164,7 @@ func TestLogin(t *testing.T) {
 		for _, c := range gotCookies {
 			request.AddCookie(c)
 		}
-		app.ServeHTTP(response, request)
+		app.Router.ServeHTTP(response, request)
 		assert.Equal(t, response.Code, http.StatusOK)
 	})
 }
@@ -163,26 +173,26 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.UserStub()
 
-	app := gotdd.NewApp(gotdd.OptionsWithDefaults(gotdd.Options{
+	app := gotdd.NewApp(gotdd.App{
 		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
-	}))
+	})
 
 	// first, let's make sure we're logged in
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
-	app.ServeHTTP(response, request)
+	app.Router.ServeHTTP(response, request)
 	assert.Equal(t, response.Code, http.StatusOK)
 
 	// try to log out
 	request, _ = http.NewRequest(http.MethodPost, "/logout", nil)
 	response = httptest.NewRecorder()
-	app.ServeHTTP(response, request)
+	app.Router.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
 
 	// make sure we can't reach home page anymore
 	request, _ = http.NewRequest(http.MethodGet, "/", nil)
 	response = httptest.NewRecorder()
-	app.ServeHTTP(response, request)
+	app.Router.ServeHTTP(response, request)
 	assert.Redirects(t, response, "/login", http.StatusFound)
 }
 

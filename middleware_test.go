@@ -16,7 +16,8 @@ func TestCORS(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodOptions, "/sample", nil)
 	response := httptest.NewRecorder()
 
-	CORS := gotdd.Cors()
+	app := gotdd.App{}
+	CORS := app.Cors()
 	handler := CORS(http.NotFoundHandler())
 
 	handler.ServeHTTP(response, request)
@@ -30,10 +31,13 @@ func TestLogging(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
-	options := gotdd.Options{
+
+	app := gotdd.App{
+
 		Logger: log.New(wlog, "", 0),
 	}
-	logger := gotdd.Logger(options)
+
+	logger := app.Logging()
 	handler := logger(http.NotFoundHandler())
 
 	handler.ServeHTTP(response, request)
@@ -55,10 +59,11 @@ func TestRecoveringFromPanic(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
-	options := gotdd.OptionsWithDefaults(gotdd.Options{})
-	options.Logger = log.New(wlog, "", 0)
+	app := gotdd.NewApp(gotdd.App{
+		Logger: log.New(wlog, "", 0),
+	})
 
-	recoverer := gotdd.Recoverer(options)
+	recoverer := app.Recoverer()
 	handler := recoverer(badHandler)
 
 	handler.ServeHTTP(response, request)
@@ -73,11 +78,11 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	options := gotdd.Options{
+	app := gotdd.App{
 		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)),
 	}
 
-	authenticate := gotdd.Authenticate(options, "/pleaselogin")
+	authenticate := app.Authenticate("/pleaselogin")
 	handler := authenticate(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 	handler.ServeHTTP(response, request)
@@ -90,11 +95,11 @@ func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 	request, _ := http.NewRequest(http.MethodGet, "/login", nil)
 	response := httptest.NewRecorder()
 
-	options := gotdd.Options{
+	app := gotdd.App{
 		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)),
 	}
 
-	redirectIfAuthenticated := gotdd.RedirectIfAuthenticated(options, "/dashboard")
+	redirectIfAuthenticated := app.RedirectIfAuthenticated("/dashboard")
 	handler := redirectIfAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 	handler.ServeHTTP(response, request)

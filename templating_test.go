@@ -20,7 +20,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
+	doubles.NewStubTemplatingEngine(template).
 		Set("username", "Milos").
 		Render(w, r, "view.html")
 
@@ -31,25 +31,27 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 func TestUsingTranslation(t *testing.T) {
 
-	options := gotdd.Options{
+	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
+	rendered := `Hello, this is my auto`
+
+	app := gotdd.NewApp(gotdd.App{
 		Locale: gotdd.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
 			},
 		}),
-	}
-
-	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
-	rendered := `Hello, this is my auto`
+	})
+	templatingEngineStub := app.GetEngine().
+		MountFS(
+			doubles.NewFileSystemStub(
+				map[string][]byte{
+					"view.html": []byte(template),
+				}))
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	gotdd.GetEngine(options).
-		MountFS(
-			doubles.NewFileSystemStub(
-				map[string][]byte{"view.html": []byte(template)})).
-		Render(w, r, "view.html")
+	templatingEngineStub.Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
 }
@@ -65,7 +67,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 		recover()
 	}()
 
-	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
+	doubles.NewStubTemplatingEngine(template).
 		Render(w, r, "view.html")
 
 	t.Errorf("templating engine should panic")
@@ -79,7 +81,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
+	doubles.NewStubTemplatingEngine(template).
 		Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), rendered)
@@ -99,7 +101,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	gotdd.GetEngine(gotdd.OptionsWithDefaults(gotdd.Options{})).
+	doubles.NewStubTemplatingEngine(htmlLayout).
 		MountFS(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 
@@ -120,8 +122,9 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	template := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
-	doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
+	doubles.NewStubTemplatingEngine(template).
 		Render(w, r, "view.html")
+
 	assert.Equal(t, w.Body.String(), want)
 }
 
@@ -132,7 +135,7 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	template := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
 	want := `some error / other error`
 
-	engine := doubles.NewStubTemplatingEngine(template, gotdd.OptionsWithDefaults(gotdd.Options{})).
+	engine := doubles.NewStubTemplatingEngine(template).
 		SetError("error1", "some error").
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
@@ -152,12 +155,17 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	options := gotdd.OptionsWithDefaults(gotdd.Options{
+	app := gotdd.NewApp(gotdd.App{
 		Session: ses,
 	})
+	templatingEngineStub := app.GetEngine().
+		MountFS(
+			doubles.NewFileSystemStub(
+				map[string][]byte{
+					"view.html": []byte(template),
+				}))
 
-	doubles.NewStubTemplatingEngine(template, options).
-		Render(w, r, "view.html")
+	templatingEngineStub.Render(w, r, "view.html")
 
 	assert.Equal(t, w.Body.String(), want)
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/alcalbg/gotdd/views"
 )
 
+const ContentTypeHTML = "text/html; charset=utf-8"
+
 type TemplatingEngine interface {
 	Render(w http.ResponseWriter, r *http.Request, patterns ...string)
 	Set(key string, data interface{}) TemplatingEngine
@@ -18,17 +20,17 @@ type TemplatingEngine interface {
 	MountFS(fs fs.FS) TemplatingEngine
 }
 
-func GetEngine(options Options) TemplatingEngine {
+func (app App) GetEngine() TemplatingEngine {
 
 	translator := func(s string) string {
-		return options.Locale.T("en-US", s) // TODO: set per user
+		return app.Locale.T("en-US", s) // TODO: set per user
 	}
 
 	var funcs = template.FuncMap{
 		"t": translator,
 		"static": func(file string) string {
 			hash := "b1a2"
-			return fmt.Sprintf("%s%s?%s", options.StaticPrefix, file, hash)
+			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
 		},
 		"uppercase": func(s string) string {
 			return strings.ToUpper(s)
@@ -40,7 +42,7 @@ func GetEngine(options Options) TemplatingEngine {
 		funcs:   funcs,
 		Data:    make(map[string]interface{}),
 		Errors:  make(map[string]string),
-		session: options.Session,
+		session: app.Session,
 	}
 }
 

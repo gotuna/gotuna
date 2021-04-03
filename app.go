@@ -1,40 +1,75 @@
 package gotdd
 
 import (
+	"io/fs"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"runtime/debug"
 	"strings"
+
+	"github.com/alcalbg/gotdd/static"
+	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 )
 
 type App struct {
-	Options
+	Logger         *log.Logger
+	Router         *mux.Router
+	FS             fs.FS
+	Session        *Session
+	UserRepository UserRepository
+	StaticPrefix   string
+	Locale         Locale
 }
 
-func NewApp(options Options) http.Handler {
+func NewApp(app App) App {
 
-	app := &App{OptionsWithDefaults(options)}
+	if app.Router == nil {
+		app.Router = mux.NewRouter()
+	}
+
+	if app.Logger == nil {
+		app.Logger = log.New(os.Stdout, "", 0)
+	}
+
+	if app.Session == nil {
+		keyPairs := os.Getenv("APP_KEY")
+		app.Session = NewSession(sessions.NewCookieStore([]byte(keyPairs)))
+	}
+
+	if app.FS == nil {
+		app.FS = static.EmbededStatic
+	}
+
+	if app.Locale == nil {
+		app.Locale = NewLocale(Translations)
+	}
+
+	// path prefix for static files
+	// e.g. "/public" or "http://cdn.example.com/assets"
+	app.StaticPrefix = strings.TrimRight(app.StaticPrefix, "/")
 
 	app.Router.NotFoundHandler = http.HandlerFunc(app.notFound)
 
 	// middlewares for all routes
-	app.Router.Use(Recoverer(app.Options))
-	app.Router.Use(Logger(app.Options))
+	app.Router.Use(app.Recoverer())
+	app.Router.Use(app.Logging())
 	// TODO: csrf middleware
 	app.Router.Methods(http.MethodOptions)
-	app.Router.Use(Cors())
+	app.Router.Use(app.Cors())
 
 	// logged in user
 	user := app.Router.NewRoute().Subrouter()
-	user.Use(Authenticate(app.Options, "/login"))
+	user.Use(app.Authenticate("/login"))
 	user.Handle("/", app.home()).Methods(http.MethodGet)
 	user.Handle("/profile", app.profile()).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", app.logout()).Methods(http.MethodPost)
 
 	// guests
 	auth := app.Router.NewRoute().Subrouter()
-	auth.Use(RedirectIfAuthenticated(app.Options, "/"))
+	auth.Use(app.RedirectIfAuthenticated("/"))
 	auth.Handle("/login", app.login()).Methods(http.MethodGet, http.MethodPost)
 	auth.Handle("/register", app.login()).Methods(http.MethodGet, http.MethodPost)
 
@@ -43,7 +78,7 @@ func NewApp(options Options) http.Handler {
 		Handler(http.StripPrefix(app.StaticPrefix, app.serveFiles())).
 		Methods(http.MethodGet)
 
-	return app.Router
+	return app
 }
 
 func (app App) serveFiles() http.Handler {
@@ -71,7 +106,7 @@ func (app App) serveFiles() http.Handler {
 func (app App) home() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		GetEngine(app.Options).
+		app.GetEngine().
 			Set("message", app.Locale.T("en-US", "Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -80,7 +115,7 @@ func (app App) home() http.Handler {
 func (app App) login() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := GetEngine(app.Options)
+		tmpl := app.GetEngine()
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -136,7 +171,7 @@ func (app App) logout() http.Handler {
 
 func (app App) profile() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		GetEngine(app.Options).
+		app.GetEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -144,7 +179,7 @@ func (app App) profile() http.Handler {
 func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 
-	GetEngine(app.Options).
+	app.GetEngine().
 		Set("title", app.Locale.T("en-US", "Not found")).
 		Render(w, r, "app.html", "4xx.html")
 }
@@ -152,7 +187,7 @@ func (app App) notFound(w http.ResponseWriter, r *http.Request) {
 func (app App) errorHandler(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		GetEngine(app.Options).
+		app.GetEngine().
 			Set("error", err).
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")
