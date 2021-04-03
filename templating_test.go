@@ -34,13 +34,13 @@ func TestUsingTranslation(t *testing.T) {
 	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
 
-	app := gotdd.NewApp(gotdd.App{
+	app := gotdd.App{
 		Locale: gotdd.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
 			},
 		}),
-	})
+	}
 	templatingEngineStub := app.GetEngine().
 		MountFS(
 			doubles.NewFileSystemStub(
@@ -155,9 +155,9 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	app := gotdd.NewApp(gotdd.App{
+	app := gotdd.App{
 		Session: ses,
-	})
+	}
 	templatingEngineStub := app.GetEngine().
 		MountFS(
 			doubles.NewFileSystemStub(

@@ -59,9 +59,9 @@ func TestRecoveringFromPanic(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
-	app := gotdd.NewApp(gotdd.App{
+	app := gotdd.App{
 		Logger: log.New(wlog, "", 0),
-	})
+	}
 
 	recoverer := app.Recoverer()
 	handler := recoverer(badHandler)

@@ -3,8 +3,7 @@ package doubles
 import "github.com/alcalbg/gotdd"
 
 func NewStubTemplatingEngine(template string) gotdd.TemplatingEngine {
-	app := gotdd.NewApp(gotdd.App{})
-	return app.GetEngine().
+	return gotdd.App{}.GetEngine().
 		MountFS(
 			NewFileSystemStub(
 				map[string][]byte{

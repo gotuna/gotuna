@@ -22,6 +22,10 @@ type TemplatingEngine interface {
 
 func (app App) GetEngine() TemplatingEngine {
 
+	if app.Locale == nil {
+		app.Locale = NewLocale(Translations)
+	}
+
 	translator := func(s string) string {
 		return app.Locale.T("en-US", s) // TODO: set per user
 	}

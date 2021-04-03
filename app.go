@@ -1,7 +1,6 @@
 package gotdd
 
 import (
-	"io"
 	"io/fs"
 	"log"
 
@@ -16,17 +15,4 @@ type App struct {
 	UserRepository UserRepository
 	StaticPrefix   string
 	Locale         Locale
-}
-
-func NewApp(app App) App {
-
-	if app.Logger == nil {
-		app.Logger = log.New(io.Discard, "", 0)
-	}
-
-	if app.Locale == nil {
-		app.Locale = NewLocale(Translations)
-	}
-
-	return app
 }
