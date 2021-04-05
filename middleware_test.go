@@ -22,8 +22,8 @@ func TestCORS(t *testing.T) {
 
 	handler.ServeHTTP(response, request)
 
-	assert.Equal(t, response.HeaderMap.Get("Access-Control-Allow-Origin"), gotdd.CORSAllowedOrigin)
-	assert.Equal(t, response.HeaderMap.Get("Access-Control-Allow-Methods"), gotdd.CORSAllowedMethods)
+	assert.Equal(t, gotdd.CORSAllowedOrigin, response.HeaderMap.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, gotdd.CORSAllowedMethods, response.HeaderMap.Get("Access-Control-Allow-Methods"))
 }
 
 func TestLogging(t *testing.T) {

@@ -18,7 +18,7 @@ func TestAuthenticate(t *testing.T) {
 			Authenticate()
 
 		assert.NoError(t, authenticated)
-		assert.Equal(t, user.Email, testUser.Email)
+		assert.Equal(t, testUser.Email, user.Email)
 	})
 
 	t.Run("test bad password", func(t *testing.T) {
@@ -28,7 +28,7 @@ func TestAuthenticate(t *testing.T) {
 			Authenticate()
 
 		assert.Error(t, authenticated)
-		assert.Equal(t, user.Email, "")
+		assert.Equal(t, "", user.Email)
 	})
 
 	t.Run("test non existing user", func(t *testing.T) {
@@ -38,6 +38,6 @@ func TestAuthenticate(t *testing.T) {
 			Authenticate()
 
 		assert.Error(t, authenticated)
-		assert.Equal(t, user.Email, "")
+		assert.Equal(t, "", user.Email)
 	})
 }

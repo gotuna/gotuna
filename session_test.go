@@ -12,7 +12,7 @@ import (
 
 func TestStoreAndRetrieveData(t *testing.T) {
 
-	t.Run("test storing and retrieving a simple string", func(t *testing.T) {
+	t.Run("test storing, retrieving, and deleting a simple string", func(t *testing.T) {
 		r := &http.Request{}
 		w := httptest.NewRecorder()
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
@@ -21,21 +21,28 @@ func TestStoreAndRetrieveData(t *testing.T) {
 		err := ses.Put(w, r, "test", "somevalue")
 		assert.NoError(t, err)
 
-		value, err := ses.Get(w, r, "test")
+		value, err := ses.Get(r, "test")
 		assert.NoError(t, err)
-		assert.Equal(t, value, "somevalue")
+		assert.Equal(t, "somevalue", value)
+
+		err = ses.Delete(w, r, "test")
+		assert.NoError(t, err)
+
+		value, err = ses.Get(r, "test")
+		assert.Error(t, err)
+		assert.Equal(t, "", value)
 	})
 
 	t.Run("test retrieving unsaved data", func(t *testing.T) {
 		r := &http.Request{}
-		w := httptest.NewRecorder()
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
 		ses := gotdd.NewSession(sessionStoreSpy)
 
-		value, err := ses.Get(w, r, "test")
+		value, err := ses.Get(r, "test")
 		assert.Error(t, err)
-		assert.Equal(t, value, "")
+		assert.Equal(t, "", value)
 	})
+
 }
 
 func TestReadingUserSIDFromEmptyStore(t *testing.T) {
@@ -44,13 +51,13 @@ func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
 	ses := gotdd.NewSession(sessionStoreSpy)
 
-	assert.Equal(t, ses.IsGuest(r), true)
+	assert.Equal(t, true, ses.IsGuest(r))
 
 	sid, err := ses.GetUserSID(r)
 	assert.Error(t, err)
-	assert.Equal(t, sid, gotdd.GuestSID)
+	assert.Equal(t, gotdd.GuestSID, sid)
 
-	assert.Equal(t, sessionStoreSpy.SaveCalls, 0)
+	assert.Equal(t, 0, sessionStoreSpy.SaveCalls)
 }
 
 func TestSaveUserSIDAndRetrieve(t *testing.T) {
@@ -65,9 +72,9 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 
 	sid, err := ses.GetUserSID(r)
 	assert.NoError(t, err)
-	assert.Equal(t, sid, doubles.UserStub().SID)
-	assert.Equal(t, ses.IsGuest(r), false)
-	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
+	assert.Equal(t, doubles.UserStub().SID, sid)
+	assert.Equal(t, false, ses.IsGuest(r))
+	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 }
 
 func TestDestroyActiveSession(t *testing.T) {
@@ -78,15 +85,15 @@ func TestDestroyActiveSession(t *testing.T) {
 	ses := gotdd.NewSession(sessionStoreSpy)
 
 	sid, _ := ses.GetUserSID(r)
-	assert.Equal(t, sid, doubles.UserStub().SID)
+	assert.Equal(t, doubles.UserStub().SID, sid)
 
 	ses.DestroySession(w, r)
 
 	sid, err := ses.GetUserSID(r)
 	assert.Error(t, err)
-	assert.Equal(t, sid, gotdd.GuestSID)
-	assert.Equal(t, sessionStoreSpy.SaveCalls, 1)
-	assert.Equal(t, sessionStoreSpy.Session.Options.MaxAge, -1)
+	assert.Equal(t, gotdd.GuestSID, sid)
+	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
+	assert.Equal(t, -1, sessionStoreSpy.Session.Options.MaxAge)
 }
 
 func TestFlashMessages(t *testing.T) {
@@ -99,7 +106,7 @@ func TestFlashMessages(t *testing.T) {
 	// request1: no flash messages
 	messages, err := ses.Flashes(w, r)
 	assert.NoError(t, err)
-	assert.Equal(t, len(messages), 0)
+	assert.Equal(t, 0, len(messages))
 
 	// request2: add flash messages
 	messages, err = ses.Flashes(w, r)
@@ -109,15 +116,15 @@ func TestFlashMessages(t *testing.T) {
 	// request3: pop flash messages
 	messages, err = ses.Flashes(w, r)
 	assert.NoError(t, err)
-	assert.Equal(t, len(messages), 2)
-	assert.Equal(t, messages[0].Message, "flash message one")
-	assert.Equal(t, messages[0].Kind, "success")
-	assert.Equal(t, messages[0].AutoClose, true)
-	assert.Equal(t, messages[1].Kind, "active")
-	assert.Equal(t, messages[1].AutoClose, true)
+	assert.Equal(t, 2, len(messages))
+	assert.Equal(t, "flash message one", messages[0].Message)
+	assert.Equal(t, "success", messages[0].Kind)
+	assert.Equal(t, true, messages[0].AutoClose)
+	assert.Equal(t, "active", messages[1].Kind)
+	assert.Equal(t, true, messages[1].AutoClose)
 
 	// request4: no flash messages
 	messages, err = ses.Flashes(w, r)
 	assert.NoError(t, err)
-	assert.Equal(t, len(messages), 0)
+	assert.Equal(t, 0, len(messages))
 }

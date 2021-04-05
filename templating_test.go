@@ -24,9 +24,9 @@ func TestRenderingWithCustomData(t *testing.T) {
 		Set("username", "Milos").
 		Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), rendered)
-	assert.Equal(t, w.Code, http.StatusOK)
-	assert.Equal(t, w.Result().Header.Get("Content-type"), gotdd.ContentTypeHTML)
+	assert.Equal(t, rendered, w.Body.String())
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, gotdd.ContentTypeHTML, w.Result().Header.Get("Content-type"))
 }
 
 func TestUsingTranslation(t *testing.T) {
@@ -53,7 +53,7 @@ func TestUsingTranslation(t *testing.T) {
 
 	templatingEngineStub.Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), rendered)
+	assert.Equal(t, rendered, w.Body.String())
 }
 
 func TestBadTemplateShouldPanic(t *testing.T) {
@@ -84,7 +84,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 	doubles.NewStubTemplatingEngine(template).
 		Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), rendered)
+	assert.Equal(t, rendered, w.Body.String())
 }
 
 func TestLayoutWithSubContentBlock(t *testing.T) {
@@ -105,7 +105,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 		MountViews(doubles.NewFileSystemStub(fs)).
 		Render(w, r, "layout.html", "content.html")
 
-	assert.Equal(t, w.Body.String(), htmlFinal)
+	assert.Equal(t, htmlFinal, w.Body.String())
 }
 
 func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
@@ -125,7 +125,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	doubles.NewStubTemplatingEngine(template).
 		Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), want)
+	assert.Equal(t, want, w.Body.String())
 }
 
 func TestErrorsCanBeAdded(t *testing.T) {
@@ -140,8 +140,8 @@ func TestErrorsCanBeAdded(t *testing.T) {
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), want)
-	assert.Equal(t, len(engine.GetErrors()), 2)
+	assert.Equal(t, want, w.Body.String())
+	assert.Equal(t, 2, len(engine.GetErrors()))
 }
 
 func TestFlashMessagesAreIncluded(t *testing.T) {
@@ -167,7 +167,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 	templatingEngineStub.Render(w, r, "view.html")
 
-	assert.Equal(t, w.Body.String(), want)
+	assert.Equal(t, want, w.Body.String())
 }
 
 func TestIsGuestIsEvaluated(t *testing.T) {

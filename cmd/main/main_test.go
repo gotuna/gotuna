@@ -45,7 +45,7 @@ func TestRoutes(t *testing.T) {
 			})
 			app.Router.ServeHTTP(response, request)
 
-			assert.Equal(t, response.Code, r.status)
+			assert.Equal(t, r.status, response.Code)
 		})
 	}
 }
@@ -66,7 +66,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		w := httptest.NewRecorder()
 		app.Router.ServeHTTP(w, r)
 
-		assert.Equal(t, w.Code, http.StatusOK)
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
 	t.Run("return valid static file from prefixed path", func(t *testing.T) {
@@ -80,7 +80,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		w := httptest.NewRecorder()
 		app.Router.ServeHTTP(w, r)
 
-		assert.Equal(t, w.Code, http.StatusOK)
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
@@ -93,7 +93,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		w := httptest.NewRecorder()
 		app.Router.ServeHTTP(w, r)
 
-		assert.Equal(t, w.Code, http.StatusNotFound)
+		assert.Equal(t, http.StatusNotFound, w.Code)
 	})
 
 }
@@ -112,7 +112,7 @@ func TestLogin(t *testing.T) {
 		})
 		app.Router.ServeHTTP(response, request)
 
-		assert.Equal(t, response.Code, http.StatusOK)
+		assert.Equal(t, http.StatusOK, response.Code)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
@@ -129,7 +129,7 @@ func TestLogin(t *testing.T) {
 			Views:          views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
-		assert.Equal(t, response.Code, http.StatusUnauthorized)
+		assert.Equal(t, http.StatusUnauthorized, response.Code)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
@@ -146,7 +146,7 @@ func TestLogin(t *testing.T) {
 			Views:          views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
-		assert.Equal(t, response.Code, http.StatusUnauthorized)
+		assert.Equal(t, http.StatusUnauthorized, response.Code)
 		assert.Contains(t, response.Body.String(), htmlNeedle)
 	})
 
@@ -175,7 +175,7 @@ func TestLogin(t *testing.T) {
 			request.AddCookie(c)
 		}
 		app.Router.ServeHTTP(response, request)
-		assert.Equal(t, response.Code, http.StatusOK)
+		assert.Equal(t, http.StatusOK, response.Code)
 	})
 }
 
@@ -192,7 +192,7 @@ func TestLogout(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 	app.Router.ServeHTTP(response, request)
-	assert.Equal(t, response.Code, http.StatusOK)
+	assert.Equal(t, http.StatusOK, response.Code)
 
 	// try to log out
 	request = httptest.NewRequest(http.MethodPost, "/logout", nil)

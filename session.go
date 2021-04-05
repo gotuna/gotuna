@@ -1,7 +1,7 @@
 package gotdd
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,10 +13,6 @@ const GuestSID = ""
 const UserSIDKey = "_user_sid"
 const flashKey = "_flash"
 const sessionName = "app_session"
-
-func init() {
-	gob.Register([]FlashMessage{})
-}
 
 type Session struct {
 	Store sessions.Store
@@ -56,39 +52,38 @@ func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value s
 	return s.Store.Save(r, w, session)
 }
 
-func (s Session) Get(w http.ResponseWriter, r *http.Request, key string) (string, error) {
+func (s Session) Get(r *http.Request, key string) (string, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
 		return "", errors.New("cannot get session from the store")
 	}
 
-	sid, ok := session.Values[key].(string)
+	value, ok := session.Values[key].(string)
 	if !ok {
 		return "", fmt.Errorf("session holds no value for key %s", key)
 	}
 
-	return sid, nil
+	return value, nil
 }
 
-func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) error {
+func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
 		return errors.New("cannot get session from the store")
 	}
 
-	session.Values[UserSIDKey] = sid
+	delete(session.Values, key)
 
 	return s.Store.Save(r, w, session)
 }
 
-func (s Session) GetUserSID(r *http.Request) (string, error) {
-	session, err := s.Store.Get(r, sessionName)
-	if err != nil {
-		return GuestSID, errors.New("cannot get session from the store")
-	}
+func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) error {
+	return s.Put(w, r, UserSIDKey, sid)
+}
 
-	sid, ok := session.Values[UserSIDKey].(string)
-	if !ok || sid == GuestSID {
+func (s Session) GetUserSID(r *http.Request) (string, error) {
+	sid, err := s.Get(r, UserSIDKey)
+	if err != nil || sid == GuestSID {
 		return GuestSID, errors.New("No user in the session")
 	}
 
@@ -119,35 +114,45 @@ func (s Session) IsGuest(r *http.Request) bool {
 
 	return false
 }
-
 func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage FlashMessage) error {
-	session, err := s.Store.Get(r, sessionName)
+
+	var messages []FlashMessage
+
+	raw, err := s.Get(r, flashKey)
 	if err != nil {
-		return errors.New("cannot get session from the store")
+		raw = "[]"
 	}
 
-	var flashes []FlashMessage
-
-	if v, ok := session.Values[flashKey]; ok {
-		flashes = v.([]FlashMessage)
+	err = json.Unmarshal([]byte(raw), &messages)
+	if err != nil {
+		return err
 	}
-	session.Values[flashKey] = append(flashes, flashMessage)
 
-	return s.Store.Save(r, w, session)
+	messages = append(messages, flashMessage)
+
+	rawbytes, err := json.Marshal(messages)
+	if err != nil {
+		return err
+	}
+
+	return s.Put(w, r, flashKey, string(rawbytes))
 }
 
 func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage, error) {
-	session, err := s.Store.Get(r, sessionName)
+
+	var messages []FlashMessage
+
+	raw, err := s.Get(r, flashKey)
 	if err != nil {
-		return nil, errors.New("cannot get session from the store")
+		return messages, nil
 	}
 
-	messages, ok := session.Values[flashKey].([]FlashMessage)
-	if !ok {
-		messages = []FlashMessage{}
+	err = json.Unmarshal([]byte(raw), &messages)
+	if err != nil {
+		return messages, err
 	}
 
-	delete(session.Values, flashKey)
+	s.Delete(w, r, flashKey)
 
-	return messages, s.Store.Save(r, w, session)
+	return messages, nil
 }
