@@ -10,6 +10,34 @@ import (
 	"github.com/alcalbg/gotdd/test/doubles"
 )
 
+func TestStoreAndRetrieveData(t *testing.T) {
+
+	t.Run("test storing and retrieving a simple string", func(t *testing.T) {
+		r := &http.Request{}
+		w := httptest.NewRecorder()
+		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+		ses := gotdd.NewSession(sessionStoreSpy)
+
+		err := ses.Put(w, r, "test", "somevalue")
+		assert.NoError(t, err)
+
+		value, err := ses.Get(w, r, "test")
+		assert.NoError(t, err)
+		assert.Equal(t, value, "somevalue")
+	})
+
+	t.Run("test retrieving unsaved data", func(t *testing.T) {
+		r := &http.Request{}
+		w := httptest.NewRecorder()
+		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+		ses := gotdd.NewSession(sessionStoreSpy)
+
+		value, err := ses.Get(w, r, "test")
+		assert.Error(t, err)
+		assert.Equal(t, value, "")
+	})
+}
+
 func TestReadingUserSIDFromEmptyStore(t *testing.T) {
 
 	r := &http.Request{}

@@ -3,6 +3,7 @@ package gotdd
 import (
 	"encoding/gob"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
@@ -44,10 +45,35 @@ func NewSession(store sessions.Store) *Session {
 	return &Session{Store: store}
 }
 
+func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value string) error {
+	session, err := s.Store.Get(r, sessionName)
+	if err != nil {
+		return errors.New("cannot get session from the store")
+	}
+
+	session.Values[key] = value
+
+	return s.Store.Save(r, w, session)
+}
+
+func (s Session) Get(w http.ResponseWriter, r *http.Request, key string) (string, error) {
+	session, err := s.Store.Get(r, sessionName)
+	if err != nil {
+		return "", errors.New("cannot get session from the store")
+	}
+
+	sid, ok := session.Values[key].(string)
+	if !ok {
+		return "", fmt.Errorf("session holds no value for key %s", key)
+	}
+
+	return sid, nil
+}
+
 func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("Cannot get session from the store")
+		return errors.New("cannot get session from the store")
 	}
 
 	session.Values[UserSIDKey] = sid
