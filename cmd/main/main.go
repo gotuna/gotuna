@@ -171,7 +171,7 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 
 func handlerLogout(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.Session.DestroySession(w, r)
+		app.Session.Destroy(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
