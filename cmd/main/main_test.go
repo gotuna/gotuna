@@ -107,9 +107,8 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		app := main.MakeApp(gotdd.App{
-			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
-			UserRepository: doubles.NewUserRepositoryStub(),
-			Views:          views.EmbededViews,
+			Session: gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+			Views:   views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
 
