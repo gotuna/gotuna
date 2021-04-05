@@ -84,36 +84,21 @@ func (s Session) SetUserSID(w http.ResponseWriter, r *http.Request, sid string) 
 func (s Session) GetUserSID(r *http.Request) (string, error) {
 	sid, err := s.Get(r, UserSIDKey)
 	if err != nil || sid == GuestSID {
-		return GuestSID, errors.New("No user in the session")
+		return GuestSID, errors.New("no user in the session")
 	}
 
 	return sid, nil
 }
 
-func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
-	session, err := s.Store.Get(r, sessionName)
-	if err != nil {
-		return errors.New("cannot get session from the store")
-	}
-
-	delete(session.Values, UserSIDKey)
-	session.Options.MaxAge = -1
-
-	return s.Store.Save(r, w, session)
-}
-
 func (s Session) IsGuest(r *http.Request) bool {
 	sid, err := s.GetUserSID(r)
-	if err != nil {
-		return true
-	}
-
-	if sid == GuestSID {
+	if err != nil || sid == GuestSID {
 		return true
 	}
 
 	return false
 }
+
 func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage FlashMessage) error {
 
 	var messages []FlashMessage
@@ -155,4 +140,16 @@ func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage
 	s.Delete(w, r, flashKey)
 
 	return messages, nil
+}
+
+func (s Session) DestroySession(w http.ResponseWriter, r *http.Request) error {
+	session, err := s.Store.Get(r, sessionName)
+	if err != nil {
+		return errors.New("cannot get session from the store")
+	}
+
+	delete(session.Values, UserSIDKey)
+	session.Options.MaxAge = -1
+
+	return s.Store.Save(r, w, session)
 }
