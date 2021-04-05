@@ -18,6 +18,15 @@ type Session struct {
 	Store sessions.Store
 }
 
+// NewSession returns new session with requested store
+func NewSession(store sessions.Store) *Session {
+	if store == nil {
+		panic("Must supply a valid session store")
+	}
+
+	return &Session{Store: store}
+}
+
 type FlashMessage struct {
 	Message   string
 	Kind      string
@@ -30,15 +39,6 @@ func NewFlash(message string) FlashMessage {
 		Kind:      "success",
 		AutoClose: true,
 	}
-}
-
-// NewSession returns new session with requested store
-func NewSession(store sessions.Store) *Session {
-	if store == nil {
-		panic("Must supply a valid session store")
-	}
-
-	return &Session{Store: store}
 }
 
 func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value string) error {
