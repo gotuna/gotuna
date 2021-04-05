@@ -6,11 +6,11 @@ import (
 	"testing"
 )
 
-func Equal(t *testing.T, got, want interface{}) {
+func Equal(t *testing.T, expected, actual interface{}) {
 	t.Helper()
 
-	if got != want {
-		t.Errorf(`%s: got "%v" want "%v"`, t.Name(), got, want)
+	if expected != actual {
+		t.Errorf(`%s: expected "%v" actual "%v"`, t.Name(), expected, actual)
 	}
 }
 
