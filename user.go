@@ -8,5 +8,5 @@ type User interface {
 
 type UserRepository interface {
 	Authenticate(w http.ResponseWriter, r *http.Request) (User, error)
-	GetByID(id string) (User, error)
+	GetUserByID(id string) (User, error)
 }

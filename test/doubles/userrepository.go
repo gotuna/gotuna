@@ -69,7 +69,7 @@ func (u userRepositoryStub) Authenticate(w http.ResponseWriter, r *http.Request)
 	return found, nil
 }
 
-func (u userRepositoryStub) GetByID(id string) (gotdd.User, error) {
+func (u userRepositoryStub) GetUserByID(id string) (gotdd.User, error) {
 	for _, user := range u.users {
 		if user.databaseID == id {
 			return user, nil
