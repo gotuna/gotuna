@@ -111,8 +111,8 @@ func serveFiles(app gotdd.App) http.Handler {
 
 func handlerHome(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.GetEngine().
-			Set("message", app.Locale.T("en-US", "Home")).
+		app.NewNativeTemplatingEngine().
+			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
 			Render(w, r, "app.html", "home.html")
 	})
 }
@@ -120,7 +120,7 @@ func handlerHome(app gotdd.App) http.Handler {
 func handlerLogin(app gotdd.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := app.GetEngine()
+		tmpl := app.NewNativeTemplatingEngine()
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -131,10 +131,10 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 		password := r.FormValue("password")
 
 		if email == "" {
-			tmpl.SetError("email", app.Locale.T("en-US", "This field is required"))
+			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "This field is required"))
 		}
 		if password == "" {
-			tmpl.SetError("password", app.Locale.T("en-US", "This field is required"))
+			tmpl.SetError("password", app.Locale.T(app.Session.GetUserLocale(r), "This field is required"))
 		}
 		if len(tmpl.GetErrors()) > 0 {
 			w.WriteHeader(http.StatusUnauthorized)
@@ -146,7 +146,7 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 		app.UserRepository.Set("password", password)
 		user, err := app.UserRepository.Authenticate()
 		if err != nil {
-			tmpl.SetError("email", app.Locale.T("en-US", "Login failed, please try again"))
+			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -159,7 +159,9 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 			return
 		}
 
-		if err := app.Session.Flash(w, r, gotdd.NewFlash(app.Locale.T("en-US", "Welcome"))); err != nil {
+		app.Session.SetUserLocale(w, r, "en-US")
+
+		if err := app.Session.Flash(w, r, gotdd.NewFlash(app.Locale.T(app.Session.GetUserLocale(r), "Welcome"))); err != nil {
 			app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
 			handlerError(app).ServeHTTP(w, r)
 			return
@@ -178,7 +180,7 @@ func handlerLogout(app gotdd.App) http.Handler {
 
 func handlerProfile(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.GetEngine().
+		app.NewNativeTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -186,8 +188,8 @@ func handlerProfile(app gotdd.App) http.Handler {
 func handlerNotFound(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		app.GetEngine().
-			Set("title", app.Locale.T("en-US", "Not found")).
+		app.NewNativeTemplatingEngine().
+			Set("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
 			Render(w, r, "app.html", "4xx.html")
 	})
 }
@@ -195,7 +197,7 @@ func handlerNotFound(app gotdd.App) http.Handler {
 func handlerError(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		app.GetEngine().
+		app.NewNativeTemplatingEngine().
 			Set("error", "TODO"). // TODO: show error
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")

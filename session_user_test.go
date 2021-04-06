@@ -49,15 +49,11 @@ func TestSettingUserLocale(t *testing.T) {
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
 	ses := gotdd.NewSession(sessionStoreSpy)
 
-	locale, err := ses.GetUserLocale(r)
-	assert.Error(t, err)
-	assert.Equal(t, "", locale)
+	assert.Equal(t, "", ses.GetUserLocale(r))
 
-	err = ses.SetUserLocale(w, r, "fr-FR")
+	err := ses.SetUserLocale(w, r, "fr-FR")
 	assert.NoError(t, err)
 
-	locale, err = ses.GetUserLocale(r)
-	assert.NoError(t, err)
-	assert.Equal(t, "fr-FR", locale)
+	assert.Equal(t, "fr-FR", ses.GetUserLocale(r))
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 }

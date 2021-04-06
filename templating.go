@@ -3,7 +3,6 @@ package gotdd
 import (
 	"fmt"
 	"html/template"
-	"io/fs"
 	"net/http"
 	"strings"
 )
@@ -15,48 +14,24 @@ type TemplatingEngine interface {
 	Set(key string, data interface{}) TemplatingEngine
 	SetError(errorKey, description string) TemplatingEngine
 	GetErrors() map[string]string
-	MountViews(views fs.FS) TemplatingEngine
 }
 
-func (app App) GetEngine() TemplatingEngine {
-
-	if app.Locale == nil {
-		app.Locale = NewLocale(map[string]map[string]string{})
-	}
-
-	translator := func(s string) string {
-		return app.Locale.T("en-US", s) // TODO: set per user
-	}
-
-	var funcs = template.FuncMap{
-		"t": translator,
-		"static": func(file string) string {
-			hash := "123" // TODO:
-			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
-		},
-		"uppercase": func(s string) string {
-			return strings.ToUpper(s)
-		},
-	}
-
+func (app App) NewNativeTemplatingEngine() TemplatingEngine {
 	return &nativeHtmlTemplates{
-		views:   app.Views,
-		funcs:   funcs,
-		Data:    make(map[string]interface{}),
-		Errors:  make(map[string]string),
-		session: app.Session,
+		app:    app,
+		Data:   make(map[string]interface{}),
+		Errors: make(map[string]string),
 	}
 }
 
 type nativeHtmlTemplates struct {
-	views   fs.FS
-	funcs   template.FuncMap
-	Data    map[string]interface{}
-	Errors  map[string]string
-	Request *http.Request
-	session *Session
-	Flashes []FlashMessage
-	IsGuest bool
+	app        App
+	Data       map[string]interface{}
+	Errors     map[string]string
+	Request    *http.Request
+	Flashes    []FlashMessage
+	UserLocale string
+	IsGuest    bool
 }
 
 func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine {
@@ -75,19 +50,20 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
-	w.Header().Set("Content-type", ContentTypeHTML)
-
-	if t.session != nil {
-		t.Flashes, _ = t.session.Flashes(w, r)
-		t.IsGuest = t.session.IsGuest(r)
+	if t.app.Session != nil {
+		t.Flashes, _ = t.app.Session.Flashes(w, r)
+		t.IsGuest = t.app.Session.IsGuest(r)
+		t.UserLocale = t.app.Session.GetUserLocale(r)
 	}
 
 	t.Request = r
 
 	tmpl := template.Must(
 		template.New("app").
-			Funcs(t.funcs).
-			ParseFS(t.views, patterns...))
+			Funcs(getTemplateFuncMap(t.app, t.UserLocale)).
+			ParseFS(t.app.Views, patterns...))
+
+	w.Header().Set("Content-type", ContentTypeHTML)
 
 	err := tmpl.Execute(w, t)
 	if err != nil {
@@ -95,7 +71,17 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func (t *nativeHtmlTemplates) MountViews(views fs.FS) TemplatingEngine {
-	t.views = views
-	return t
+func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
+	return template.FuncMap{
+		"t": func(s string) string {
+			return app.Locale.T(userLocale, s)
+		},
+		"static": func(file string) string {
+			hash := "123" // TODO:
+			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
+		},
+		"uppercase": func(s string) string {
+			return strings.ToUpper(s)
+		},
+	}
 }

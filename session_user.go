@@ -35,6 +35,11 @@ func (s Session) SetUserLocale(w http.ResponseWriter, r *http.Request, sid strin
 	return s.Put(w, r, UserLocaleKey, sid)
 }
 
-func (s Session) GetUserLocale(r *http.Request) (string, error) {
-	return s.Get(r, UserLocaleKey)
+func (s Session) GetUserLocale(r *http.Request) string {
+	locale, err := s.Get(r, UserLocaleKey)
+	if err != nil {
+		return "" // TODO: default locale
+	}
+
+	return locale
 }

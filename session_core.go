@@ -1,6 +1,7 @@
 package gotdd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -69,4 +70,18 @@ func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 	session.Options.MaxAge = -1
 
 	return s.Store.Save(r, w, session)
+}
+
+func TypeFromString(raw string, t interface{}) error {
+	return json.Unmarshal([]byte(raw), &t)
+}
+
+func TypeToString(t interface{}) (string, error) {
+	b, err := json.Marshal(t)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }

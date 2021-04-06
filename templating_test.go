@@ -35,23 +35,24 @@ func TestUsingTranslation(t *testing.T) {
 	rendered := `Hello, this is my auto`
 
 	app := gotdd.App{
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)),
 		Locale: gotdd.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
 			},
 		}),
+		Views: doubles.NewFileSystemStub(
+			map[string][]byte{
+				"view.html": []byte(template),
+			}),
 	}
-	templatingEngineStub := app.GetEngine().
-		MountViews(
-			doubles.NewFileSystemStub(
-				map[string][]byte{
-					"view.html": []byte(template),
-				}))
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	templatingEngineStub.Render(w, r, "view.html")
+	app.Session.SetUserLocale(w, r, "en-US")
+
+	app.NewNativeTemplatingEngine().Render(w, r, "view.html")
 
 	assert.Equal(t, rendered, w.Body.String())
 }
@@ -93,16 +94,17 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	const htmlSubcontent = `{{define "sub"}}<span>Subcontent</span>{{end}}`
 	const htmlFinal = `<div id="wrapper"><span>Subcontent</span></div>`
 
-	fs := map[string][]byte{
-		"layout.html":  []byte(htmlLayout),
-		"content.html": []byte(htmlSubcontent),
-	}
-
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(htmlLayout).
-		MountViews(doubles.NewFileSystemStub(fs)).
+	gotdd.App{
+		Views: doubles.NewFileSystemStub(
+			map[string][]byte{
+				"layout.html":  []byte(htmlLayout),
+				"content.html": []byte(htmlSubcontent),
+			}),
+	}.
+		NewNativeTemplatingEngine().
 		Render(w, r, "layout.html", "content.html")
 
 	assert.Equal(t, htmlFinal, w.Body.String())
@@ -155,21 +157,15 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	app := gotdd.App{
+	gotdd.App{
 		Session: ses,
-	}
-	templatingEngineStub := app.GetEngine().
-		MountViews(
-			doubles.NewFileSystemStub(
-				map[string][]byte{
-					"view.html": []byte(template),
-				}))
-
-	templatingEngineStub.Render(w, r, "view.html")
+		Views: doubles.NewFileSystemStub(
+			map[string][]byte{
+				"view.html": []byte(template),
+			}),
+	}.
+		NewNativeTemplatingEngine().
+		Render(w, r, "view.html")
 
 	assert.Equal(t, want, w.Body.String())
-}
-
-func TestIsGuestIsEvaluated(t *testing.T) {
-	// TODO
 }
