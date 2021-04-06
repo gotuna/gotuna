@@ -4,6 +4,7 @@ type User struct {
 	SID          string
 	Email        string
 	PasswordHash string
+	Locale       string
 }
 
 type UserRepository interface {

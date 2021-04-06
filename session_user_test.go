@@ -41,3 +41,23 @@ func TestSaveUserSIDAndRetrieve(t *testing.T) {
 	assert.Equal(t, false, ses.IsGuest(r))
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 }
+
+func TestSettingUserLocale(t *testing.T) {
+
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+	ses := gotdd.NewSession(sessionStoreSpy)
+
+	locale, err := ses.GetUserLocale(r)
+	assert.Error(t, err)
+	assert.Equal(t, "", locale)
+
+	err = ses.SetUserLocale(w, r, "fr-FR")
+	assert.NoError(t, err)
+
+	locale, err = ses.GetUserLocale(r)
+	assert.NoError(t, err)
+	assert.Equal(t, "fr-FR", locale)
+	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
+}

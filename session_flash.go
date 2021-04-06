@@ -2,6 +2,7 @@ package gotdd
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -30,19 +31,19 @@ func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage Flas
 		raw = "[]"
 	}
 
-	err = json.Unmarshal([]byte(raw), &messages)
+	err = typeFromString(raw, &messages)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot reconstruct type from json string %v", err)
 	}
 
 	messages = append(messages, flashMessage)
 
-	rawbytes, err := json.Marshal(messages)
+	str, err := typeToString(messages)
 	if err != nil {
-		return err
+		return fmt.Errorf("cannot convert type to json string %v", err)
 	}
 
-	return s.Put(w, r, flashKey, string(rawbytes))
+	return s.Put(w, r, flashKey, str)
 }
 
 func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage, error) {
@@ -54,12 +55,26 @@ func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage
 		return messages, nil
 	}
 
-	err = json.Unmarshal([]byte(raw), &messages)
+	err = typeFromString(raw, &messages)
 	if err != nil {
-		return messages, err
+		return messages, fmt.Errorf("cannot get a type from json string %v", err)
 	}
 
 	s.Delete(w, r, flashKey)
 
 	return messages, nil
+}
+
+func typeFromString(raw string, t interface{}) error {
+	return json.Unmarshal([]byte(raw), &t)
+}
+
+func typeToString(t interface{}) (string, error) {
+	b, err := json.Marshal(t)
+
+	if err != nil {
+		return "", err
+	}
+
+	return string(b), nil
 }

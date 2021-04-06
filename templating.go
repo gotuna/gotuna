@@ -31,7 +31,7 @@ func (app App) GetEngine() TemplatingEngine {
 	var funcs = template.FuncMap{
 		"t": translator,
 		"static": func(file string) string {
-			hash := "b1a2"
+			hash := "123" // TODO:
 			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
 		},
 		"uppercase": func(s string) string {
