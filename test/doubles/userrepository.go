@@ -68,6 +68,16 @@ func (u *userRepositoryStub) Set(key string, value interface{}) gotdd.UserReposi
 	return u
 }
 
+func (u userRepositoryStub) GetByID(id string) (gotdd.User, error) {
+	for _, user := range u.users {
+		if user.databaseID == id {
+			return user, nil
+		}
+	}
+
+	return FakeUserStub{}, errors.New("user not found")
+}
+
 func (u userRepositoryStub) getUserByEmail(email string) (FakeUserStub, error) {
 	for _, user := range u.users {
 		if user.Email == email {

@@ -7,4 +7,5 @@ type User interface {
 type UserRepository interface {
 	Authenticate() (User, error)
 	Set(key string, value interface{}) UserRepository
+	GetByID(id string) (User, error)
 }
