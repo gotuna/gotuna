@@ -12,7 +12,7 @@ import (
 
 func TestFlashMessages(t *testing.T) {
 
-	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.FakeUser1.GetID())
 	ses := gotdd.NewSession(sessionStoreSpy)
 	r := &http.Request{}
 	w := httptest.NewRecorder()

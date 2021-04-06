@@ -15,7 +15,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 	t.Run("test storing, retrieving, and deleting a simple string", func(t *testing.T) {
 		r := &http.Request{}
 		w := httptest.NewRecorder()
-		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 		ses := gotdd.NewSession(sessionStoreSpy)
 
 		err := ses.Put(w, r, "test", "somevalue")
@@ -35,7 +35,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 
 	t.Run("test retrieving unsaved data", func(t *testing.T) {
 		r := &http.Request{}
-		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 		ses := gotdd.NewSession(sessionStoreSpy)
 
 		value, err := ses.Get(r, "test")
@@ -47,19 +47,22 @@ func TestStoreAndRetrieveData(t *testing.T) {
 
 func TestDestroyActiveSession(t *testing.T) {
 
+	testUser := doubles.FakeUser1
+
 	r := &http.Request{}
 	w := httptest.NewRecorder()
-	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(testUser.GetID())
 	ses := gotdd.NewSession(sessionStoreSpy)
 
-	sid, _ := ses.GetUserSID(r)
-	assert.Equal(t, doubles.UserStub().SID, sid)
+	id, err := ses.GetUserID(r)
+	assert.NoError(t, err)
+	assert.Equal(t, testUser.GetID(), id)
 
 	ses.Destroy(w, r)
 
-	sid, err := ses.GetUserSID(r)
+	id, err = ses.GetUserID(r)
 	assert.Error(t, err)
-	assert.Equal(t, gotdd.GuestSID, sid)
+	assert.Equal(t, "", id)
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 	assert.Equal(t, -1, sessionStoreSpy.Session.Options.MaxAge)
 }

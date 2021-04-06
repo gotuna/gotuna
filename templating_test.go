@@ -35,7 +35,7 @@ func TestUsingTranslation(t *testing.T) {
 	rendered := `Hello, this is my auto`
 
 	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)),
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.FakeUser1.GetID())),
 		Locale: gotdd.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
@@ -150,7 +150,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses := gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID))
+	ses := gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.FakeUser1.GetID()))
 	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash one"})
 	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 

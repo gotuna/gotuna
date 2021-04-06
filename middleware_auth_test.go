@@ -16,7 +16,7 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)),
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy("")),
 	}
 
 	authenticate := app.Authenticate("/pleaselogin")
@@ -33,7 +33,7 @@ func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.UserStub().SID)),
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.FakeUser1.GetID())),
 	}
 
 	redirectIfAuthenticated := app.RedirectIfAuthenticated("/dashboard")

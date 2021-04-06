@@ -10,34 +10,34 @@ import (
 	"github.com/alcalbg/gotdd/test/doubles"
 )
 
-func TestReadingUserSIDFromEmptyStore(t *testing.T) {
+func TestReadingUserIDFromEmptyStore(t *testing.T) {
 
 	r := &http.Request{}
-	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 	ses := gotdd.NewSession(sessionStoreSpy)
 
 	assert.Equal(t, true, ses.IsGuest(r))
 
-	sid, err := ses.GetUserSID(r)
+	id, err := ses.GetUserID(r)
 	assert.Error(t, err)
-	assert.Equal(t, gotdd.GuestSID, sid)
+	assert.Equal(t, "", id)
 
 	assert.Equal(t, 0, sessionStoreSpy.SaveCalls)
 }
 
-func TestSaveUserSIDAndRetrieve(t *testing.T) {
+func TestSaveUserIDAndRetrieve(t *testing.T) {
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
-	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 	ses := gotdd.NewSession(sessionStoreSpy)
 
-	err := ses.SetUserSID(w, r, doubles.UserStub().SID)
+	err := ses.SetUserID(w, r, doubles.FakeUser1.GetID())
 	assert.NoError(t, err)
 
-	sid, err := ses.GetUserSID(r)
+	id, err := ses.GetUserID(r)
 	assert.NoError(t, err)
-	assert.Equal(t, doubles.UserStub().SID, sid)
+	assert.Equal(t, doubles.FakeUser1.GetID(), id)
 	assert.Equal(t, false, ses.IsGuest(r))
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 }
@@ -46,7 +46,7 @@ func TestSettingUserLocale(t *testing.T) {
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
-	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(gotdd.GuestSID)
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 	ses := gotdd.NewSession(sessionStoreSpy)
 
 	assert.Equal(t, "", ses.GetUserLocale(r))

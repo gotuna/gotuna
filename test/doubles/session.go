@@ -7,9 +7,9 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-func NewGorillaSessionStoreSpy(userSID string) *storeSpy {
+func NewGorillaSessionStoreSpy(userID string) *storeSpy {
 	userSession := sessions.NewSession(&storeSpy{}, "")
-	userSession.Values[gotdd.UserSIDKey] = userSID
+	userSession.Values[gotdd.UserIDKey] = userID
 
 	return &storeSpy{Session: userSession}
 }

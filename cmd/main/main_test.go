@@ -18,28 +18,29 @@ import (
 
 func TestRoutes(t *testing.T) {
 	routes := []struct {
-		userSID string
-		route   string
-		method  string
-		status  int
+		userID string
+		route  string
+		method string
+		status int
 	}{
 		{"", "/", http.MethodGet, http.StatusFound},
-		{"123", "/", http.MethodGet, http.StatusOK},
+		{doubles.FakeUser1.GetID(), "/", http.MethodGet, http.StatusOK},
 		{"", "/", http.MethodPost, http.StatusMethodNotAllowed},
 		{"", "/invalid", http.MethodGet, http.StatusNotFound},
 		{"", "/login", http.MethodGet, http.StatusOK},
-		{"123", "/login", http.MethodGet, http.StatusFound},
-		{"123", "/profile", http.MethodGet, http.StatusOK},
+		{doubles.FakeUser1.GetID(), "/login", http.MethodGet, http.StatusFound},
+		{doubles.FakeUser1.GetID(), "/profile", http.MethodGet, http.StatusOK},
+		{doubles.FakeUser2.GetID(), "/profile", http.MethodGet, http.StatusOK},
 	}
 
 	for _, r := range routes {
-		t.Run(fmt.Sprintf("test route %s for %s", r.route, r.userSID), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test route %s for %s", r.route, r.userID), func(t *testing.T) {
 
 			request := httptest.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
 			app := main.MakeApp(gotdd.App{
-				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userSID)),
+				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
 				Static:  doubles.NewFileSystemStub(map[string][]byte{}),
 				Views:   views.EmbededViews,
 			})
@@ -135,7 +136,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("submit login with bad password", func(t *testing.T) {
 		data := url.Values{}
-		data.Set("email", doubles.UserStub().Email)
+		data.Set("email", doubles.FakeUser1.Email)
 		data.Set("password", "bad")
 
 		request := loginRequest(data)
@@ -152,7 +153,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("submit successful login and go to the home page", func(t *testing.T) {
 		data := url.Values{}
-		data.Set("email", doubles.UserStub().Email)
+		data.Set("email", doubles.FakeUser1.Email)
 		data.Set("password", "pass123")
 
 		app := main.MakeApp(gotdd.App{
@@ -181,10 +182,10 @@ func TestLogin(t *testing.T) {
 
 func TestLogout(t *testing.T) {
 
-	user := doubles.UserStub()
+	user := doubles.FakeUser1
 
 	app := main.MakeApp(gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.SID)),
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
 		Views:   views.EmbededViews,
 	})
 

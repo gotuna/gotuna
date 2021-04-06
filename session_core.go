@@ -66,7 +66,7 @@ func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 		return errors.New("cannot get session from the store")
 	}
 
-	delete(session.Values, UserSIDKey)
+	delete(session.Values, UserIDKey)
 	session.Options.MaxAge = -1
 
 	return s.Store.Save(r, w, session)

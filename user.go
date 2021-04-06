@@ -1,9 +1,7 @@
 package gotdd
 
-type User struct {
-	SID          string
-	Email        string
-	PasswordHash string
+type User interface {
+	GetID() string
 }
 
 type UserRepository interface {
