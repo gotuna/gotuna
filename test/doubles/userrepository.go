@@ -49,9 +49,16 @@ func (u userRepositoryStub) Authenticate(w http.ResponseWriter, r *http.Request)
 	email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 	password := r.FormValue("password")
 
+	if email == "" {
+		return FakeUserStub{}, errors.New("this field is required")
+	}
+	if password == "" {
+		return FakeUserStub{}, errors.New("this field is required")
+	}
+
 	found, err := u.getUserByEmail(email)
 	if err != nil {
-		return FakeUserStub{}, err
+		return FakeUserStub{}, fmt.Errorf("cannot find user with this email %v", err)
 	}
 
 	// in real life this should be bcrypt.CompareHashAndPassword

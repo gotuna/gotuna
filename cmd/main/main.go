@@ -127,21 +127,6 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 			return
 		}
 
-		email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
-		password := r.FormValue("password")
-
-		if email == "" {
-			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "This field is required"))
-		}
-		if password == "" {
-			tmpl.SetError("password", app.Locale.T(app.Session.GetUserLocale(r), "This field is required"))
-		}
-		if len(tmpl.GetErrors()) > 0 {
-			w.WriteHeader(http.StatusUnauthorized)
-			tmpl.Render(w, r, "app.html", "login.html")
-			return
-		}
-
 		user, err := app.UserRepository.Authenticate(w, r)
 		if err != nil {
 			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "Login failed, please try again"))
