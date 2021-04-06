@@ -12,7 +12,6 @@ func UserStub() gotdd.User {
 		SID:          "123",
 		Email:        "john@example.com",
 		PasswordHash: "pass123",
-		Locale:       "en-US",
 	}
 }
 
