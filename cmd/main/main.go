@@ -142,9 +142,7 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 			return
 		}
 
-		app.UserRepository.Set("email", email)
-		app.UserRepository.Set("password", password)
-		user, err := app.UserRepository.Authenticate()
+		user, err := app.UserRepository.Authenticate(w, r)
 		if err != nil {
 			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)

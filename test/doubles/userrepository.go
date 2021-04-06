@@ -3,6 +3,8 @@ package doubles
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/alcalbg/gotdd"
 )
@@ -39,33 +41,25 @@ func NewUserRepositoryStub() *userRepositoryStub {
 }
 
 type userRepositoryStub struct {
-	users         []FakeUserStub
-	inputEmail    string
-	inputPassword string
+	users []FakeUserStub
 }
 
-func (u userRepositoryStub) Authenticate() (gotdd.User, error) {
-	found, err := u.getUserByEmail(u.inputEmail)
+func (u userRepositoryStub) Authenticate(w http.ResponseWriter, r *http.Request) (gotdd.User, error) {
+
+	email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
+	password := r.FormValue("password")
+
+	found, err := u.getUserByEmail(email)
 	if err != nil {
 		return FakeUserStub{}, err
 	}
 
 	// in real life this should be bcrypt.CompareHashAndPassword
-	if found.password != u.inputPassword {
+	if found.password != password {
 		return FakeUserStub{}, fmt.Errorf("passwords don't match %v", err)
 	}
 
 	return found, nil
-}
-
-func (u *userRepositoryStub) Set(key string, value interface{}) gotdd.UserRepository {
-	if key == "email" {
-		u.inputEmail = value.(string)
-	}
-	if key == "password" {
-		u.inputPassword = value.(string)
-	}
-	return u
 }
 
 func (u userRepositoryStub) GetByID(id string) (gotdd.User, error) {
