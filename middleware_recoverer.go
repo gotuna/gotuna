@@ -25,7 +25,6 @@ func (app App) Recoverer(destination string) mux.MiddlewareFunc {
 			}()
 
 			next.ServeHTTP(w, r)
-
 		})
 	}
 }
