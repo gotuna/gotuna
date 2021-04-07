@@ -10,7 +10,7 @@
   </head>
   <body>
 
-    {{if not .IsGuest}}
+    {{if not isGuest}}
     <nav class="navbar is-info" role="navigation" aria-label="main navigation">
       <div class="container">
         <div class="navbar-brand">
@@ -27,7 +27,20 @@
           <div class="navbar-end">
             <div class="navbar-item has-dropdown is-hoverable">
               <a class="navbar-link">
-                {{currentuser.Name}}
+                {{currentLocale}}
+              </a>
+              <div class="navbar-dropdown is-right">
+                <a class="navbar-item" href="/setlocale/en-US">
+                  en-US
+                </a>
+                <a class="navbar-item" href="/setlocale/fr-FR">
+                  fr-FR
+                </a>
+              </div>
+            </div>
+            <div class="navbar-item has-dropdown is-hoverable">
+              <a class="navbar-link">
+                {{currentUser.Name}}
               </a>
               <div class="navbar-dropdown is-right">
                 <a class="navbar-item" href="/profile">

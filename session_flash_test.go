@@ -22,7 +22,7 @@ func TestFlashMessages(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 0, len(messages))
 
-	// request2: add flash messages
+	// request2: add two flash messages
 	messages, err = ses.Flashes(w, r)
 	ses.Flash(w, r, gotdd.NewFlash("flash message one"))
 	ses.Flash(w, r, gotdd.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})

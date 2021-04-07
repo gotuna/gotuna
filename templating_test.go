@@ -103,7 +103,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 				map[string][]byte{
 					"view.html": []byte(tmpl),
 				}),
-			ViewsFuncMap: template.FuncMap{
+			ViewHelpers: template.FuncMap{
 				"customUppercase": func(s string) string {
 					return strings.ToUpper(s)
 				},
@@ -147,7 +147,7 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	w := httptest.NewRecorder()
 	w.WriteHeader(http.StatusConflict)
 
-	tmpl := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
+	tmpl := `{{define "app"}}Hello {{request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
 	doubles.NewStubTemplatingEngine(tmpl).
@@ -194,11 +194,15 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 		Render(w, r, "view.html")
 
 	assert.Equal(t, want, w.Body.String())
+
+	messages, err := ses.Flashes(w, r)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(messages))
 }
 
 func TestCurrentUserIsIncluded(t *testing.T) {
 
-	tmpl := `{{define "app"}}Welcome {{currentuser.Name}}{{end}}`
+	tmpl := `{{define "app"}}Welcome {{currentUser.Name}}{{end}}`
 	rendered := `Welcome John`
 
 	fakeUser := doubles.FakeUser1

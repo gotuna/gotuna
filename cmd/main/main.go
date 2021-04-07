@@ -53,7 +53,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 		app.Locale = gotdd.NewLocale(map[string]map[string]string{})
 	}
 
-	app.ViewsFuncMap = template.FuncMap{
+	app.ViewHelpers = template.FuncMap{
 		"uppercase": func(s string) string {
 			return strings.ToUpper(s)
 		},
@@ -77,6 +77,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	user.Handle("/", handlerHome(app)).Methods(http.MethodGet)
 	user.Handle("/profile", handlerProfile(app)).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", handlerLogout(app)).Methods(http.MethodPost)
+	user.Handle("/setlocale/{locale}", handlerChangeLocale(app)).Methods(http.MethodGet, http.MethodPost)
 
 	// guests
 	auth := app.Router.NewRoute().Subrouter()
@@ -171,9 +172,16 @@ func handlerLogout(app gotdd.App) http.Handler {
 
 func handlerProfile(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.Session.SetUserLocale(w, r, "fr-FR")
 		app.NewNativeTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
+	})
+}
+
+func handlerChangeLocale(app gotdd.App) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		app.Session.SetUserLocale(w, r, vars["locale"])
+		http.Redirect(w, r, "/", http.StatusFound)
 	})
 }
 

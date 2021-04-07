@@ -24,13 +24,10 @@ func (app App) NewNativeTemplatingEngine() TemplatingEngine {
 }
 
 type nativeHtmlTemplates struct {
-	app        App
-	Data       map[string]interface{}
-	Errors     map[string]string
-	Request    *http.Request
-	Flashes    []FlashMessage
-	UserLocale string
-	IsGuest    bool
+	app     App
+	Data    map[string]interface{}
+	Errors  map[string]string
+	Flashes []FlashMessage
 }
 
 func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine {
@@ -51,15 +48,11 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 
 	if t.app.Session != nil {
 		t.Flashes, _ = t.app.Session.Flashes(w, r)
-		t.IsGuest = t.app.Session.IsGuest(r)
-		t.UserLocale = t.app.Session.GetUserLocale(r)
 	}
-
-	t.Request = r
 
 	tmpl := template.Must(
 		template.New("app").
-			Funcs(t.getTemplateFuncMap()).
+			Funcs(t.getHelpers(w, r)).
 			ParseFS(t.app.Views, patterns...))
 
 	w.Header().Set("Content-type", ContentTypeHTML)
@@ -70,23 +63,33 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func (t nativeHtmlTemplates) getTemplateFuncMap() template.FuncMap {
+func (t nativeHtmlTemplates) getHelpers(w http.ResponseWriter, r *http.Request, patterns ...string) template.FuncMap {
 	// default helpers
 	fmap := template.FuncMap{
+		"request": func() *http.Request {
+			return r
+		},
 		"t": func(s string) string {
-			return t.app.Locale.T(t.UserLocale, s)
+			locale := t.app.Session.GetUserLocale(r)
+			return t.app.Locale.T(locale, s)
 		},
 		"static": func(file string) string {
 			hash := "123" // TODO:
 			return fmt.Sprintf("%s%s?%s", t.app.StaticPrefix, file, hash)
 		},
-		"currentuser": func() User {
-			user, _ := GetUserFromContext(t.Request.Context())
-			return user
+		"currentUser": func() (User, error) {
+			user, err := GetUserFromContext(r.Context())
+			return user, err
+		},
+		"currentLocale": func() string {
+			return t.app.Session.GetUserLocale(r)
+		},
+		"isGuest": func() bool {
+			return t.app.Session.IsGuest(r)
 		},
 	}
 	// add custom, user-defined helpers
-	for k, v := range t.app.ViewsFuncMap {
+	for k, v := range t.app.ViewHelpers {
 		fmap[k] = v
 	}
 	return fmap

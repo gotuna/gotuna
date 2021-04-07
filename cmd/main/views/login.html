@@ -6,7 +6,7 @@
       <div class="field">
         <label class="label">{{t "Email"}}</label>
         <div class="control">
-          <input class="input {{if index .Errors "email"}}is-danger{{end}}" type="email" name="email" placeholder="{{t "Email"}}" value="{{.Request.FormValue "email"}}">
+          <input class="input {{if index .Errors "email"}}is-danger{{end}}" type="email" name="email" placeholder="{{t "Email"}}" value="{{request.FormValue "email"}}">
         </div>
         <p class="help is-danger">{{index .Errors "email"}}</p>
       </div>
