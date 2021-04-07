@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"strings"
 )
 
 const ContentTypeHTML = "text/html; charset=utf-8"
@@ -76,7 +75,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 }
 
 func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
-	return template.FuncMap{
+	fmap := template.FuncMap{
 		"t": func(s string) string {
 			return app.Locale.T(userLocale, s)
 		},
@@ -84,8 +83,10 @@ func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
 			hash := "123" // TODO:
 			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
 		},
-		"uppercase": func(s string) string {
-			return strings.ToUpper(s)
-		},
 	}
+	// add custom, user-defined helper functions
+	for k, v := range app.ViewsFuncMap {
+		fmap[k] = v
+	}
+	return fmap
 }

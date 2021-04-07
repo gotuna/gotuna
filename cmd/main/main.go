@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -50,6 +51,12 @@ func MakeApp(app gotdd.App) gotdd.App {
 
 	if app.Locale == nil {
 		app.Locale = gotdd.NewLocale(map[string]map[string]string{})
+	}
+
+	app.ViewsFuncMap = template.FuncMap{
+		"uppercase": func(s string) string {
+			return strings.ToUpper(s)
+		},
 	}
 
 	app.Router = mux.NewRouter()

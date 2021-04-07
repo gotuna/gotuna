@@ -2,6 +2,7 @@ package gotdd_test
 
 import (
 	"context"
+	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,13 +16,13 @@ import (
 
 func TestRenderingWithCustomData(t *testing.T) {
 
-	template := `{{define "app"}}Hello, my name is {{.Data.username }}{{end}}`
+	tmpl := `{{define "app"}}Hello, my name is {{.Data.username }}{{end}}`
 	rendered := `Hello, my name is John`
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template).
+	doubles.NewStubTemplatingEngine(tmpl).
 		Set("username", "John").
 		Render(w, r, "view.html")
 
@@ -32,7 +33,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 func TestUsingTranslation(t *testing.T) {
 
-	template := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
+	tmpl := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
 
 	app := gotdd.App{
@@ -44,7 +45,7 @@ func TestUsingTranslation(t *testing.T) {
 		}),
 		Views: doubles.NewFileSystemStub(
 			map[string][]byte{
-				"view.html": []byte(template),
+				"view.html": []byte(tmpl),
 			}),
 	}
 
@@ -60,7 +61,7 @@ func TestUsingTranslation(t *testing.T) {
 
 func TestBadTemplateShouldPanic(t *testing.T) {
 
-	template := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
+	tmpl := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
@@ -69,7 +70,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 		recover()
 	}()
 
-	doubles.NewStubTemplatingEngine(template).
+	doubles.NewStubTemplatingEngine(tmpl).
 		Render(w, r, "view.html")
 
 	t.Errorf("templating engine should panic")
@@ -77,16 +78,40 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 
 func TestUsingHelperFunctions(t *testing.T) {
 
-	template := `{{- define "app" -}} {{uppercase "hello"}} {{- end -}}`
-	rendered := `HELLO`
+	t.Run("test native helper function", func(t *testing.T) {
+		tmpl := `{{- define "app" -}} {{static "file"}} {{- end -}}`
+		rendered := `file?123`
 
-	r := &http.Request{}
-	w := httptest.NewRecorder()
+		r := &http.Request{}
+		w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template).
-		Render(w, r, "view.html")
+		doubles.NewStubTemplatingEngine(tmpl).
+			Render(w, r, "view.html")
 
-	assert.Equal(t, rendered, w.Body.String())
+		assert.Equal(t, rendered, w.Body.String())
+	})
+
+	t.Run("test when custom helper function is added", func(t *testing.T) {
+		tmpl := `{{- define "app" -}} {{customUppercase "name"}} {{- end -}}`
+		rendered := `NAME`
+
+		r := &http.Request{}
+		w := httptest.NewRecorder()
+
+		gotdd.App{
+			Views: doubles.NewFileSystemStub(
+				map[string][]byte{
+					"view.html": []byte(tmpl),
+				}),
+			ViewsFuncMap: template.FuncMap{
+				"customUppercase": func(s string) string {
+					return strings.ToUpper(s)
+				},
+			}}.NewNativeTemplatingEngine().
+			Render(w, r, "view.html")
+
+		assert.Equal(t, rendered, w.Body.String())
+	})
 }
 
 func TestLayoutWithSubContentBlock(t *testing.T) {
@@ -122,10 +147,10 @@ func TestCurrentRequestCanBeUsedInTemplates(t *testing.T) {
 	w := httptest.NewRecorder()
 	w.WriteHeader(http.StatusConflict)
 
-	template := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
+	tmpl := `{{define "app"}}Hello {{.Request.FormValue "email"}}{{end}}`
 	want := `Hello user@example.com`
 
-	doubles.NewStubTemplatingEngine(template).
+	doubles.NewStubTemplatingEngine(tmpl).
 		Render(w, r, "view.html")
 
 	assert.Equal(t, want, w.Body.String())
@@ -135,10 +160,10 @@ func TestErrorsCanBeAdded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	template := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
+	tmpl := `{{define "app"}}{{index .Errors "error1"}} / {{index .Errors "error2"}}{{end}}`
 	want := `some error / other error`
 
-	engine := doubles.NewStubTemplatingEngine(template).
+	engine := doubles.NewStubTemplatingEngine(tmpl).
 		SetError("error1", "some error").
 		SetError("error2", "other error")
 	engine.Render(w, r, "view.html")
@@ -155,14 +180,14 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash one"})
 	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 
-	template := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
+	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
 	gotdd.App{
 		Session: ses,
 		Views: doubles.NewFileSystemStub(
 			map[string][]byte{
-				"view.html": []byte(template),
+				"view.html": []byte(tmpl),
 			}),
 	}.
 		NewNativeTemplatingEngine().
@@ -173,7 +198,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 func TestCurrentUserIsIncluded(t *testing.T) {
 
-	template := `{{define "app"}}Welcome {{.Data.currentuser.Name }}{{end}}`
+	tmpl := `{{define "app"}}Welcome {{.Data.currentuser.Name }}{{end}}`
 	rendered := `Welcome John`
 
 	fakeUser := doubles.FakeUser1
@@ -182,7 +207,7 @@ func TestCurrentUserIsIncluded(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(ctx)
 	w := httptest.NewRecorder()
 
-	doubles.NewStubTemplatingEngine(template).
+	doubles.NewStubTemplatingEngine(tmpl).
 		Set("username", "John").
 		Render(w, r, "view.html")
 
