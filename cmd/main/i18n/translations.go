@@ -17,8 +17,8 @@ var Translations = map[string]map[string]string{
 		"en-US": "Login",
 	},
 	"Home": {
-		"en-US": "HomeEN",
-		"fr-FR": "HomeFR",
+		"en-US": "Home",
+		"fr-FR": "Accueil",
 	},
 	"Profile": {
 		"en-US": "Profile",
