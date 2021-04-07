@@ -30,6 +30,7 @@ func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value s
 		return errors.New("cannot get session from the store")
 	}
 
+	// TODO: lock needed?
 	session.Values[key] = value
 
 	return s.Store.Save(r, w, session)
@@ -41,6 +42,7 @@ func (s Session) Get(r *http.Request, key string) (string, error) {
 		return "", errors.New("cannot get session from the store")
 	}
 
+	// TODO: lock needed?
 	value, ok := session.Values[key].(string)
 	if !ok {
 		return "", fmt.Errorf("session holds no value for key %s", key)
