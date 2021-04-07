@@ -120,7 +120,7 @@ func serveFiles(app gotdd.App) http.Handler {
 
 func handlerHome(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.NewNativeTemplatingEngine().
+		app.NewTemplatingEngine().
 			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -129,7 +129,7 @@ func handlerHome(app gotdd.App) http.Handler {
 func handlerLogin(app gotdd.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		tmpl := app.NewNativeTemplatingEngine()
+		tmpl := app.NewTemplatingEngine()
 
 		if r.Method == http.MethodGet {
 			tmpl.Render(w, r, "app.html", "login.html")
@@ -172,7 +172,7 @@ func handlerLogout(app gotdd.App) http.Handler {
 
 func handlerProfile(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		app.NewNativeTemplatingEngine().
+		app.NewTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
 }
@@ -188,7 +188,7 @@ func handlerChangeLocale(app gotdd.App) http.Handler {
 func handlerNotFound(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
-		app.NewNativeTemplatingEngine().
+		app.NewTemplatingEngine().
 			Set("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
 			Render(w, r, "app.html", "4xx.html")
 	})
@@ -197,7 +197,7 @@ func handlerNotFound(app gotdd.App) http.Handler {
 func handlerError(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		app.NewNativeTemplatingEngine().
+		app.NewTemplatingEngine().
 			Set("error", "TODO"). // TODO: show error
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")

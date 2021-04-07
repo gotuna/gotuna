@@ -54,7 +54,7 @@ func TestUsingTranslation(t *testing.T) {
 
 	app.Session.SetUserLocale(w, r, "en-US")
 
-	app.NewNativeTemplatingEngine().Render(w, r, "view.html")
+	app.NewTemplatingEngine().Render(w, r, "view.html")
 
 	assert.Equal(t, rendered, w.Body.String())
 }
@@ -107,7 +107,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 				"customUppercase": func(s string) string {
 					return strings.ToUpper(s)
 				},
-			}}.NewNativeTemplatingEngine().
+			}}.NewTemplatingEngine().
 			Render(w, r, "view.html")
 
 		assert.Equal(t, rendered, w.Body.String())
@@ -130,7 +130,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 				"content.html": []byte(htmlSubcontent),
 			}),
 	}.
-		NewNativeTemplatingEngine().
+		NewTemplatingEngine().
 		Render(w, r, "layout.html", "content.html")
 
 	assert.Equal(t, htmlFinal, w.Body.String())
@@ -190,7 +190,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 				"view.html": []byte(tmpl),
 			}),
 	}.
-		NewNativeTemplatingEngine().
+		NewTemplatingEngine().
 		Render(w, r, "view.html")
 
 	assert.Equal(t, want, w.Body.String())

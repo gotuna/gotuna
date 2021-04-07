@@ -8,5 +8,5 @@ func NewStubTemplatingEngine(template string) gotdd.TemplatingEngine {
 			map[string][]byte{
 				"view.html": []byte(template),
 			}),
-	}.NewNativeTemplatingEngine()
+	}.NewTemplatingEngine()
 }

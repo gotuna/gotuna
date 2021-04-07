@@ -15,7 +15,7 @@ type TemplatingEngine interface {
 	GetErrors() map[string]string
 }
 
-func (app App) NewNativeTemplatingEngine() TemplatingEngine {
+func (app App) NewTemplatingEngine() TemplatingEngine {
 	return &nativeHtmlTemplates{
 		app:    app,
 		Data:   make(map[string]interface{}),
