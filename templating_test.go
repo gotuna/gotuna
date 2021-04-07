@@ -1,6 +1,7 @@
 package gotdd_test
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -15,13 +16,13 @@ import (
 func TestRenderingWithCustomData(t *testing.T) {
 
 	template := `{{define "app"}}Hello, my name is {{.Data.username }}{{end}}`
-	rendered := `Hello, my name is Milos`
+	rendered := `Hello, my name is John`
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
 	doubles.NewStubTemplatingEngine(template).
-		Set("username", "Milos").
+		Set("username", "John").
 		Render(w, r, "view.html")
 
 	assert.Equal(t, rendered, w.Body.String())
@@ -168,4 +169,24 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 		Render(w, r, "view.html")
 
 	assert.Equal(t, want, w.Body.String())
+}
+
+func TestCurrentUserIsIncluded(t *testing.T) {
+
+	template := `{{define "app"}}Welcome {{.Data.currentuser.Name }}{{end}}`
+	rendered := `Welcome John`
+
+	fakeUser := doubles.FakeUser1
+
+	ctx := gotdd.WithUser(context.Background(), fakeUser)
+	r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(ctx)
+	w := httptest.NewRecorder()
+
+	doubles.NewStubTemplatingEngine(template).
+		Set("username", "John").
+		Render(w, r, "view.html")
+
+	assert.Equal(t, rendered, w.Body.String())
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, gotdd.ContentTypeHTML, w.Result().Header.Get("Content-type"))
 }
