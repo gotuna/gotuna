@@ -66,6 +66,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	// logged in user
 	user := app.Router.NewRoute().Subrouter()
 	user.Use(app.Authenticate("/login"))
+	user.Use(app.StoreUserToContext())
 	user.Handle("/", handlerHome(app)).Methods(http.MethodGet)
 	user.Handle("/profile", handlerProfile(app)).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", handlerLogout(app)).Methods(http.MethodPost)

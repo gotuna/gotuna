@@ -19,8 +19,8 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy("")),
 	}
 
-	authenticate := app.Authenticate("/pleaselogin")
-	handler := authenticate(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	middleware := app.Authenticate("/pleaselogin")
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 	handler.ServeHTTP(response, request)
 
@@ -29,17 +29,43 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 
 func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 
+	fakeUser := doubles.FakeUser1
+
 	request := httptest.NewRequest(http.MethodGet, "/login", nil)
 	response := httptest.NewRecorder()
 
 	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.FakeUser1.GetID())),
+		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
 	}
 
-	redirectIfAuthenticated := app.RedirectIfAuthenticated("/dashboard")
-	handler := redirectIfAuthenticated(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	middleware := app.RedirectIfAuthenticated("/dashboard")
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
 
 	handler.ServeHTTP(response, request)
 
 	assert.Redirects(t, response, "/dashboard", http.StatusFound)
+}
+
+func TestStoringLoggedInUserToContext(t *testing.T) {
+	fakeUser := doubles.FakeUser1
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	app := gotdd.App{
+		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
+		UserRepository: doubles.NewUserRepositoryStub(),
+	}
+
+	middleware := app.StoreUserToContext()
+
+	var userInContext gotdd.User
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userInContext, _ = gotdd.GetUser(r.Context())
+	}))
+
+	handler.ServeHTTP(response, request)
+
+	assert.Equal(t, response.Code, http.StatusOK)
+	assert.Equal(t, fakeUser, userInContext)
 }

@@ -33,3 +33,25 @@ func (app App) RedirectIfAuthenticated(destination string) mux.MiddlewareFunc {
 		})
 	}
 }
+
+func (app App) StoreUserToContext() mux.MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			userID, err := app.Session.GetUserID(r)
+
+			if err != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			if user, err := app.UserRepository.GetUserByID(userID); err == nil {
+				next.ServeHTTP(w, r.WithContext(WithUser(r.Context(), user)))
+				return
+			}
+
+			next.ServeHTTP(w, r)
+			return
+		})
+	}
+}

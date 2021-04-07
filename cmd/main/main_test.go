@@ -40,9 +40,10 @@ func TestRoutes(t *testing.T) {
 			response := httptest.NewRecorder()
 
 			app := main.MakeApp(gotdd.App{
-				Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
-				Static:  doubles.NewFileSystemStub(map[string][]byte{}),
-				Views:   views.EmbededViews,
+				Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
+				Static:         doubles.NewFileSystemStub(map[string][]byte{}),
+				UserRepository: doubles.NewUserRepositoryStub(),
+				Views:          views.EmbededViews,
 			})
 			app.Router.ServeHTTP(response, request)
 
@@ -185,8 +186,9 @@ func TestLogout(t *testing.T) {
 	user := doubles.FakeUser1
 
 	app := main.MakeApp(gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
-		Views:   views.EmbededViews,
+		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
+		Views:          views.EmbededViews,
+		UserRepository: doubles.NewUserRepositoryStub(),
 	})
 
 	// first, let's make sure we're logged in

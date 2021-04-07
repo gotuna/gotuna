@@ -34,7 +34,7 @@ func NoError(t *testing.T, err error) {
 	t.Helper()
 
 	if err != nil {
-		t.Errorf(`%s: didn't expect error %v`, t.Name(), err)
+		t.Errorf(`%s: didn't expect error: %v`, t.Name(), err)
 	}
 }
 
