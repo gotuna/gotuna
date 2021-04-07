@@ -45,27 +45,3 @@ func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 
 	assert.Redirects(t, response, "/dashboard", http.StatusFound)
 }
-
-func TestStoringLoggedInUserToContext(t *testing.T) {
-	fakeUser := doubles.FakeUser1
-
-	request := httptest.NewRequest(http.MethodGet, "/", nil)
-	response := httptest.NewRecorder()
-
-	app := gotdd.App{
-		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
-		UserRepository: doubles.NewUserRepositoryStub(),
-	}
-
-	middleware := app.StoreUserToContext()
-
-	var userInContext gotdd.User
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userInContext, _ = gotdd.GetUserFromContext(r.Context())
-	}))
-
-	handler.ServeHTTP(response, request)
-
-	assert.Equal(t, response.Code, http.StatusOK)
-	assert.Equal(t, fakeUser, userInContext)
-}
