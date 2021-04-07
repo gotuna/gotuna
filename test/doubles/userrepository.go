@@ -12,18 +12,21 @@ import (
 var FakeUser1 = FakeUserStub{
 	databaseID: "123",
 	Email:      "john@example.com",
+	Name:       "John",
 	password:   "pass123",
 }
 
 var FakeUser2 = FakeUserStub{
 	databaseID: "456",
 	Email:      "bob@example.com",
+	Name:       "Bob",
 	password:   "bobby5",
 }
 
 type FakeUserStub struct {
 	databaseID string
 	Email      string
+	Name       string
 	password   string
 }
 
