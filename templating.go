@@ -75,6 +75,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 }
 
 func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
+	// default helpers
 	fmap := template.FuncMap{
 		"t": func(s string) string {
 			return app.Locale.T(userLocale, s)
@@ -84,7 +85,7 @@ func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
 			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
 		},
 	}
-	// add custom, user-defined helper functions
+	// add custom, user-defined helpers
 	for k, v := range app.ViewsFuncMap {
 		fmap[k] = v
 	}
