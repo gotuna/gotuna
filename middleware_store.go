@@ -17,13 +17,13 @@ func (app App) StoreUserToContext() mux.MiddlewareFunc {
 				return
 			}
 
+			ctx := r.Context()
+
 			if user, err := app.UserRepository.GetUserByID(userID); err == nil {
-				next.ServeHTTP(w, r.WithContext(ContextWithUser(r.Context(), user)))
-				return
+				ctx = ContextWithUser(ctx, user)
 			}
 
-			next.ServeHTTP(w, r)
-			return
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
