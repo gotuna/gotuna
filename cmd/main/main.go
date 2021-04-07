@@ -32,7 +32,7 @@ func main() {
 		Session:        gotdd.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
 		Static:         static.EmbededStatic,
 		StaticPrefix:   "",
-		Views:          views.EmbededViews,
+		ViewFiles:      views.EmbededViews,
 		Locale:         gotdd.NewLocale(i18n.Translations),
 	})
 

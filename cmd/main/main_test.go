@@ -43,7 +43,7 @@ func TestRoutes(t *testing.T) {
 				Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
 				Static:         doubles.NewFileSystemStub(map[string][]byte{}),
 				UserRepository: doubles.NewUserRepositoryStub(),
-				Views:          views.EmbededViews,
+				ViewFiles:      views.EmbededViews,
 			})
 			app.Router.ServeHTTP(response, request)
 
@@ -109,8 +109,8 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		app := main.MakeApp(gotdd.App{
-			Session: gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
-			Views:   views.EmbededViews,
+			Session:   gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+			ViewFiles: views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
 
@@ -128,7 +128,7 @@ func TestLogin(t *testing.T) {
 		app := main.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
-			Views:          views.EmbededViews,
+			ViewFiles:      views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
 		assert.Equal(t, http.StatusUnauthorized, response.Code)
@@ -145,7 +145,7 @@ func TestLogin(t *testing.T) {
 		app := main.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
-			Views:          views.EmbededViews,
+			ViewFiles:      views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
 		assert.Equal(t, http.StatusUnauthorized, response.Code)
@@ -160,7 +160,7 @@ func TestLogin(t *testing.T) {
 		app := main.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
-			Views:          views.EmbededViews,
+			ViewFiles:      views.EmbededViews,
 		})
 
 		// step1: after successful login, user is redirected to the home page
@@ -187,7 +187,7 @@ func TestLogout(t *testing.T) {
 
 	app := main.MakeApp(gotdd.App{
 		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
-		Views:          views.EmbededViews,
+		ViewFiles:      views.EmbededViews,
 		UserRepository: doubles.NewUserRepositoryStub(),
 	})
 

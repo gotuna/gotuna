@@ -53,7 +53,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	tmpl := template.Must(
 		template.New("app").
 			Funcs(t.getHelpers(w, r)).
-			ParseFS(t.app.Views, patterns...))
+			ParseFS(t.app.ViewFiles, patterns...))
 
 	w.Header().Set("Content-type", ContentTypeHTML)
 

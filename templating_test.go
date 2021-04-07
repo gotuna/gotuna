@@ -43,7 +43,7 @@ func TestUsingTranslation(t *testing.T) {
 				"en-US": "auto",
 			},
 		}),
-		Views: doubles.NewFileSystemStub(
+		ViewFiles: doubles.NewFileSystemStub(
 			map[string][]byte{
 				"view.html": []byte(tmpl),
 			}),
@@ -99,7 +99,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		gotdd.App{
-			Views: doubles.NewFileSystemStub(
+			ViewFiles: doubles.NewFileSystemStub(
 				map[string][]byte{
 					"view.html": []byte(tmpl),
 				}),
@@ -124,7 +124,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	gotdd.App{
-		Views: doubles.NewFileSystemStub(
+		ViewFiles: doubles.NewFileSystemStub(
 			map[string][]byte{
 				"layout.html":  []byte(htmlLayout),
 				"content.html": []byte(htmlSubcontent),
@@ -185,7 +185,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 	gotdd.App{
 		Session: ses,
-		Views: doubles.NewFileSystemStub(
+		ViewFiles: doubles.NewFileSystemStub(
 			map[string][]byte{
 				"view.html": []byte(tmpl),
 			}),

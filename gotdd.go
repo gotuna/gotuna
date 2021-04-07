@@ -13,7 +13,7 @@ type App struct {
 	Router         *mux.Router
 	Static         fs.FS
 	StaticPrefix   string
-	Views          fs.FS
+	ViewFiles      fs.FS
 	ViewHelpers    template.FuncMap
 	Session        *Session
 	UserRepository UserRepository
