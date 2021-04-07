@@ -5,9 +5,9 @@ import (
 	"errors"
 )
 
-type ctxKeyUserType string
+type ctxKeyType string
 
-const ctxKeyUser ctxKeyUserType = "user"
+const ctxKeyUser ctxKeyType = "user"
 
 func ContextWithUser(ctx context.Context, user User) context.Context {
 	return context.WithValue(ctx, ctxKeyUser, user)
