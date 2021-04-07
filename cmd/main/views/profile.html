@@ -8,13 +8,13 @@
       <div class="field">
         <label class="label">{{t "Email"}}</label>
         <div class="control">
-          <input class="input" value="{{.Data.currentuser.Email}}" disabled>
+          <input class="input" value="{{currentuser.Email}}" disabled>
         </div>
       </div>
       <div class="field">
         <label class="label">{{t "Name"}}</label>
         <div class="control">
-          <input class="input {{if index .Errors "name"}}is-danger{{end}}" type="name" name="name" placeholder="{{t "Name"}}" value="{{.Data.currentuser.Name}}">
+          <input class="input {{if index .Errors "name"}}is-danger{{end}}" type="name" name="name" placeholder="{{t "Name"}}" value="{{currentuser.Name}}">
         </div>
         <p class="help is-danger">{{index .Errors "name"}}</p>
       </div>

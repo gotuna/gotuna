@@ -198,7 +198,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 func TestCurrentUserIsIncluded(t *testing.T) {
 
-	tmpl := `{{define "app"}}Welcome {{.Data.currentuser.Name }}{{end}}`
+	tmpl := `{{define "app"}}Welcome {{currentuser.Name}}{{end}}`
 	rendered := `Welcome John`
 
 	fakeUser := doubles.FakeUser1

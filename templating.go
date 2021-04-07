@@ -49,10 +49,6 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
-	if user, err := GetUserFromContext(r.Context()); err == nil {
-		t.Set("currentuser", user)
-	}
-
 	if t.app.Session != nil {
 		t.Flashes, _ = t.app.Session.Flashes(w, r)
 		t.IsGuest = t.app.Session.IsGuest(r)
