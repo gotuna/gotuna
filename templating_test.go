@@ -178,7 +178,7 @@ func TestCurrentUserIsIncluded(t *testing.T) {
 
 	fakeUser := doubles.FakeUser1
 
-	ctx := gotdd.WithUser(context.Background(), fakeUser)
+	ctx := gotdd.ContextWithUser(context.Background(), fakeUser)
 	r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(ctx)
 	w := httptest.NewRecorder()
 

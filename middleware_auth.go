@@ -46,7 +46,7 @@ func (app App) StoreUserToContext() mux.MiddlewareFunc {
 			}
 
 			if user, err := app.UserRepository.GetUserByID(userID); err == nil {
-				next.ServeHTTP(w, r.WithContext(WithUser(r.Context(), user)))
+				next.ServeHTTP(w, r.WithContext(ContextWithUser(r.Context(), user)))
 				return
 			}
 

@@ -50,7 +50,7 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
-	if user, err := GetUser(r.Context()); err == nil {
+	if user, err := GetUserFromContext(r.Context()); err == nil {
 		t.Set("currentuser", user)
 	}
 

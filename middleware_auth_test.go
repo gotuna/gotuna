@@ -61,7 +61,7 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 
 	var userInContext gotdd.User
 	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userInContext, _ = gotdd.GetUser(r.Context())
+		userInContext, _ = gotdd.GetUserFromContext(r.Context())
 	}))
 
 	handler.ServeHTTP(response, request)
