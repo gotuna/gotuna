@@ -11,14 +11,16 @@ import (
 
 func TestStoringAndGettingUserFromContext(t *testing.T) {
 
-	// empty context doesnt have a user
-	_, err := gotdd.GetUser(context.Background())
-	assert.Error(t, err)
+	t.Run("empty context doesnt have a user", func(t *testing.T) {
+		_, err := gotdd.GetUser(context.Background())
+		assert.Error(t, err)
+	})
 
-	// store and retrieve fake user
-	user := doubles.FakeUser1
-	ctx := gotdd.WithUser(context.Background(), user)
-	got, err := gotdd.GetUser(ctx)
-	assert.NoError(t, err)
-	assert.Equal(t, user, got)
+	t.Run("store and retrieve fake user", func(t *testing.T) {
+		user := doubles.FakeUser1
+		ctx := gotdd.WithUser(context.Background(), user)
+		got, err := gotdd.GetUser(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, user, got)
+	})
 }
