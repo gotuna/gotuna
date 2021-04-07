@@ -47,7 +47,7 @@ func (t nativeHtmlTemplates) GetErrors() map[string]string {
 func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
 	if t.app.Session != nil {
-		t.Flashes, _ = t.app.Session.Flashes(w, r)
+		t.Flashes = t.app.Session.Flashes(w, r)
 	}
 
 	tmpl := template.Must(

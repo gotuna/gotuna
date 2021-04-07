@@ -18,18 +18,16 @@ func TestFlashMessages(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	// request1: no flash messages
-	messages, err := ses.Flashes(w, r)
-	assert.NoError(t, err)
+	messages := ses.Flashes(w, r)
 	assert.Equal(t, 0, len(messages))
 
 	// request2: add two flash messages
-	messages, err = ses.Flashes(w, r)
+	messages = ses.Flashes(w, r)
 	ses.Flash(w, r, gotdd.NewFlash("flash message one"))
 	ses.Flash(w, r, gotdd.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
 
 	// request3: pop flash messages
-	messages, err = ses.Flashes(w, r)
-	assert.NoError(t, err)
+	messages = ses.Flashes(w, r)
 	assert.Equal(t, 2, len(messages))
 	assert.Equal(t, "flash message one", messages[0].Message)
 	assert.Equal(t, "success", messages[0].Kind)
@@ -38,7 +36,6 @@ func TestFlashMessages(t *testing.T) {
 	assert.Equal(t, true, messages[1].AutoClose)
 
 	// request4: no flash messages
-	messages, err = ses.Flashes(w, r)
-	assert.NoError(t, err)
+	messages = ses.Flashes(w, r)
 	assert.Equal(t, 0, len(messages))
 }

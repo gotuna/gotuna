@@ -45,21 +45,18 @@ func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage Flas
 	return s.Put(w, r, flashKey, str)
 }
 
-func (s Session) Flashes(w http.ResponseWriter, r *http.Request) ([]FlashMessage, error) {
+func (s Session) Flashes(w http.ResponseWriter, r *http.Request) []FlashMessage {
 
 	var messages []FlashMessage
 
 	raw, err := s.Get(r, flashKey)
 	if err != nil {
-		return messages, nil
+		return messages
 	}
 
-	err = TypeFromString(raw, &messages)
-	if err != nil {
-		return messages, fmt.Errorf("cannot get a type from json string %v", err)
-	}
+	TypeFromString(raw, &messages)
 
 	s.Delete(w, r, flashKey)
 
-	return messages, nil
+	return messages
 }

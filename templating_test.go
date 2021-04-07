@@ -195,8 +195,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 
 	assert.Equal(t, want, w.Body.String())
 
-	messages, err := ses.Flashes(w, r)
-	assert.NoError(t, err)
+	messages := ses.Flashes(w, r)
 	assert.Equal(t, 0, len(messages))
 }
 
