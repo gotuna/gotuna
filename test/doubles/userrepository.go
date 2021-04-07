@@ -9,34 +9,34 @@ import (
 	"github.com/alcalbg/gotdd"
 )
 
-var FakeUser1 = FakeUserStub{
+var FakeUser1 = fakeUserStub{
 	databaseID: "123",
 	Email:      "john@example.com",
 	Name:       "John",
 	password:   "pass123",
 }
 
-var FakeUser2 = FakeUserStub{
+var FakeUser2 = fakeUserStub{
 	databaseID: "456",
 	Email:      "bob@example.com",
 	Name:       "Bob",
 	password:   "bobby5",
 }
 
-type FakeUserStub struct {
+type fakeUserStub struct {
 	databaseID string
 	Email      string
 	Name       string
 	password   string
 }
 
-func (u FakeUserStub) GetID() string {
+func (u fakeUserStub) GetID() string {
 	return u.databaseID
 }
 
 func NewUserRepositoryStub() *userRepositoryStub {
 	return &userRepositoryStub{
-		users: []FakeUserStub{
+		users: []fakeUserStub{
 			FakeUser1,
 			FakeUser2,
 		},
@@ -44,7 +44,7 @@ func NewUserRepositoryStub() *userRepositoryStub {
 }
 
 type userRepositoryStub struct {
-	users []FakeUserStub
+	users []fakeUserStub
 }
 
 func (u userRepositoryStub) Authenticate(w http.ResponseWriter, r *http.Request) (gotdd.User, error) {
@@ -53,20 +53,20 @@ func (u userRepositoryStub) Authenticate(w http.ResponseWriter, r *http.Request)
 	password := r.FormValue("password")
 
 	if email == "" {
-		return FakeUserStub{}, errors.New("this field is required")
+		return fakeUserStub{}, errors.New("this field is required")
 	}
 	if password == "" {
-		return FakeUserStub{}, errors.New("this field is required")
+		return fakeUserStub{}, errors.New("this field is required")
 	}
 
 	found, err := u.getUserByEmail(email)
 	if err != nil {
-		return FakeUserStub{}, fmt.Errorf("cannot find user with this email %v", err)
+		return fakeUserStub{}, fmt.Errorf("cannot find user with this email %v", err)
 	}
 
 	// in real life this should be bcrypt.CompareHashAndPassword
 	if found.password != password {
-		return FakeUserStub{}, fmt.Errorf("passwords don't match %v", err)
+		return fakeUserStub{}, fmt.Errorf("passwords don't match %v", err)
 	}
 
 	return found, nil
@@ -79,15 +79,15 @@ func (u userRepositoryStub) GetUserByID(id string) (gotdd.User, error) {
 		}
 	}
 
-	return FakeUserStub{}, errors.New("user not found")
+	return fakeUserStub{}, errors.New("user not found")
 }
 
-func (u userRepositoryStub) getUserByEmail(email string) (FakeUserStub, error) {
+func (u userRepositoryStub) getUserByEmail(email string) (fakeUserStub, error) {
 	for _, user := range u.users {
 		if user.Email == email {
 			return user, nil
 		}
 	}
 
-	return FakeUserStub{}, errors.New("user not found")
+	return fakeUserStub{}, errors.New("user not found")
 }
