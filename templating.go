@@ -63,7 +63,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 
 	tmpl := template.Must(
 		template.New("app").
-			Funcs(getTemplateFuncMap(t.app, t.UserLocale)).
+			Funcs(t.getTemplateFuncMap()).
 			ParseFS(t.app.Views, patterns...))
 
 	w.Header().Set("Content-type", ContentTypeHTML)
@@ -74,19 +74,23 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func getTemplateFuncMap(app App, userLocale string) template.FuncMap {
+func (t nativeHtmlTemplates) getTemplateFuncMap() template.FuncMap {
 	// default helpers
 	fmap := template.FuncMap{
 		"t": func(s string) string {
-			return app.Locale.T(userLocale, s)
+			return t.app.Locale.T(t.UserLocale, s)
 		},
 		"static": func(file string) string {
 			hash := "123" // TODO:
-			return fmt.Sprintf("%s%s?%s", app.StaticPrefix, file, hash)
+			return fmt.Sprintf("%s%s?%s", t.app.StaticPrefix, file, hash)
+		},
+		"currentuser": func() User {
+			user, _ := GetUserFromContext(t.Request.Context())
+			return user
 		},
 	}
 	// add custom, user-defined helpers
-	for k, v := range app.ViewsFuncMap {
+	for k, v := range t.app.ViewsFuncMap {
 		fmap[k] = v
 	}
 	return fmap

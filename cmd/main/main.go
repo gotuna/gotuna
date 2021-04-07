@@ -171,6 +171,7 @@ func handlerLogout(app gotdd.App) http.Handler {
 
 func handlerProfile(app gotdd.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.Session.SetUserLocale(w, r, "fr-FR")
 		app.NewNativeTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
