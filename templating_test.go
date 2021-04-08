@@ -91,14 +91,14 @@ func TestUsingHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("test when custom helper function is added", func(t *testing.T) {
-		tmpl := `{{- define "app" -}} {{customhelper "name"}} {{- end -}}`
+		tmpl := `{{- define "app" -}} {{uppercase "name"}} {{- end -}}`
 		rendered := `NAME`
 
 		r := &http.Request{}
 		w := httptest.NewRecorder()
 
 		customHelper := func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
-			return "customhelper", func(s string) string {
+			return "uppercase", func(s string) string {
 				return strings.ToUpper(s)
 			}
 		}
@@ -108,7 +108,7 @@ func TestUsingHelperFunctions(t *testing.T) {
 				map[string][]byte{
 					"view.html": []byte(tmpl),
 				}),
-			ViewHelpers: []gotdd.ViewHelper{customHelper},
+			ViewHelpers: []gotdd.ViewHelperFunc{customHelper},
 		}.NewTemplatingEngine().
 			Render(w, r, "view.html")
 

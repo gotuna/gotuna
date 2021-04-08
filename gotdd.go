@@ -13,7 +13,7 @@ type App struct {
 	Static         fs.FS
 	StaticPrefix   string
 	ViewFiles      fs.FS
-	ViewHelpers    []ViewHelper
+	ViewHelpers    []ViewHelperFunc
 	Session        *Session
 	UserRepository UserRepository
 	Locale         Locale

@@ -8,7 +8,7 @@ import (
 
 const ContentTypeHTML = "text/html; charset=utf-8"
 
-type ViewHelper func(w http.ResponseWriter, r *http.Request) (string, interface{})
+type ViewHelperFunc func(w http.ResponseWriter, r *http.Request) (string, interface{})
 
 type TemplatingEngine interface {
 	Render(w http.ResponseWriter, r *http.Request, patterns ...string)

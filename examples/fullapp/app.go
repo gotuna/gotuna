@@ -46,7 +46,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	}
 
 	// custom view helpers
-	app.ViewHelpers = []gotdd.ViewHelper{
+	app.ViewHelpers = []gotdd.ViewHelperFunc{
 		func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
 			return "uppercase", func(s string) string {
 				return strings.ToUpper(s)
