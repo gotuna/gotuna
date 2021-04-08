@@ -25,16 +25,11 @@ go test -race -v ./...
 go run examples/fullapp/cmd/main.go
 ```
 
-# Hot reloading
-- Install CompileDaemon for running the watcher (https://github.com/githubnemo/CompileDaemon)
-- Run the watcher script with `./watch.sh`
-- Open http://127.0.0.1:8888
-
 # External dependencies
 External modules are mostly used when the feature is too complex to build or maintain - Router, Secure cookies
 
-# TODO Features
-- Cache (Redis)
+# TODO
+- Cache
 - Validation
 
 # Licence
