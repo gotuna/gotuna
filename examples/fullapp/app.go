@@ -35,7 +35,12 @@ func NewUserRepository() gotuna.UserRepository {
 	})
 }
 
-func MakeApp(app gotuna.App) gotuna.App {
+type App struct {
+	gotuna.App
+	Csrf mux.MiddlewareFunc // app-specific config
+}
+
+func MakeApp(app App) App {
 
 	if app.Logger == nil {
 		app.Logger = log.New(io.Discard, "", 0)
@@ -65,6 +70,7 @@ func MakeApp(app gotuna.App) gotuna.App {
 	app.Router.Handle("/error", handlerError(app)).Methods(http.MethodGet, http.MethodPost)
 	app.Router.Use(app.Recoverer("/error"))
 	app.Router.Use(app.Logging())
+	app.Router.Use(app.Csrf)
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(app.Cors())
 
@@ -94,7 +100,7 @@ func MakeApp(app gotuna.App) gotuna.App {
 	return app
 }
 
-func handlerHome(app gotuna.App) http.Handler {
+func handlerHome(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
@@ -102,7 +108,7 @@ func handlerHome(app gotuna.App) http.Handler {
 	})
 }
 
-func handlerLogin(app gotuna.App) http.HandlerFunc {
+func handlerLogin(app App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		tmpl := app.NewTemplatingEngine()
@@ -135,21 +141,21 @@ func handlerLogin(app gotuna.App) http.HandlerFunc {
 	}
 }
 
-func handlerLogout(app gotuna.App) http.Handler {
+func handlerLogout(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.Session.Destroy(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
 
-func handlerProfile(app gotuna.App) http.Handler {
+func handlerProfile(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
 }
 
-func handlerChangeLocale(app gotuna.App) http.Handler {
+func handlerChangeLocale(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		app.Session.SetUserLocale(w, r, vars["locale"])
@@ -157,7 +163,7 @@ func handlerChangeLocale(app gotuna.App) http.Handler {
 	})
 }
 
-func handlerNotFound(app gotuna.App) http.Handler {
+func handlerNotFound(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		app.NewTemplatingEngine().
@@ -166,7 +172,7 @@ func handlerNotFound(app gotuna.App) http.Handler {
 	})
 }
 
-func handlerError(app gotuna.App) http.Handler {
+func handlerError(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		app.NewTemplatingEngine().
@@ -176,12 +182,12 @@ func handlerError(app gotuna.App) http.Handler {
 	})
 }
 
-func flash(app gotuna.App, w http.ResponseWriter, r *http.Request, msg string) {
+func flash(app App, w http.ResponseWriter, r *http.Request, msg string) {
 	if err := app.Session.Flash(w, r, gotuna.NewFlash(msg)); err != nil {
 		app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
 	}
 }
 
-func t(app gotuna.App, r *http.Request, s string) string {
+func t(app App, r *http.Request, s string) string {
 	return app.Locale.T(app.Session.GetUserLocale(r), s)
 }

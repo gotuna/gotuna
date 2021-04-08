@@ -20,23 +20,22 @@ func main() {
 	port := ":8888"
 	keyPairs := os.Getenv("APP_KEY")
 
-	app := fullapp.MakeApp(gotuna.App{
-		Logger:         log.New(os.Stdout, "", 0),
-		UserRepository: fullapp.NewUserRepository(),
-		Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
-		Static:         static.EmbededStatic,
-		StaticPrefix:   "",
-		ViewFiles:      views.EmbededViews,
-		Locale:         gotuna.NewLocale(i18n.Translations),
-	})
-
-	// production only, do not use in tests
-	app.Router.Use(
+	app := fullapp.MakeApp(fullapp.App{
+		gotuna.App{
+			Logger:         log.New(os.Stdout, "", 0),
+			UserRepository: fullapp.NewUserRepository(),
+			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
+			Static:         static.EmbededStatic,
+			StaticPrefix:   "",
+			ViewFiles:      views.EmbededViews,
+			Locale:         gotuna.NewLocale(i18n.Translations),
+		},
 		csrf.Protect(
 			[]byte(keyPairs),
 			csrf.FieldName("csrf_token"),
 			csrf.CookieName("csrf_token"),
-		))
+		),
+	})
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
