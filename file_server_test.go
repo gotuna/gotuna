@@ -16,11 +16,11 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	t.Run("return valid static file from root", func(t *testing.T) {
+	app := gotdd.App{
+		Static: doubles.NewFileSystemStub(files),
+	}
 
-		app := gotdd.App{
-			Static: doubles.NewFileSystemStub(files),
-		}
+	t.Run("return valid static file from root", func(t *testing.T) {
 
 		r := httptest.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
@@ -30,10 +30,6 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 	})
 
 	t.Run("return 404 on non existing file", func(t *testing.T) {
-
-		app := gotdd.App{
-			Static: doubles.NewFileSystemStub(files),
-		}
 
 		r := httptest.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
