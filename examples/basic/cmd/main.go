@@ -5,15 +5,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/examples/basic"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/examples/basic"
 )
 
 func main() {
 
 	port := ":8888"
 
-	app := basic.MakeApp(gotdd.App{})
+	app := basic.MakeApp(gotuna.App{})
 
 	fmt.Printf("starting server at http://localhost%s \n", port)
 

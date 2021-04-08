@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/alcalbg/gotdd"
 	"github.com/gorilla/mux"
+	"github.com/gotuna/gotuna"
 )
 
-func MakeApp(app gotdd.App) gotdd.App {
+func MakeApp(app gotuna.App) gotuna.App {
 
 	app.Router = mux.NewRouter()
 	app.Router.Handle("/", handlerHome(app)).Methods(http.MethodGet)
@@ -16,7 +16,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	return app
 }
 
-func handlerHome(app gotdd.App) http.Handler {
+func handlerHome(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Hello World!")
 	})

@@ -3,13 +3,13 @@ package doubles
 import (
 	"net/http"
 
-	"github.com/alcalbg/gotdd"
 	"github.com/gorilla/sessions"
+	"github.com/gotuna/gotuna"
 )
 
 func NewGorillaSessionStoreSpy(userID string) *storeSpy {
 	userSession := sessions.NewSession(&storeSpy{}, "")
-	userSession.Values[gotdd.UserIDKey] = userID
+	userSession.Values[gotuna.UserIDKey] = userID
 
 	return &storeSpy{Session: userSession}
 }

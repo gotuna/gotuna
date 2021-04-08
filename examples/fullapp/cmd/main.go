@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/examples/fullapp"
-	"github.com/alcalbg/gotdd/examples/fullapp/i18n"
-	"github.com/alcalbg/gotdd/examples/fullapp/static"
-	"github.com/alcalbg/gotdd/examples/fullapp/views"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/sessions"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/examples/fullapp"
+	"github.com/gotuna/gotuna/examples/fullapp/i18n"
+	"github.com/gotuna/gotuna/examples/fullapp/static"
+	"github.com/gotuna/gotuna/examples/fullapp/views"
 )
 
 func main() {
@@ -20,14 +20,14 @@ func main() {
 	port := ":8888"
 	keyPairs := os.Getenv("APP_KEY")
 
-	app := fullapp.MakeApp(gotdd.App{
+	app := fullapp.MakeApp(gotuna.App{
 		Logger:         log.New(os.Stdout, "", 0),
 		UserRepository: fullapp.NewUserRepository(),
-		Session:        gotdd.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
+		Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
 		Static:         static.EmbededStatic,
 		StaticPrefix:   "",
 		ViewFiles:      views.EmbededViews,
-		Locale:         gotdd.NewLocale(i18n.Translations),
+		Locale:         gotuna.NewLocale(i18n.Translations),
 	})
 
 	// production only, do not use in tests

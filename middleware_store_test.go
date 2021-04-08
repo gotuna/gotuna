@@ -1,13 +1,13 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestStoringLoggedInUserToContext(t *testing.T) {
@@ -16,17 +16,17 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	app := gotdd.App{
-		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
+	app := gotuna.App{
+		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
 		UserRepository: doubles.NewUserRepositoryStub(),
 	}
 
 	middleware := app.StoreUserToContext()
 
-	var userInContext gotdd.User
+	var userInContext gotuna.User
 
 	middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userInContext, _ = gotdd.GetUserFromContext(r.Context())
+		userInContext, _ = gotuna.GetUserFromContext(r.Context())
 	})).ServeHTTP(response, request)
 
 	assert.Equal(t, response.Code, http.StatusOK)

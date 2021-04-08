@@ -1,4 +1,4 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestAuthenticate(t *testing.T) {

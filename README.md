@@ -1,4 +1,4 @@
-# Web Framework for Go
+# GoTuna - Web framework written in Go
 Experimental Go web framework. Used to experiment with Go, try the latest language features, explore, and learn more.
 
 NOTE: This project is under heavy development and is not ready for use.

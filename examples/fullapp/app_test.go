@@ -8,12 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/examples/fullapp"
-	"github.com/alcalbg/gotdd/examples/fullapp/views"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
 	"github.com/gorilla/sessions"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/examples/fullapp"
+	"github.com/gotuna/gotuna/examples/fullapp/views"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestRoutes(t *testing.T) {
@@ -39,8 +39,8 @@ func TestRoutes(t *testing.T) {
 			request := httptest.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			app := fullapp.MakeApp(gotdd.App{
-				Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
+			app := fullapp.MakeApp(gotuna.App{
+				Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
 				Static:         doubles.NewFileSystemStub(map[string][]byte{}),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
@@ -58,7 +58,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	app := fullapp.MakeApp(gotdd.App{
+	app := fullapp.MakeApp(gotuna.App{
 		Static:       doubles.NewFileSystemStub(files),
 		StaticPrefix: "/publicprefix",
 	})
@@ -78,8 +78,8 @@ func TestLogin(t *testing.T) {
 		request := httptest.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		app := fullapp.MakeApp(gotdd.App{
-			Session:   gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		app := fullapp.MakeApp(gotuna.App{
+			Session:   gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			ViewFiles: views.EmbededViews,
 		})
 		app.Router.ServeHTTP(response, request)
@@ -95,8 +95,8 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		app := fullapp.MakeApp(gotdd.App{
-			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		app := fullapp.MakeApp(gotuna.App{
+			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
 		})
@@ -112,8 +112,8 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		app := fullapp.MakeApp(gotdd.App{
-			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		app := fullapp.MakeApp(gotuna.App{
+			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
 		})
@@ -127,8 +127,8 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.MemUser1.Email)
 		data.Set("password", "pass123")
 
-		app := fullapp.MakeApp(gotdd.App{
-			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
+		app := fullapp.MakeApp(gotuna.App{
+			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
 		})
@@ -155,8 +155,8 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.MemUser1
 
-	app := fullapp.MakeApp(gotdd.App{
-		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
+	app := fullapp.MakeApp(gotuna.App{
+		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
 		ViewFiles:      views.EmbededViews,
 		UserRepository: doubles.NewUserRepositoryStub(),
 	})

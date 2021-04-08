@@ -5,16 +5,16 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/examples/basic"
-	"github.com/alcalbg/gotdd/test/assert"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/examples/basic"
+	"github.com/gotuna/gotuna/test/assert"
 )
 
 func TestHome(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	app := basic.MakeApp(gotdd.App{})
+	app := basic.MakeApp(gotuna.App{})
 	app.Router.ServeHTTP(response, request)
 
 	assert.Equal(t, http.StatusOK, response.Code)

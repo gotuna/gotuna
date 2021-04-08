@@ -1,4 +1,4 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"context"
@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestRenderingWithCustomData(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 	assert.Equal(t, rendered, w.Body.String())
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, gotdd.ContentTypeHTML, w.Result().Header.Get("Content-type"))
+	assert.Equal(t, gotuna.ContentTypeHTML, w.Result().Header.Get("Content-type"))
 }
 
 func TestUsingTranslation(t *testing.T) {
@@ -35,9 +35,9 @@ func TestUsingTranslation(t *testing.T) {
 	tmpl := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
 	rendered := `Hello, this is my auto`
 
-	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())),
-		Locale: gotdd.NewLocale(map[string]map[string]string{
+	app := gotuna.App{
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())),
+		Locale: gotuna.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
 			},
@@ -103,12 +103,12 @@ func TestUsingHelperFunctions(t *testing.T) {
 			}
 		}
 
-		gotdd.App{
+		gotuna.App{
 			ViewFiles: doubles.NewFileSystemStub(
 				map[string][]byte{
 					"view.html": []byte(tmpl),
 				}),
-			ViewHelpers: []gotdd.ViewHelperFunc{customHelper},
+			ViewHelpers: []gotuna.ViewHelperFunc{customHelper},
 		}.NewTemplatingEngine().
 			Render(w, r, "view.html")
 
@@ -125,7 +125,7 @@ func TestLayoutWithSubContentBlock(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	gotdd.App{
+	gotuna.App{
 		ViewFiles: doubles.NewFileSystemStub(
 			map[string][]byte{
 				"layout.html":  []byte(htmlLayout),
@@ -178,14 +178,14 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses := gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
-	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash one"})
-	ses.Flash(w, r, gotdd.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
+	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
+	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
+	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 
 	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
 
-	gotdd.App{
+	gotuna.App{
 		Session: ses,
 		ViewFiles: doubles.NewFileSystemStub(
 			map[string][]byte{
@@ -208,7 +208,7 @@ func TestCurrentUserIsIncluded(t *testing.T) {
 
 	fakeUser := doubles.MemUser1
 
-	ctx := gotdd.ContextWithUser(context.Background(), fakeUser)
+	ctx := gotuna.ContextWithUser(context.Background(), fakeUser)
 	r := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(ctx)
 	w := httptest.NewRecorder()
 
@@ -218,5 +218,5 @@ func TestCurrentUserIsIncluded(t *testing.T) {
 
 	assert.Equal(t, rendered, w.Body.String())
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Equal(t, gotdd.ContentTypeHTML, w.Result().Header.Get("Content-type"))
+	assert.Equal(t, gotuna.ContentTypeHTML, w.Result().Header.Get("Content-type"))
 }

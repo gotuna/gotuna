@@ -1,4 +1,4 @@
-module github.com/alcalbg/gotdd
+module github.com/gotuna/gotuna
 
 go 1.16
 

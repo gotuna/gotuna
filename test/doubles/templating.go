@@ -1,9 +1,9 @@
 package doubles
 
-import "github.com/alcalbg/gotdd"
+import "github.com/gotuna/gotuna"
 
-func NewStubTemplatingEngine(template string) gotdd.TemplatingEngine {
-	return gotdd.App{
+func NewStubTemplatingEngine(template string) gotuna.TemplatingEngine {
+	return gotuna.App{
 		ViewFiles: NewFileSystemStub(
 			map[string][]byte{
 				"view.html": []byte(template),

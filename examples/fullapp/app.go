@@ -9,44 +9,44 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alcalbg/gotdd"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/gotuna/gotuna"
 )
 
-var User1 = gotdd.InMemoryUser{
+var User1 = gotuna.InMemoryUser{
 	UniqueID: "123",
 	Email:    "john@example.com",
 	Name:     "John",
 	Password: "pass123",
 }
 
-var User2 = gotdd.InMemoryUser{
+var User2 = gotuna.InMemoryUser{
 	UniqueID: "456",
 	Email:    "bob@example.com",
 	Name:     "Bob",
 	Password: "bobby5",
 }
 
-func NewUserRepository() gotdd.UserRepository {
-	return gotdd.NewInMemoryUserRepository([]gotdd.InMemoryUser{
+func NewUserRepository() gotuna.UserRepository {
+	return gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
 		User1,
 		User2,
 	})
 }
 
-func MakeApp(app gotdd.App) gotdd.App {
+func MakeApp(app gotuna.App) gotuna.App {
 
 	if app.Logger == nil {
 		app.Logger = log.New(io.Discard, "", 0)
 	}
 
 	if app.Locale == nil {
-		app.Locale = gotdd.NewLocale(map[string]map[string]string{})
+		app.Locale = gotuna.NewLocale(map[string]map[string]string{})
 	}
 
 	// custom view helpers
-	app.ViewHelpers = []gotdd.ViewHelperFunc{
+	app.ViewHelpers = []gotuna.ViewHelperFunc{
 		func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
 			return "uppercase", func(s string) string {
 				return strings.ToUpper(s)
@@ -94,7 +94,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	return app
 }
 
-func handlerHome(app gotdd.App) http.Handler {
+func handlerHome(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
@@ -102,7 +102,7 @@ func handlerHome(app gotdd.App) http.Handler {
 	})
 }
 
-func handlerLogin(app gotdd.App) http.HandlerFunc {
+func handlerLogin(app gotuna.App) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		tmpl := app.NewTemplatingEngine()
@@ -135,21 +135,21 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 	}
 }
 
-func handlerLogout(app gotdd.App) http.Handler {
+func handlerLogout(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.Session.Destroy(w, r)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
 
-func handlerProfile(app gotdd.App) http.Handler {
+func handlerProfile(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
 	})
 }
 
-func handlerChangeLocale(app gotdd.App) http.Handler {
+func handlerChangeLocale(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		app.Session.SetUserLocale(w, r, vars["locale"])
@@ -157,7 +157,7 @@ func handlerChangeLocale(app gotdd.App) http.Handler {
 	})
 }
 
-func handlerNotFound(app gotdd.App) http.Handler {
+func handlerNotFound(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		app.NewTemplatingEngine().
@@ -166,7 +166,7 @@ func handlerNotFound(app gotdd.App) http.Handler {
 	})
 }
 
-func handlerError(app gotdd.App) http.Handler {
+func handlerError(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		app.NewTemplatingEngine().
@@ -176,12 +176,12 @@ func handlerError(app gotdd.App) http.Handler {
 	})
 }
 
-func flash(app gotdd.App, w http.ResponseWriter, r *http.Request, msg string) {
-	if err := app.Session.Flash(w, r, gotdd.NewFlash(msg)); err != nil {
+func flash(app gotuna.App, w http.ResponseWriter, r *http.Request, msg string) {
+	if err := app.Session.Flash(w, r, gotuna.NewFlash(msg)); err != nil {
 		app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
 	}
 }
 
-func t(app gotdd.App, r *http.Request, s string) string {
+func t(app gotuna.App, r *http.Request, s string) string {
 	return app.Locale.T(app.Session.GetUserLocale(r), s)
 }

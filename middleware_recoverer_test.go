@@ -1,4 +1,4 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"bytes"
@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
 )
 
 func TestRecoveringFromPanic(t *testing.T) {
@@ -25,7 +25,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	wlog := &bytes.Buffer{}
-	app := gotdd.App{
+	app := gotuna.App{
 		Logger: log.New(wlog, "", 0),
 	}
 

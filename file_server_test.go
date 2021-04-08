@@ -1,13 +1,13 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestServingStaticFilesFromPublicFolder(t *testing.T) {
@@ -16,7 +16,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	app := gotdd.App{
+	app := gotuna.App{
 		Static: doubles.NewFileSystemStub(files),
 	}
 

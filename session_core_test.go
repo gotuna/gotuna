@@ -1,13 +1,13 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestStoreAndRetrieveData(t *testing.T) {
@@ -16,7 +16,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 		r := &http.Request{}
 		w := httptest.NewRecorder()
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-		ses := gotdd.NewSession(sessionStoreSpy)
+		ses := gotuna.NewSession(sessionStoreSpy)
 
 		err := ses.Put(w, r, "test", "somevalue")
 		assert.NoError(t, err)
@@ -36,7 +36,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 	t.Run("test retrieving unsaved data", func(t *testing.T) {
 		r := &http.Request{}
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-		ses := gotdd.NewSession(sessionStoreSpy)
+		ses := gotuna.NewSession(sessionStoreSpy)
 
 		value, err := ses.Get(r, "test")
 		assert.Error(t, err)
@@ -52,7 +52,7 @@ func TestDestroyActiveSession(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(testUser.GetID())
-	ses := gotdd.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy)
 
 	id, err := ses.GetUserID(r)
 	assert.NoError(t, err)

@@ -1,19 +1,19 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestFlashMessages(t *testing.T) {
 
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())
-	ses := gotdd.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy)
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
@@ -23,8 +23,8 @@ func TestFlashMessages(t *testing.T) {
 
 	// request2: add two flash messages
 	messages = ses.Flashes(w, r)
-	ses.Flash(w, r, gotdd.NewFlash("flash message one"))
-	ses.Flash(w, r, gotdd.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
+	ses.Flash(w, r, gotuna.NewFlash("flash message one"))
+	ses.Flash(w, r, gotuna.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
 
 	// request3: pop flash messages
 	messages = ses.Flashes(w, r)

@@ -1,15 +1,15 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
 )
 
 func TestTranslations(t *testing.T) {
 
-	locale := gotdd.NewLocale(map[string]map[string]string{
+	locale := gotuna.NewLocale(map[string]map[string]string{
 		"The world": {
 			"en-US": "The world",
 			"de-DE": "Die welt",
@@ -33,7 +33,7 @@ func TestTranslations(t *testing.T) {
 
 func TestPluralization(t *testing.T) {
 
-	locale := gotdd.NewLocale(map[string]map[string]string{
+	locale := gotuna.NewLocale(map[string]map[string]string{
 		"oranges": {
 			"en-US": "There is one orange|There are many oranges",
 		},

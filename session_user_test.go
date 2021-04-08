@@ -1,20 +1,20 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestReadingUserIDFromEmptyStore(t *testing.T) {
 
 	r := &http.Request{}
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotdd.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy)
 
 	assert.Equal(t, true, ses.IsGuest(r))
 
@@ -30,7 +30,7 @@ func TestSaveUserIDAndRetrieve(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotdd.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy)
 
 	err := ses.SetUserID(w, r, doubles.MemUser1.GetID())
 	assert.NoError(t, err)
@@ -47,7 +47,7 @@ func TestSettingUserLocale(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotdd.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy)
 
 	assert.Equal(t, "", ses.GetUserLocale(r))
 

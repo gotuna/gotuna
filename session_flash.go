@@ -1,4 +1,4 @@
-package gotdd
+package gotuna
 
 import (
 	"fmt"

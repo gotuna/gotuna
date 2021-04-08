@@ -1,13 +1,13 @@
-package gotdd_test
+package gotuna_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/test/assert"
-	"github.com/alcalbg/gotdd/test/doubles"
+	"github.com/gotuna/gotuna"
+	"github.com/gotuna/gotuna/test/assert"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
@@ -15,8 +15,8 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
 
-	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+	app := gotuna.App{
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
 	}
 
 	middleware := app.Authenticate("/pleaselogin")
@@ -34,8 +34,8 @@ func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/login", nil)
 	response := httptest.NewRecorder()
 
-	app := gotdd.App{
-		Session: gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
+	app := gotuna.App{
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
 	}
 
 	middleware := app.RedirectIfAuthenticated("/dashboard")
