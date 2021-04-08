@@ -152,11 +152,7 @@ func handlerLogin(app gotdd.App) http.HandlerFunc {
 
 		app.Session.SetUserLocale(w, r, "en-US")
 
-		if err := app.Session.Flash(w, r, gotdd.NewFlash(app.Locale.T(app.Session.GetUserLocale(r), "Welcome"))); err != nil {
-			app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
-			handlerError(app).ServeHTTP(w, r)
-			return
-		}
+		flash(app, w, r, t(app, r, "Welcome"))
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -201,4 +197,14 @@ func handlerError(app gotdd.App) http.Handler {
 			Set("stacktrace", string(debug.Stack())).
 			Render(w, r, "app.html", "error.html")
 	})
+}
+
+func flash(app gotdd.App, w http.ResponseWriter, r *http.Request, msg string) {
+	if err := app.Session.Flash(w, r, gotdd.NewFlash(msg)); err != nil {
+		app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
+	}
+}
+
+func t(app gotdd.App, r *http.Request, s string) string {
+	return app.Locale.T(app.Session.GetUserLocale(r), s)
 }
