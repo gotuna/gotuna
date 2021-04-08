@@ -15,7 +15,9 @@ func (app App) Logging() mux.MiddlewareFunc {
 
 			next.ServeHTTP(w, r)
 
-			app.Logger.Printf("%s %s %s %s", start.Format(time.RFC3339), r.Method, r.URL.Path, time.Since(start))
+			if app.Logger != nil {
+				app.Logger.Printf("%s %s %s %s", start.Format(time.RFC3339), r.Method, r.URL.Path, time.Since(start))
+			}
 		})
 	}
 }

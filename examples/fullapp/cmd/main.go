@@ -41,6 +41,6 @@ func main() {
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
 	if err := http.ListenAndServe(port, app.Router); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
+		log.Fatalf("could not listen on port %s %v", port, err)
 	}
 }
