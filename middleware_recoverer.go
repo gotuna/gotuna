@@ -15,7 +15,7 @@ func (app App) Recoverer(destination string) mux.MiddlewareFunc {
 				if err := recover(); err != nil {
 					stacktrace := string(debug.Stack())
 
-					app.Logger.Printf("PANIC RECOVERED: %v", err)
+					app.Logger.Printf("PANIC RECOVERED:\n%v", err)
 					app.Logger.Println(stacktrace)
 
 					// TODO: when templates are broken, redirecton can't work properly
