@@ -29,7 +29,7 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 
 func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 
-	fakeUser := doubles.FakeUser1
+	fakeUser := doubles.MemUser1
 
 	request := httptest.NewRequest(http.MethodGet, "/login", nil)
 	response := httptest.NewRecorder()

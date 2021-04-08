@@ -24,13 +24,13 @@ func TestRoutes(t *testing.T) {
 		status int
 	}{
 		{"", "/", http.MethodGet, http.StatusFound},
-		{doubles.FakeUser1.GetID(), "/", http.MethodGet, http.StatusOK},
+		{doubles.MemUser1.GetID(), "/", http.MethodGet, http.StatusOK},
 		{"", "/", http.MethodPost, http.StatusMethodNotAllowed},
 		{"", "/invalid", http.MethodGet, http.StatusNotFound},
 		{"", "/login", http.MethodGet, http.StatusOK},
-		{doubles.FakeUser1.GetID(), "/login", http.MethodGet, http.StatusFound},
-		{doubles.FakeUser1.GetID(), "/profile", http.MethodGet, http.StatusOK},
-		{doubles.FakeUser2.GetID(), "/profile", http.MethodGet, http.StatusOK},
+		{doubles.MemUser1.GetID(), "/login", http.MethodGet, http.StatusFound},
+		{doubles.MemUser1.GetID(), "/profile", http.MethodGet, http.StatusOK},
+		{doubles.MemUser2.GetID(), "/profile", http.MethodGet, http.StatusOK},
 	}
 
 	for _, r := range routes {
@@ -137,7 +137,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("submit login with bad password", func(t *testing.T) {
 		data := url.Values{}
-		data.Set("email", doubles.FakeUser1.Email)
+		data.Set("email", doubles.MemUser1.Email)
 		data.Set("password", "bad")
 
 		request := loginRequest(data)
@@ -154,7 +154,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("submit successful login and go to the home page", func(t *testing.T) {
 		data := url.Values{}
-		data.Set("email", doubles.FakeUser1.Email)
+		data.Set("email", doubles.MemUser1.Email)
 		data.Set("password", "pass123")
 
 		app := main.MakeApp(gotdd.App{
@@ -183,7 +183,7 @@ func TestLogin(t *testing.T) {
 
 func TestLogout(t *testing.T) {
 
-	user := doubles.FakeUser1
+	user := doubles.MemUser1
 
 	app := main.MakeApp(gotdd.App{
 		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),

@@ -13,12 +13,10 @@ import (
 
 func TestAuthenticate(t *testing.T) {
 
-	fakeUser := doubles.FakeUser1
-
 	t.Run("test good authentication", func(t *testing.T) {
 
 		form := url.Values{
-			"email":    {fakeUser.Email},
+			"email":    {doubles.MemUser1.Email},
 			"password": {"pass123"},
 		}
 
@@ -30,13 +28,13 @@ func TestAuthenticate(t *testing.T) {
 			Authenticate(response, request)
 
 		assert.NoError(t, authenticated)
-		assert.Equal(t, fakeUser.GetID(), user.GetID())
+		assert.Equal(t, doubles.MemUser1.GetID(), user.GetID())
 	})
 
 	t.Run("test bad password", func(t *testing.T) {
 
 		form := url.Values{
-			"email":    {fakeUser.Email},
+			"email":    {doubles.MemUser1.Email},
 			"password": {"bad-password"},
 		}
 

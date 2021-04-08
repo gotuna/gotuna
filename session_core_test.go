@@ -47,7 +47,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 
 func TestDestroyActiveSession(t *testing.T) {
 
-	testUser := doubles.FakeUser1
+	testUser := doubles.MemUser1
 
 	r := &http.Request{}
 	w := httptest.NewRecorder()

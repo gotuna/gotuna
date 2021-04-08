@@ -18,7 +18,7 @@ func TestStoringAndGettingUserFromContext(t *testing.T) {
 	})
 
 	t.Run("store and retrieve fake user", func(t *testing.T) {
-		user := doubles.FakeUser1
+		user := doubles.MemUser1
 		ctx := gotdd.ContextWithUser(context.Background(), user)
 		got, err := gotdd.GetUserFromContext(ctx)
 		assert.NoError(t, err)

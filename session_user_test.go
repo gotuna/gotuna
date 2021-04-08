@@ -32,12 +32,12 @@ func TestSaveUserIDAndRetrieve(t *testing.T) {
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
 	ses := gotdd.NewSession(sessionStoreSpy)
 
-	err := ses.SetUserID(w, r, doubles.FakeUser1.GetID())
+	err := ses.SetUserID(w, r, doubles.MemUser1.GetID())
 	assert.NoError(t, err)
 
 	id, err := ses.GetUserID(r)
 	assert.NoError(t, err)
-	assert.Equal(t, doubles.FakeUser1.GetID(), id)
+	assert.Equal(t, doubles.MemUser1.GetID(), id)
 	assert.Equal(t, false, ses.IsGuest(r))
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 }

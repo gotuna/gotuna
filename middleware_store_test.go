@@ -11,7 +11,7 @@ import (
 )
 
 func TestStoringLoggedInUserToContext(t *testing.T) {
-	fakeUser := doubles.FakeUser1
+	fakeUser := doubles.MemUser1
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()

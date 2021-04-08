@@ -16,7 +16,6 @@ import (
 	"github.com/alcalbg/gotdd/cmd/main/i18n"
 	"github.com/alcalbg/gotdd/cmd/main/static"
 	"github.com/alcalbg/gotdd/cmd/main/views"
-	"github.com/alcalbg/gotdd/test/doubles"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -28,7 +27,7 @@ func main() {
 
 	app := MakeApp(gotdd.App{
 		Logger:         log.New(os.Stdout, "", 0),
-		UserRepository: doubles.NewUserRepositoryStub(),
+		UserRepository: NewUserRepository(),
 		Session:        gotdd.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
 		Static:         static.EmbededStatic,
 		StaticPrefix:   "",
