@@ -30,9 +30,7 @@ func TestRecoveringFromPanic(t *testing.T) {
 	}
 
 	recoverer := app.Recoverer(destination)
-	handler := recoverer(badHandler)
-
-	handler.ServeHTTP(response, request)
+	recoverer(badHandler).ServeHTTP(response, request)
 
 	assert.Redirects(t, response, destination, http.StatusInternalServerError)
 	assert.Contains(t, wlog.String(), needle)

@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -89,32 +88,10 @@ func MakeApp(app gotdd.App) gotdd.App {
 
 	// serve files from the static directory
 	app.Router.PathPrefix(app.StaticPrefix).
-		Handler(http.StripPrefix(app.StaticPrefix, serveFiles(app))).
+		Handler(http.StripPrefix(app.StaticPrefix, app.ServeFiles())).
 		Methods(http.MethodGet)
 
 	return app
-}
-
-func serveFiles(app gotdd.App) http.Handler {
-	fs := http.FS(app.Static)
-	fileapp := http.FileServer(fs)
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		f, err := fs.Open(path.Clean(r.URL.Path))
-		if os.IsNotExist(err) {
-			handlerNotFound(app).ServeHTTP(w, r)
-			return
-		}
-		stat, _ := f.Stat()
-		if stat.IsDir() {
-			handlerNotFound(app).ServeHTTP(w, r)
-			return
-		}
-
-		// TODO: ModTime doesn't work for embed?
-		//w.Header().Set("ETag", fmt.Sprintf("%x", stat.ModTime().UnixNano()))
-		//w.Header().Set("Cache-Control", fmt.Sprintf("max-age=%s", "31536000"))
-		fileapp.ServeHTTP(w, r)
-	})
 }
 
 func handlerHome(app gotdd.App) http.Handler {

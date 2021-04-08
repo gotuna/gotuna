@@ -58,46 +58,16 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	t.Run("return valid static file from root", func(t *testing.T) {
-
-		app := main.MakeApp(gotdd.App{
-			Static: doubles.NewFileSystemStub(files),
-		})
-
-		r := httptest.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
-		w := httptest.NewRecorder()
-		app.Router.ServeHTTP(w, r)
-
-		assert.Equal(t, http.StatusOK, w.Code)
+	app := main.MakeApp(gotdd.App{
+		Static:       doubles.NewFileSystemStub(files),
+		StaticPrefix: "/publicprefix",
 	})
 
-	t.Run("return valid static file from prefixed path", func(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
+	w := httptest.NewRecorder()
+	app.Router.ServeHTTP(w, r)
 
-		app := main.MakeApp(gotdd.App{
-			Static:       doubles.NewFileSystemStub(files),
-			StaticPrefix: "/publicprefix",
-		})
-
-		r := httptest.NewRequest(http.MethodGet, "/publicprefix/somedir/image.jpg", nil)
-		w := httptest.NewRecorder()
-		app.Router.ServeHTTP(w, r)
-
-		assert.Equal(t, http.StatusOK, w.Code)
-	})
-
-	t.Run("return 404 on non existing file", func(t *testing.T) {
-
-		app := main.MakeApp(gotdd.App{
-			Static: doubles.NewFileSystemStub(files),
-		})
-
-		r := httptest.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
-		w := httptest.NewRecorder()
-		app.Router.ServeHTTP(w, r)
-
-		assert.Equal(t, http.StatusNotFound, w.Code)
-	})
-
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 func TestLogin(t *testing.T) {

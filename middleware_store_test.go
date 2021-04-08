@@ -24,11 +24,10 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 	middleware := app.StoreUserToContext()
 
 	var userInContext gotdd.User
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userInContext, _ = gotdd.GetUserFromContext(r.Context())
-	}))
 
-	handler.ServeHTTP(response, request)
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userInContext, _ = gotdd.GetUserFromContext(r.Context())
+	})).ServeHTTP(response, request)
 
 	assert.Equal(t, response.Code, http.StatusOK)
 	assert.Equal(t, fakeUser, userInContext)

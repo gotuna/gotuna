@@ -13,11 +13,9 @@ func TestCORS(t *testing.T) {
 	request := httptest.NewRequest(http.MethodOptions, "/sample", nil)
 	response := httptest.NewRecorder()
 
-	app := gotdd.App{}
-	CORS := app.Cors()
-	handler := CORS(http.NotFoundHandler())
+	middleware := gotdd.App{}.Cors()
 
-	handler.ServeHTTP(response, request)
+	middleware(http.NotFoundHandler()).ServeHTTP(response, request)
 
 	assert.Equal(t, gotdd.CORSAllowedOrigin, response.HeaderMap.Get("Access-Control-Allow-Origin"))
 	assert.Equal(t, gotdd.CORSAllowedMethods, response.HeaderMap.Get("Access-Control-Allow-Methods"))
