@@ -1,23 +1,17 @@
-package main
+package fullapp
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"log"
 	"net/http"
-	"os"
 	"runtime/debug"
 	"strings"
 	"time"
 
 	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/cmd/main/i18n"
-	"github.com/alcalbg/gotdd/cmd/main/static"
-	"github.com/alcalbg/gotdd/cmd/main/views"
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 )
 
 var User1 = gotdd.InMemoryUser{
@@ -39,36 +33,6 @@ func NewUserRepository() gotdd.UserRepository {
 		User1,
 		User2,
 	})
-}
-
-func main() {
-
-	port := ":8888"
-	keyPairs := os.Getenv("APP_KEY")
-
-	app := MakeApp(gotdd.App{
-		Logger:         log.New(os.Stdout, "", 0),
-		UserRepository: NewUserRepository(),
-		Session:        gotdd.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
-		Static:         static.EmbededStatic,
-		StaticPrefix:   "",
-		ViewFiles:      views.EmbededViews,
-		Locale:         gotdd.NewLocale(i18n.Translations),
-	})
-
-	// production only, do not use in tests
-	app.Router.Use(
-		csrf.Protect(
-			[]byte(keyPairs),
-			csrf.FieldName("csrf_token"),
-			csrf.CookieName("csrf_token"),
-		))
-
-	fmt.Printf("starting server at http://localhost%s \n", port)
-
-	if err := http.ListenAndServe(port, app.Router); err != nil {
-		log.Fatalf("could not listen on port 5000 %v", err)
-	}
 }
 
 func MakeApp(app gotdd.App) gotdd.App {

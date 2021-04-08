@@ -1,4 +1,4 @@
-package main_test
+package fullapp_test
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"testing"
 
 	"github.com/alcalbg/gotdd"
-	"github.com/alcalbg/gotdd/cmd/main"
-	"github.com/alcalbg/gotdd/cmd/main/views"
+	"github.com/alcalbg/gotdd/examples/fullapp"
+	"github.com/alcalbg/gotdd/examples/fullapp/views"
 	"github.com/alcalbg/gotdd/test/assert"
 	"github.com/alcalbg/gotdd/test/doubles"
 	"github.com/gorilla/sessions"
@@ -39,7 +39,7 @@ func TestRoutes(t *testing.T) {
 			request := httptest.NewRequest(r.method, r.route, nil)
 			response := httptest.NewRecorder()
 
-			app := main.MakeApp(gotdd.App{
+			app := fullapp.MakeApp(gotdd.App{
 				Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
 				Static:         doubles.NewFileSystemStub(map[string][]byte{}),
 				UserRepository: doubles.NewUserRepositoryStub(),
@@ -58,7 +58,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 		"somedir/image.jpg": nil,
 	}
 
-	app := main.MakeApp(gotdd.App{
+	app := fullapp.MakeApp(gotdd.App{
 		Static:       doubles.NewFileSystemStub(files),
 		StaticPrefix: "/publicprefix",
 	})
@@ -78,7 +78,7 @@ func TestLogin(t *testing.T) {
 		request := httptest.NewRequest(http.MethodGet, "/login", nil)
 		response := httptest.NewRecorder()
 
-		app := main.MakeApp(gotdd.App{
+		app := fullapp.MakeApp(gotdd.App{
 			Session:   gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			ViewFiles: views.EmbededViews,
 		})
@@ -95,7 +95,7 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		app := main.MakeApp(gotdd.App{
+		app := fullapp.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
@@ -112,7 +112,7 @@ func TestLogin(t *testing.T) {
 
 		request := loginRequest(data)
 		response := httptest.NewRecorder()
-		app := main.MakeApp(gotdd.App{
+		app := fullapp.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
@@ -127,7 +127,7 @@ func TestLogin(t *testing.T) {
 		data.Set("email", doubles.MemUser1.Email)
 		data.Set("password", "pass123")
 
-		app := main.MakeApp(gotdd.App{
+		app := fullapp.MakeApp(gotdd.App{
 			Session:        gotdd.NewSession(sessions.NewCookieStore([]byte("abc"))),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
@@ -155,7 +155,7 @@ func TestLogout(t *testing.T) {
 
 	user := doubles.MemUser1
 
-	app := main.MakeApp(gotdd.App{
+	app := fullapp.MakeApp(gotdd.App{
 		Session:        gotdd.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
 		ViewFiles:      views.EmbededViews,
 		UserRepository: doubles.NewUserRepositoryStub(),
