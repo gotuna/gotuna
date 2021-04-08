@@ -24,7 +24,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 		r := httptest.NewRequest(http.MethodGet, "/somedir/image.jpg", nil)
 		w := httptest.NewRecorder()
-		app.ServeFiles().ServeHTTP(w, r)
+		app.ServeFiles(http.HandlerFunc(http.NotFound)).ServeHTTP(w, r)
 
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
@@ -33,7 +33,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 		r := httptest.NewRequest(http.MethodGet, "/pic/non-existing.jpg", nil)
 		w := httptest.NewRecorder()
-		app.ServeFiles().ServeHTTP(w, r)
+		app.ServeFiles(http.HandlerFunc(http.NotFound)).ServeHTTP(w, r)
 
 		assert.Equal(t, http.StatusNotFound, w.Code)
 	})

@@ -6,18 +6,18 @@ import (
 	"path"
 )
 
-func (app App) ServeFiles() http.Handler {
+func (app App) ServeFiles(notFound http.Handler) http.Handler {
 	fs := http.FS(app.Static)
 	fileapp := http.FileServer(fs)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		f, err := fs.Open(path.Clean(r.URL.Path))
 		if os.IsNotExist(err) {
-			http.NotFoundHandler().ServeHTTP(w, r)
+			notFound.ServeHTTP(w, r)
 			return
 		}
 		stat, _ := f.Stat()
 		if stat.IsDir() {
-			http.NotFoundHandler().ServeHTTP(w, r)
+			notFound.ServeHTTP(w, r)
 			return
 		}
 

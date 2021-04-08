@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Internal Server Error</title>
+    <title>404 - Not Found</title>
     <link rel="stylesheet" href="{{static "/bulma/bulma.min.css"}}">
     <link rel="stylesheet" href="{{static "/style.css"}}">
   </head>
@@ -12,12 +12,11 @@
 
     <section class="section">
       <div class="container">
-        Internal Server Error
-        <pre>{{.Data.error}}</pre>                                                                                                                │tp://localhost:8888
-        <pre>{{.Data.stacktrace}}</pre>
+        <p>{{.Data.title}}</p>
+        <a href="/">{{t "Home"}}</a>
       </div>
     </section>
 
   </body>
 </html>
-{{-end-}}
+{{- end -}}

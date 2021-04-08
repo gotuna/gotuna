@@ -109,7 +109,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 
 	// serve files from the static directory
 	app.Router.PathPrefix(app.StaticPrefix).
-		Handler(http.StripPrefix(app.StaticPrefix, app.ServeFiles())).
+		Handler(http.StripPrefix(app.StaticPrefix, app.ServeFiles(handlerNotFound(app)))).
 		Methods(http.MethodGet)
 
 	return app
@@ -183,7 +183,7 @@ func handlerNotFound(app gotdd.App) http.Handler {
 		w.WriteHeader(http.StatusNotFound)
 		app.NewTemplatingEngine().
 			Set("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
-			Render(w, r, "app.html", "4xx.html")
+			Render(w, r, "404.html")
 	})
 }
 
@@ -193,7 +193,7 @@ func handlerError(app gotdd.App) http.Handler {
 		app.NewTemplatingEngine().
 			Set("error", "TODO"). // TODO: show error
 			Set("stacktrace", string(debug.Stack())).
-			Render(w, r, "app.html", "error.html")
+			Render(w, r, "error.html")
 	})
 }
 
