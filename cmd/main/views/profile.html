@@ -4,7 +4,13 @@
   <div class="columns">
     <div class="column">
     <form method="POST" action="/profile">
-      {{.Data.csrf}}
+      {{csrf}}
+      <div class="field">
+        <label class="label">{{t "ID"}}</label>
+        <div class="control">
+          <input class="input" value="{{currentUser.UniqueID}}" disabled>
+        </div>
+      </div>
       <div class="field">
         <label class="label">{{t "Email"}}</label>
         <div class="control">
@@ -14,27 +20,7 @@
       <div class="field">
         <label class="label">{{t "Name"}}</label>
         <div class="control">
-          <input class="input {{if index .Errors "name"}}is-danger{{end}}" type="name" name="name" placeholder="{{t "Name"}}" value="{{currentUser.Name}}">
-        </div>
-        <p class="help is-danger">{{index .Errors "name"}}</p>
-      </div>
-      <div class="field">
-        <label class="label">{{t "New Password"}}</label>
-        <div class="control">
-          <input class="input {{if index .Errors "new_password"}}is-danger{{end}}" type="password" name="new_password" placeholder="{{t "Leave blank if you don't want to change it"}}">
-        </div>
-        <p class="help is-danger">{{index .Errors "new_password"}}</p>
-      </div>
-      <div class="field">
-        <label class="label">{{t "Repeat Password"}}</label>
-        <div class="control">
-          <input class="input {{if index .Errors "repeat_password"}}is-danger{{end}}" type="password" name="repeat_password" placeholder="{{t "Leave blank if you don't want to change it"}}">
-        </div>
-        <p class="help is-danger">{{index .Errors "repeat_password"}}</p>
-      </div>
-      <div class="field is-grouped mt-5">
-        <div class="control">
-          <button class="button is-link">{{t "Submit"}}</button>
+          <input class="input" value="{{currentUser.Name}}" disabled>
         </div>
       </div>
     </form>

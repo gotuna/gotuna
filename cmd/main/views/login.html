@@ -3,6 +3,7 @@
 {{define "content"}}
   <div class="guest-form">
     <form method="POST" action="/login">
+      {{csrf}}
       <div class="field">
         <label class="label">{{t "Email"}}</label>
         <div class="control">

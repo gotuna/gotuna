@@ -1,7 +1,6 @@
 package gotdd
 
 import (
-	"html/template"
 	"io/fs"
 	"log"
 
@@ -14,7 +13,7 @@ type App struct {
 	Static         fs.FS
 	StaticPrefix   string
 	ViewFiles      fs.FS
-	ViewHelpers    template.FuncMap
+	ViewHelpers    []ViewHelper
 	Session        *Session
 	UserRepository UserRepository
 	Locale         Locale

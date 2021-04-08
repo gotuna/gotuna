@@ -2,7 +2,6 @@ package gotdd_test
 
 import (
 	"context"
-	"html/template"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -92,22 +91,25 @@ func TestUsingHelperFunctions(t *testing.T) {
 	})
 
 	t.Run("test when custom helper function is added", func(t *testing.T) {
-		tmpl := `{{- define "app" -}} {{customUppercase "name"}} {{- end -}}`
+		tmpl := `{{- define "app" -}} {{customhelper "name"}} {{- end -}}`
 		rendered := `NAME`
 
 		r := &http.Request{}
 		w := httptest.NewRecorder()
+
+		customHelper := func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
+			return "customhelper", func(s string) string {
+				return strings.ToUpper(s)
+			}
+		}
 
 		gotdd.App{
 			ViewFiles: doubles.NewFileSystemStub(
 				map[string][]byte{
 					"view.html": []byte(tmpl),
 				}),
-			ViewHelpers: template.FuncMap{
-				"customUppercase": func(s string) string {
-					return strings.ToUpper(s)
-				},
-			}}.NewTemplatingEngine().
+			ViewHelpers: []gotdd.ViewHelper{customHelper},
+		}.NewTemplatingEngine().
 			Render(w, r, "view.html")
 
 		assert.Equal(t, rendered, w.Body.String())

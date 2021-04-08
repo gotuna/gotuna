@@ -15,6 +15,7 @@ import (
 	"github.com/alcalbg/gotdd/cmd/main/i18n"
 	"github.com/alcalbg/gotdd/cmd/main/static"
 	"github.com/alcalbg/gotdd/cmd/main/views"
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -55,6 +56,14 @@ func main() {
 		Locale:         gotdd.NewLocale(i18n.Translations),
 	})
 
+	// production only, do not use in tests
+	app.Router.Use(
+		csrf.Protect(
+			[]byte(keyPairs),
+			csrf.FieldName("csrf_token"),
+			csrf.CookieName("csrf_token"),
+		))
+
 	fmt.Printf("starting server at http://localhost%s \n", port)
 
 	if err := http.ListenAndServe(port, app.Router); err != nil {
@@ -72,24 +81,30 @@ func MakeApp(app gotdd.App) gotdd.App {
 		app.Locale = gotdd.NewLocale(map[string]map[string]string{})
 	}
 
-	app.ViewHelpers = template.FuncMap{
-		"uppercase": func(s string) string {
-			return strings.ToUpper(s)
+	// custom view helpers
+	app.ViewHelpers = []gotdd.ViewHelper{
+		func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
+			return "uppercase", func(s string) string {
+				return strings.ToUpper(s)
+			}
+		},
+		func(w http.ResponseWriter, r *http.Request) (string, interface{}) {
+			return "csrf", func() template.HTML {
+				return csrf.TemplateField(r)
+			}
 		},
 	}
 
 	app.Router = mux.NewRouter()
-	app.Router.NotFoundHandler = handlerNotFound(app)
 
 	// middlewares for all routes
 	app.Router.Handle("/error", handlerError(app)).Methods(http.MethodGet, http.MethodPost)
 	app.Router.Use(app.Recoverer("/error"))
 	app.Router.Use(app.Logging())
-	// TODO: csrf middleware
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(app.Cors())
 
-	// logged in user
+	// for logged in users
 	user := app.Router.NewRoute().Subrouter()
 	user.Use(app.Authenticate("/login"))
 	user.Use(app.StoreUserToContext())
@@ -98,7 +113,7 @@ func MakeApp(app gotdd.App) gotdd.App {
 	user.Handle("/logout", handlerLogout(app)).Methods(http.MethodPost)
 	user.Handle("/setlocale/{locale}", handlerChangeLocale(app)).Methods(http.MethodGet, http.MethodPost)
 
-	// guests
+	// for guests
 	auth := app.Router.NewRoute().Subrouter()
 	auth.Use(app.RedirectIfAuthenticated("/"))
 	auth.Handle("/login", handlerLogin(app)).Methods(http.MethodGet, http.MethodPost)

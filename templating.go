@@ -8,6 +8,8 @@ import (
 
 const ContentTypeHTML = "text/html; charset=utf-8"
 
+type ViewHelper func(w http.ResponseWriter, r *http.Request) (string, interface{})
+
 type TemplatingEngine interface {
 	Render(w http.ResponseWriter, r *http.Request, patterns ...string)
 	Set(key string, data interface{}) TemplatingEngine
@@ -89,8 +91,9 @@ func (t nativeHtmlTemplates) getHelpers(w http.ResponseWriter, r *http.Request, 
 		},
 	}
 	// add custom, user-defined helpers
-	for k, v := range t.app.ViewHelpers {
-		fmap[k] = v
+	for _, v := range t.app.ViewHelpers {
+		n, f := v(w, r)
+		fmap[n] = f
 	}
 	return fmap
 }

@@ -48,6 +48,7 @@
                 </a>
                 <a class="navbar-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                   <form id="logout-form" method="POST" action="/logout">
+                    {{csrf}}
                     {{t "Log Out"}}
                   </form>
                 </a>
