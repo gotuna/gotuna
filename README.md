@@ -8,27 +8,34 @@ NOTE: This project is under heavy development and is not ready for use.
 - Router (Gorilla)
 - Middleware support
 - Session managment (Gorilla)
-- CSRF protection (Gorilla)
+- User authentication (via user provider interface)
 - Native view rendering (html/template)
-- User authentication scaffolding
 - Multi-language support
-- Sample layout with login forms (Bulma CSS)
+
+# Requirements
+- Make sure you have Go >= 1.16 installed
+
+# Testing
+```
+go test -race -v ./...
+```
+
+# Running examples
+```
+go run examples/fullapp/cmd/main.go
+```
+
+# Hot reloading
+- Install CompileDaemon for running the watcher (https://github.com/githubnemo/CompileDaemon)
+- Run the watcher script with `./watch.sh`
+- Open http://127.0.0.1:8888
 
 # External dependencies
 External modules are mostly used when the feature is too complex to build or maintain - Router, Secure cookies
 
 # TODO Features
-- CSRF
 - Cache (Redis)
-- DB abstraction
 - Validation
-
-# Installation & Hot reloading
-- Make sure you have Go >= 1.16 installed
-- Configure `.env` based on `.env.example`
-- Install CompileDaemon for running the watcher (https://github.com/githubnemo/CompileDaemon)
-- Run the watcher script `./watch.sh`
-- Open http://127.0.0.1:8888
 
 # Licence
 This project is licensed under the MIT License.
