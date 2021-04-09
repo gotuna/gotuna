@@ -1,6 +1,4 @@
-# GoTuna - Web framework written in Go
-Experimental Go web framework. Used to experiment with Go, try the latest language features, explore, and learn more.
-
+# GoTuna - progressive web framework written in Go
 NOTE: This project is under heavy development and is not ready for use.
 
 # Features
@@ -29,8 +27,8 @@ go run examples/fullapp/cmd/main.go
 External modules are mostly used when the feature is too complex to build or maintain - Router, Secure cookies
 
 # TODO
+- Validation (input/forms)
 - Cache
-- Validation
 
 # Licence
 This project is licensed under the MIT License.
