@@ -3,13 +3,14 @@
 </p>
 
 # GoTuna - progressive web framework written in Go
-NOTE: This project is under heavy development and is not ready for use.
+NOTE: This project is under heavy development and is not ready for production use.
 
 # Features
 - Router (gorilla)
 - Standard `http.Handler` interface
 - Middleware support
-- Session managment (gorilla)
+- User session managment (gorilla)
+- Session flash messages
 - Native view rendering (html/template) with helpers
 - Static file server included with configurable prefix
 - Standard logger interface
