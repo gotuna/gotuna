@@ -6,13 +6,19 @@
 NOTE: This project is under heavy development and is not ready for use.
 
 # Features
-- MVC pattern
-- Router (Gorilla)
+- Router (gorilla)
+- Standard `http.Handler` interface
 - Middleware support
-- Session managment (Gorilla)
+- Session managment (gorilla)
+- Native view rendering (html/template) with helpers
+- Static file server included with configurable prefix
+- Standard logger interface
+- Request logging and panic recovery
+- Full support for embedded templates and static files
 - User authentication (via user provider interface)
-- Native view rendering (html/template)
+- Sample InMemory user provider included
 - Multi-language support
+- Database agnostic
 
 # Requirements
 - Make sure you have Go >= 1.16 installed
