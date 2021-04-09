@@ -1,3 +1,7 @@
+<p align="center">
+<img src="https://avatars.githubusercontent.com/u/82163094?s=200&v=4">
+</p>
+
 # GoTuna - progressive web framework written in Go
 NOTE: This project is under heavy development and is not ready for use.
 
