@@ -14,6 +14,7 @@ import (
 	"github.com/gotuna/gotuna"
 )
 
+// User1 is a sample user #1.
 var User1 = gotuna.InMemoryUser{
 	UniqueID: "123",
 	Email:    "john@example.com",
@@ -21,6 +22,7 @@ var User1 = gotuna.InMemoryUser{
 	Password: "pass123",
 }
 
+// User2 is a sample user #2.
 var User2 = gotuna.InMemoryUser{
 	UniqueID: "456",
 	Email:    "bob@example.com",
@@ -28,6 +30,7 @@ var User2 = gotuna.InMemoryUser{
 	Password: "bobby5",
 }
 
+// NewUserRepository returns a new in-memory user repository with two sample users.
 func NewUserRepository() gotuna.UserRepository {
 	return gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
 		User1,
@@ -35,11 +38,13 @@ func NewUserRepository() gotuna.UserRepository {
 	})
 }
 
+// App is a main dependency store.
 type App struct {
 	gotuna.App
 	Csrf mux.MiddlewareFunc // app-specific config
 }
 
+// MakeApp creates an App with sample dependencies.
 func MakeApp(app App) App {
 
 	if app.Logger == nil {

@@ -6,10 +6,13 @@ import (
 	"net/http"
 )
 
+// ContentTypeHTML is a standard Content-Type header for HTML response.
 const ContentTypeHTML = "text/html; charset=utf-8"
 
+// ViewHelperFunc is a view helper that can be used in any template file.
 type ViewHelperFunc func(w http.ResponseWriter, r *http.Request) (string, interface{})
 
+// TemplatingEngine used for rendering response.
 type TemplatingEngine interface {
 	Render(w http.ResponseWriter, r *http.Request, patterns ...string)
 	Set(key string, data interface{}) TemplatingEngine
@@ -17,36 +20,37 @@ type TemplatingEngine interface {
 	GetErrors() map[string]string
 }
 
+// NewTemplatingEngine is a constructor that returns a native HTML templating engine.
 func (app App) NewTemplatingEngine() TemplatingEngine {
-	return &nativeHtmlTemplates{
+	return &nativeHTML{
 		app:    app,
 		Data:   make(map[string]interface{}),
 		Errors: make(map[string]string),
 	}
 }
 
-type nativeHtmlTemplates struct {
+type nativeHTML struct {
 	app     App
 	Data    map[string]interface{}
 	Errors  map[string]string
 	Flashes []FlashMessage
 }
 
-func (t *nativeHtmlTemplates) Set(key string, data interface{}) TemplatingEngine {
+func (t *nativeHTML) Set(key string, data interface{}) TemplatingEngine {
 	t.Data[key] = data
 	return t
 }
 
-func (t *nativeHtmlTemplates) SetError(errorKey, description string) TemplatingEngine {
+func (t *nativeHTML) SetError(errorKey, description string) TemplatingEngine {
 	t.Errors[errorKey] = description
 	return t
 }
 
-func (t nativeHtmlTemplates) GetErrors() map[string]string {
+func (t nativeHTML) GetErrors() map[string]string {
 	return t.Errors
 }
 
-func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
+func (t *nativeHTML) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
 	if t.app.Session != nil {
 		t.Flashes = t.app.Session.Flashes(w, r)
@@ -65,7 +69,7 @@ func (t *nativeHtmlTemplates) Render(w http.ResponseWriter, r *http.Request, pat
 	}
 }
 
-func (t nativeHtmlTemplates) getHelpers(w http.ResponseWriter, r *http.Request, patterns ...string) template.FuncMap {
+func (t nativeHTML) getHelpers(w http.ResponseWriter, r *http.Request, patterns ...string) template.FuncMap {
 	// default helpers
 	fmap := template.FuncMap{
 		"request": func() *http.Request {

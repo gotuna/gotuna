@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// StoreUserToContext middleware will retrieve the current logged in user from
+// the UserRepository and store it into the request context for further use.
 func (app App) StoreUserToContext() mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

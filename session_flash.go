@@ -7,12 +7,14 @@ import (
 
 const flashKey = "_flash"
 
+// FlashMessage represents a flash message.
 type FlashMessage struct {
 	Message   string
 	Kind      string
 	AutoClose bool
 }
 
+// NewFlash is a constructor for new flash message.
 func NewFlash(message string) FlashMessage {
 	return FlashMessage{
 		Message:   message,
@@ -21,6 +23,9 @@ func NewFlash(message string) FlashMessage {
 	}
 }
 
+// Flash will store flash message into the session.
+// These messages are primarily used to inform the user during a subsequesnt
+// request about some status update.
 func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage FlashMessage) error {
 
 	var messages []FlashMessage
@@ -45,6 +50,7 @@ func (s Session) Flash(w http.ResponseWriter, r *http.Request, flashMessage Flas
 	return s.Put(w, r, flashKey, str)
 }
 
+// Flashes returns all messages from the session and removes them.
 func (s Session) Flashes(w http.ResponseWriter, r *http.Request) []FlashMessage {
 
 	var messages []FlashMessage

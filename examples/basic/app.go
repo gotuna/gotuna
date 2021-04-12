@@ -8,6 +8,7 @@ import (
 	"github.com/gotuna/gotuna"
 )
 
+// MakeApp with sample dependencies.
 func MakeApp(app gotuna.App) gotuna.App {
 
 	app.Router = mux.NewRouter()

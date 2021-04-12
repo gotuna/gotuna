@@ -6,6 +6,11 @@ import (
 	"path"
 )
 
+// ServeFiles returns a Handler that serves a HTTP requests with the file contents.
+//
+// You can pass 404 Handler to be served when the file is not found.
+//
+// It will not list directories, instead, the 404 Handler will be used.
 func (app App) ServeFiles(notFound http.Handler) http.Handler {
 	fs := http.FS(app.Static)
 	fileapp := http.FileServer(fs)

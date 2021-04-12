@@ -21,7 +21,7 @@ func main() {
 	keyPairs := os.Getenv("APP_KEY")
 
 	app := fullapp.MakeApp(fullapp.App{
-		gotuna.App{
+		App: gotuna.App{
 			Logger:         log.New(os.Stdout, "", 0),
 			UserRepository: fullapp.NewUserRepository(),
 			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
@@ -30,7 +30,7 @@ func main() {
 			ViewFiles:      views.EmbededViews,
 			Locale:         gotuna.NewLocale(i18n.Translations),
 		},
-		csrf.Protect(
+		Csrf: csrf.Protect(
 			[]byte(keyPairs),
 			csrf.FieldName("csrf_token"),
 			csrf.CookieName("csrf_token"),

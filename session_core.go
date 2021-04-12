@@ -11,11 +11,12 @@ import (
 
 const sessionName = "app_session"
 
+// Session is the main application session store.
 type Session struct {
 	Store sessions.Store
 }
 
-// NewSession returns new session with requested store
+// NewSession returns a new application session with requested store engine.
 func NewSession(store sessions.Store) *Session {
 	if store == nil {
 		panic("Must supply a valid session store")
@@ -24,6 +25,7 @@ func NewSession(store sessions.Store) *Session {
 	return &Session{Store: store}
 }
 
+// Put string value in the session for specified key.
 func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
@@ -36,6 +38,7 @@ func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value s
 	return s.Store.Save(r, w, session)
 }
 
+// Get string value from the session for specified key.
 func (s Session) Get(r *http.Request, key string) (string, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
@@ -51,6 +54,7 @@ func (s Session) Get(r *http.Request, key string) (string, error) {
 	return value, nil
 }
 
+// Delete value from the session for key.
 func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
@@ -62,6 +66,7 @@ func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) erro
 	return s.Store.Save(r, w, session)
 }
 
+// Destroy the user session by removing the user key and expiring the cookie.
 func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
@@ -74,10 +79,8 @@ func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 	return s.Store.Save(r, w, session)
 }
 
-func TypeFromString(raw string, t interface{}) error {
-	return json.Unmarshal([]byte(raw), &t)
-}
-
+// TypeToString converts any type t to JSON-encoded string value.
+// This is used because app's session can only hold basic string values.
 func TypeToString(t interface{}) (string, error) {
 	b, err := json.Marshal(t)
 
@@ -86,4 +89,9 @@ func TypeToString(t interface{}) (string, error) {
 	}
 
 	return string(b), nil
+}
+
+// TypeFromString converts JSON-encoded value into the type t.
+func TypeFromString(raw string, t interface{}) error {
+	return json.Unmarshal([]byte(raw), &t)
 }

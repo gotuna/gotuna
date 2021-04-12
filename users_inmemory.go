@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+// InMemoryUser is a sample User entity implementation with some
+// sample fields provided like Name and Email.
+//
+// Password is stored as plain-text for simplicity. In real life, you should
+// probably use crypto/bcrypt library and store hashed representation and
+// compare passwords in Authenticate method with bcrypt.CompareHashAndPassword
 type InMemoryUser struct {
 	UniqueID string
 	Email    string
@@ -14,10 +20,13 @@ type InMemoryUser struct {
 	Password string
 }
 
+// GetID will return a unique ID for every specific user.
 func (u InMemoryUser) GetID() string {
 	return u.UniqueID
 }
 
+// NewInMemoryUserRepository returns a sample in-memory UserRepository
+// implementation which can be used in tests or sample apps.
 func NewInMemoryUserRepository(users []InMemoryUser) UserRepository {
 	return inMemoryUserRepository{users}
 }

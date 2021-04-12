@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// Authenticate middleware will redirect all guests to the destination.
+// This is used to guard user-only routes and to force guests to login.
 func (app App) Authenticate(destination string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +22,10 @@ func (app App) Authenticate(destination string) mux.MiddlewareFunc {
 	}
 }
 
+// RedirectIfAuthenticated middleware will redirect authenticated
+// users to the destination.
+// This is used to deflect logged in users from guest-only pages like login
+// or register page back to the app.
 func (app App) RedirectIfAuthenticated(destination string) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

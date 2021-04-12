@@ -17,6 +17,6 @@ func TestCORS(t *testing.T) {
 
 	middleware(http.NotFoundHandler()).ServeHTTP(response, request)
 
-	assert.Equal(t, gotuna.CORSAllowedOrigin, response.HeaderMap.Get("Access-Control-Allow-Origin"))
-	assert.Equal(t, gotuna.CORSAllowedMethods, response.HeaderMap.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, "*", response.HeaderMap.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "OPTIONS,HEAD,GET,POST,PUT,PATCH,DELETE", response.HeaderMap.Get("Access-Control-Allow-Methods"))
 }

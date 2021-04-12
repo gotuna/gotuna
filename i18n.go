@@ -5,11 +5,13 @@ import (
 	"strings"
 )
 
+// Locale is the main i18n interface.
 type Locale interface {
 	T(language string, s string, p ...interface{}) string
 	TP(language string, s string, n int, p ...interface{}) string
 }
 
+// NewLocale creates a new i18n instance.
 func NewLocale(set map[string]map[string]string) Locale {
 	return &locale{set}
 }
@@ -18,7 +20,7 @@ type locale struct {
 	set map[string]map[string]string
 }
 
-// T is short for Translate
+// T is short for Translate.
 func (c locale) T(language string, key string, p ...interface{}) string {
 
 	if c.set[key][language] == "" {
@@ -28,7 +30,7 @@ func (c locale) T(language string, key string, p ...interface{}) string {
 	return fmt.Sprintf(c.set[key][language], p...)
 }
 
-// TP is short for TranslatePlural
+// TP is short for TranslatePlural.
 func (c locale) TP(language string, key string, n int, p ...interface{}) string {
 
 	if c.set[key][language] == "" {
