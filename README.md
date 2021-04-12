@@ -2,6 +2,14 @@
 <img src="https://avatars.githubusercontent.com/u/82163094?s=200&v=4">
 </p>
 
+
+<p align="center">
+<a href="https://pkg.go.dev/github.com/gotuna/gotuna"><img src="https://pkg.go.dev/badge/github.com/gotuna/gotuna" alt="PkgGoDev"></a>
+<img src="https://github.com/gotuna/gotuna/workflows/Go/badge.svg" alt="Tests Status" />
+<a href="https://goreportcard.com/report/github.com/gotuna/gotuna"><img src="https://goreportcard.com/badge/github.com/gotuna/gotuna" alt="Go Report Card" /></a>
+</p>
+
+
 # GoTuna - progressive web framework written in Go
 NOTE: This project is under heavy development and is not ready for production use.
 
