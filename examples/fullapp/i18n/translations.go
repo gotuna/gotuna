@@ -1,5 +1,8 @@
 package i18n
 
+// Translations is a sample translation string map for the app.
+//
+// Language keys: "en-US", "fr-FR"
 var Translations = map[string]map[string]string{
 	"Email": {
 		"en-US": "Email",
