@@ -6,6 +6,7 @@ import (
 	"testing"
 )
 
+// Equal asserts that two are equal.
 func Equal(t *testing.T, expected, actual interface{}) {
 	t.Helper()
 
@@ -14,6 +15,7 @@ func Equal(t *testing.T, expected, actual interface{}) {
 	}
 }
 
+// Greater asserts that a > b.
 func Greater(t *testing.T, a, b int) {
 	t.Helper()
 
@@ -22,6 +24,7 @@ func Greater(t *testing.T, a, b int) {
 	}
 }
 
+// Contains asserts that s contains substring.
 func Contains(t *testing.T, s, substring string) {
 	t.Helper()
 
@@ -30,6 +33,7 @@ func Contains(t *testing.T, s, substring string) {
 	}
 }
 
+// NoError asserts that err is not an error.
 func NoError(t *testing.T, err error) {
 	t.Helper()
 
@@ -38,6 +42,7 @@ func NoError(t *testing.T, err error) {
 	}
 }
 
+// Error asserts that err is an error.
 func Error(t *testing.T, err error) {
 	t.Helper()
 
@@ -46,6 +51,7 @@ func Error(t *testing.T, err error) {
 	}
 }
 
+// Redirects asserts that response redirects to the url with the provided code.
 func Redirects(t *testing.T, r *httptest.ResponseRecorder, url string, code int) {
 	t.Helper()
 
