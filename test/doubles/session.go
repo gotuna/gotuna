@@ -7,6 +7,7 @@ import (
 	"github.com/gotuna/gotuna"
 )
 
+// NewGorillaSessionStoreSpy return a new gorilla.Store spy
 func NewGorillaSessionStoreSpy(userID string) *storeSpy {
 	userSession := sessions.NewSession(&storeSpy{}, "")
 	userSession.Values[gotuna.UserIDKey] = userID

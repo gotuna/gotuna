@@ -7,6 +7,7 @@ import (
 	"os"
 )
 
+// NewFileSystemStub returns a new fs.FS stub with provided files.
 func NewFileSystemStub(files map[string][]byte) *filesystemStub {
 	return &filesystemStub{
 		files: files,
