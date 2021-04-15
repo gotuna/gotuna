@@ -32,14 +32,17 @@ func TestRenderingWithCustomData(t *testing.T) {
 
 func TestUsingTranslation(t *testing.T) {
 
-	tmpl := `{{define "app"}}Hello, this is my {{t "car"}}{{end}}`
-	rendered := `Hello, this is my auto`
+	tmpl := `{{define "app"}}Hello, this is my {{t "car"}}. {{tp "oranges" 5}}{{end}}`
+	rendered := `Hello, this is my auto. There are many oranges`
 
 	app := gotuna.App{
 		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())),
 		Locale: gotuna.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
+			},
+			"oranges": {
+				"en-US": "There is one orange|There are many oranges",
 			},
 		}),
 		ViewFiles: doubles.NewFileSystemStub(

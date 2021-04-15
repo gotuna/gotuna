@@ -173,6 +173,7 @@ func handlerNotFound(app App) http.Handler {
 		w.WriteHeader(http.StatusNotFound)
 		app.NewTemplatingEngine().
 			Set("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
+			SetError("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
 			Render(w, r, "404.html")
 	})
 }

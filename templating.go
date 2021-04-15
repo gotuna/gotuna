@@ -79,6 +79,10 @@ func (t nativeHTML) getHelpers(w http.ResponseWriter, r *http.Request, patterns 
 			locale := t.app.Session.GetUserLocale(r)
 			return t.app.Locale.T(locale, s)
 		},
+		"tp": func(s string, n int) string {
+			locale := t.app.Session.GetUserLocale(r)
+			return t.app.Locale.TP(locale, s, n)
+		},
 		"static": func(file string) string {
 			hash := "123" // TODO:
 			return fmt.Sprintf("%s%s?%s", t.app.StaticPrefix, file, hash)
