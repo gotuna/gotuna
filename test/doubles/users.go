@@ -4,7 +4,7 @@ import "github.com/gotuna/gotuna"
 
 // MemUser1 is a sample in-memory user.
 var MemUser1 = gotuna.InMemoryUser{
-	UniqueID: "123",
+	ID:       "123",
 	Email:    "john@example.com",
 	Name:     "John",
 	Password: "pass123",
@@ -12,7 +12,7 @@ var MemUser1 = gotuna.InMemoryUser{
 
 // MemUser2 is a sample in-memory user.
 var MemUser2 = gotuna.InMemoryUser{
-	UniqueID: "456",
+	ID:       "456",
 	Email:    "bob@example.com",
 	Name:     "Bob",
 	Password: "bobby5",

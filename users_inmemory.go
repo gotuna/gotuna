@@ -14,7 +14,7 @@ import (
 // probably use crypto/bcrypt library and store hashed representation and
 // compare passwords in Authenticate method with bcrypt.CompareHashAndPassword
 type InMemoryUser struct {
-	UniqueID string
+	ID       string
 	Email    string
 	Name     string
 	Password string
@@ -22,7 +22,7 @@ type InMemoryUser struct {
 
 // GetID will return a unique ID for every specific user.
 func (u InMemoryUser) GetID() string {
-	return u.UniqueID
+	return u.ID
 }
 
 // NewInMemoryUserRepository returns a sample in-memory UserRepository
@@ -62,7 +62,7 @@ func (u inMemoryUserRepository) Authenticate(w http.ResponseWriter, r *http.Requ
 
 func (u inMemoryUserRepository) GetUserByID(id string) (User, error) {
 	for _, user := range u.users {
-		if user.UniqueID == id {
+		if user.ID == id {
 			return user, nil
 		}
 	}
