@@ -20,10 +20,10 @@ Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentat
 - Router (gorilla)
 - Standard `http.Handler` interface
 - Middleware support
-- User session managment (gorilla)
+- User session management (gorilla)
 - Session flash messages
 - Native view rendering (html/template) with helpers
-- Static file server included with configurable prefix
+- Static file server included with the configurable prefix
 - Standard logger interface
 - Request logging and panic recovery
 - Full support for embedded templates and static files
