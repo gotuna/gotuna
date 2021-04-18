@@ -10,9 +10,6 @@
 </p>
 
 # GoTuna - Web framework for Go
-NOTE: This project is under heavy development and is not ready for production use.
-
-# Documentation
 Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentation, examples, and more.
 
 
