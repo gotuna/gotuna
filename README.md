@@ -7,7 +7,6 @@
 <a href="https://pkg.go.dev/github.com/gotuna/gotuna"><img src="https://pkg.go.dev/badge/github.com/gotuna/gotuna" alt="PkgGoDev"></a>
 <a href="https://github.com/gotuna/gotuna/actions"><img src="https://github.com/gotuna/gotuna/workflows/Go/badge.svg" alt="Tests Status" /></a>
 <a href="https://goreportcard.com/report/github.com/gotuna/gotuna"><img src="https://goreportcard.com/badge/github.com/gotuna/gotuna" alt="Go Report Card" /></a>
-<a href="https://codecov.io/gh/gotuna/gotuna"><img src="https://codecov.io/gh/gotuna/gotuna/branch/main/graph/badge.svg?token=QG7CG4MSPC" alt="Codecov" /></a>
 </p>
 
 # GoTuna - Web framework for Go
