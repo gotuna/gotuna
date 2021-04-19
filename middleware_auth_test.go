@@ -27,7 +27,24 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 	assert.Redirects(t, response, "/pleaselogin", http.StatusFound)
 }
 
-func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
+func TestUserIsNotRedirectedToTheLoginPage(t *testing.T) {
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	app := gotuna.App{
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("123")),
+	}
+
+	middleware := app.Authenticate("/pleaselogin")
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+
+	handler.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusOK, response.Code)
+}
+
+func TestUserIsRedirectedToHome(t *testing.T) {
 
 	fakeUser := doubles.MemUser1
 
@@ -44,4 +61,21 @@ func TestLoggedInUserIsRedirectedToHome(t *testing.T) {
 	handler.ServeHTTP(response, request)
 
 	assert.Redirects(t, response, "/dashboard", http.StatusFound)
+}
+
+func TestGuestIsNotRedirectedToHome(t *testing.T) {
+
+	request := httptest.NewRequest(http.MethodGet, "/login", nil)
+	response := httptest.NewRecorder()
+
+	app := gotuna.App{
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+	}
+
+	middleware := app.RedirectIfAuthenticated("/dashboard")
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+
+	handler.ServeHTTP(response, request)
+
+	assert.Equal(t, http.StatusOK, response.Code)
 }
