@@ -14,30 +14,6 @@ import (
 	"github.com/gotuna/gotuna"
 )
 
-// User1 is a sample user #1.
-var User1 = gotuna.InMemoryUser{
-	ID:       "123",
-	Email:    "john@example.com",
-	Name:     "John",
-	Password: "pass123",
-}
-
-// User2 is a sample user #2.
-var User2 = gotuna.InMemoryUser{
-	ID:       "456",
-	Email:    "bob@example.com",
-	Name:     "Bob",
-	Password: "bobby5",
-}
-
-// NewUserRepository returns a new in-memory user repository with two sample users.
-func NewUserRepository() gotuna.UserRepository {
-	return gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
-		User1,
-		User2,
-	})
-}
-
 // App is a main dependency store.
 type App struct {
 	gotuna.App

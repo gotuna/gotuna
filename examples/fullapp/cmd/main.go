@@ -13,6 +13,7 @@ import (
 	"github.com/gotuna/gotuna/examples/fullapp/i18n"
 	"github.com/gotuna/gotuna/examples/fullapp/static"
 	"github.com/gotuna/gotuna/examples/fullapp/views"
+	"github.com/gotuna/gotuna/test/doubles"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 	app := fullapp.MakeApp(fullapp.App{
 		App: gotuna.App{
 			Logger:         log.New(os.Stdout, "", 0),
-			UserRepository: fullapp.NewUserRepository(),
+			UserRepository: doubles.NewUserRepositoryStub(),
 			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
 			Static:         static.EmbededStatic,
 			StaticPrefix:   "",
