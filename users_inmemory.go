@@ -2,9 +2,17 @@ package gotuna
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
+)
+
+var (
+	// ErrWrongPassword is thrown on bad password
+	ErrWrongPassword = constError("wrong password")
+	// ErrCannotFindUser is thrown when we cannot match user
+	ErrCannotFindUser = constError("user not found")
+	// ErrRequiredField is thrown when requestfield is required
+	ErrRequiredField = constError("this field is required")
 )
 
 // InMemoryUser is a sample User entity implementation with some
@@ -41,20 +49,20 @@ func (u inMemoryUserRepository) Authenticate(w http.ResponseWriter, r *http.Requ
 	Password := r.FormValue("password")
 
 	if email == "" {
-		return InMemoryUser{}, errors.New("this field is required")
+		return InMemoryUser{}, ErrRequiredField
 	}
 	if Password == "" {
-		return InMemoryUser{}, errors.New("this field is required")
+		return InMemoryUser{}, ErrRequiredField
 	}
 
 	found, err := u.getUserByEmail(email)
 	if err != nil {
-		return InMemoryUser{}, fmt.Errorf("cannot find user with this email %v", err)
+		return InMemoryUser{}, ErrCannotFindUser
 	}
 
 	// in real life this should be bcrypt.CompareHashAndPassword
 	if found.Password != Password {
-		return InMemoryUser{}, fmt.Errorf("passwords don't match %v", err)
+		return InMemoryUser{}, ErrWrongPassword
 	}
 
 	return found, nil
@@ -67,7 +75,7 @@ func (u inMemoryUserRepository) GetUserByID(id string) (User, error) {
 		}
 	}
 
-	return InMemoryUser{}, errors.New("user not found")
+	return InMemoryUser{}, ErrCannotFindUser
 }
 
 func (u inMemoryUserRepository) getUserByEmail(email string) (InMemoryUser, error) {

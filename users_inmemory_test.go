@@ -7,62 +7,96 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/gotuna/gotuna"
 	"github.com/gotuna/gotuna/test/assert"
 	"github.com/gotuna/gotuna/test/doubles"
 )
 
+func TestUserRepository(t *testing.T) {
+
+	repo := gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
+		gotuna.InMemoryUser{
+			ID:    "555",
+			Email: "ted@example.com",
+		},
+	})
+
+	user, err := repo.GetUserByID("555")
+	assert.NoError(t, err)
+	assert.Equal(t, "555", user.GetID())
+
+	userNotFound, err := repo.GetUserByID("777")
+	assert.Error(t, err)
+	assert.Equal(t, "", userNotFound.GetID())
+}
+
 func TestAuthenticate(t *testing.T) {
 
-	t.Run("test good authentication", func(t *testing.T) {
+	forms := []struct {
+		name   string
+		form   url.Values
+		userID string
+		err    error
+	}{
+		{
+			"test good authentication",
+			url.Values{
+				"email":    {doubles.MemUser1.Email},
+				"password": {"pass123"},
+			},
+			doubles.MemUser1.GetID(),
+			nil,
+		},
+		{
+			"test bad password",
+			url.Values{
+				"email":    {doubles.MemUser1.Email},
+				"password": {"bad-pass"},
+			},
+			"",
+			gotuna.ErrWrongPassword,
+		},
+		{
+			"test no password",
+			url.Values{
+				"email": {doubles.MemUser1.Email},
+			},
+			"",
+			gotuna.ErrRequiredField,
+		},
+		{
+			"test no email",
+			url.Values{
+				"password": {"pass123"},
+			},
+			"",
+			gotuna.ErrRequiredField,
+		},
+		{
+			"non-existing user",
+			url.Values{
+				"email":    {"harry@example.com"},
+				"password": {"i-do-not-exist"},
+			},
+			"",
+			gotuna.ErrCannotFindUser,
+		},
+	}
 
-		form := url.Values{
-			"email":    {doubles.MemUser1.Email},
-			"password": {"pass123"},
-		}
+	for _, tt := range forms {
+		t.Run(tt.name, func(t *testing.T) {
 
-		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(form.Encode()))
-		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		response := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tt.form.Encode()))
+			request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			response := httptest.NewRecorder()
 
-		user, authenticated := doubles.NewUserRepositoryStub().
-			Authenticate(response, request)
+			userRepo := doubles.NewUserRepositoryStub()
+			user, authenticated := userRepo.Authenticate(response, request)
 
-		assert.NoError(t, authenticated)
-		assert.Equal(t, doubles.MemUser1.GetID(), user.GetID())
-	})
+			assert.Equal(t, tt.err, authenticated)
+			assert.Equal(t, tt.userID, user.GetID())
 
-	t.Run("test bad password", func(t *testing.T) {
+		})
+	}
 
-		form := url.Values{
-			"email":    {doubles.MemUser1.Email},
-			"password": {"bad-password"},
-		}
-
-		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(form.Encode()))
-		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		response := httptest.NewRecorder()
-
-		user, authenticated := doubles.NewUserRepositoryStub().
-			Authenticate(response, request)
-
-		assert.Error(t, authenticated)
-		assert.Equal(t, "", user.GetID())
-	})
-
-	t.Run("test non existing user", func(t *testing.T) {
-		form := url.Values{
-			"email":    {"non-existing"},
-			"password": {"non-existing"},
-		}
-
-		request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(form.Encode()))
-		request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		response := httptest.NewRecorder()
-
-		user, authenticated := doubles.NewUserRepositoryStub().
-			Authenticate(response, request)
-
-		assert.Error(t, authenticated)
-		assert.Equal(t, "", user.GetID())
-	})
 }
