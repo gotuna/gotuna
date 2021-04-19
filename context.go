@@ -2,10 +2,12 @@ package gotuna
 
 import (
 	"context"
+	"net/url"
 )
 
 type ctxKeyType string
 
+const ctxKeyParams ctxKeyType = "params"
 const ctxKeyUser ctxKeyType = "user"
 
 // ErrNoUserInContext is thrown when we cannot extract the User from the current context
@@ -23,4 +25,20 @@ func GetUserFromContext(ctx context.Context) (User, error) {
 		return nil, ErrNoUserInContext
 	}
 	return user, nil
+}
+
+// ContextWithParams returns a context with all the input parameters for
+// the current request query/form/route
+func ContextWithParams(ctx context.Context, vars url.Values) context.Context {
+	return context.WithValue(ctx, ctxKeyParams, vars)
+}
+
+// GetParam return specific request parameter (query/form/route)
+func GetParam(ctx context.Context, param string) string {
+	params, ok := ctx.Value(ctxKeyParams).(url.Values)
+	if !ok || len(params[param]) < 1 {
+		return ""
+	}
+
+	return params[param][0]
 }

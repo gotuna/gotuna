@@ -20,3 +20,8 @@ type App struct {
 	UserRepository UserRepository
 	Locale         Locale
 }
+
+// NewMuxRouter returns the underlying mux router instance
+func NewMuxRouter() *mux.Router {
+	return mux.NewRouter()
+}

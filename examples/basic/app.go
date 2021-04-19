@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/gotuna/gotuna"
 )
 
 // MakeApp with sample dependencies.
 func MakeApp(app gotuna.App) gotuna.App {
 
-	app.Router = mux.NewRouter()
+	app.Router = gotuna.NewMuxRouter()
 	app.Router.Handle("/", handlerHome(app)).Methods(http.MethodGet)
 
 	return app
