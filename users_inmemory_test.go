@@ -15,7 +15,7 @@ import (
 func TestUserRepository(t *testing.T) {
 
 	repo := gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
-		gotuna.InMemoryUser{
+		{
 			ID:    "555",
 			Email: "ted@example.com",
 		},
