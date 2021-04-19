@@ -1,6 +1,8 @@
 package gotuna_test
 
 import (
+	"bytes"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,7 +41,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 		ses := gotuna.NewSession(sessionStoreSpy)
 
 		value, err := ses.Get(r, "test")
-		assert.Error(t, err)
+		assert.Equal(t, gotuna.ErrNoValueForThisKey, err)
 		assert.Equal(t, "", value)
 	})
 
@@ -65,4 +67,24 @@ func TestDestroyActiveSession(t *testing.T) {
 	assert.Equal(t, "", id)
 	assert.Equal(t, 1, sessionStoreSpy.SaveCalls)
 	assert.Equal(t, -1, sessionStoreSpy.Session.Options.MaxAge)
+}
+
+func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
+
+	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotuna.NewSession(nil)
+	})
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	wlog := &bytes.Buffer{}
+	app := gotuna.App{
+		Logger: log.New(wlog, "", 0),
+	}
+
+	recoverer := app.Recoverer("")
+	recoverer(badHandler).ServeHTTP(response, request)
+
+	assert.Contains(t, wlog.String(), "must supply a valid session store")
 }

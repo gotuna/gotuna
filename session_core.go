@@ -2,11 +2,16 @@ package gotuna
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/sessions"
+)
+
+var (
+	// ErrCannotGetSession is thrown when we cannot get retreive a valid session from the store
+	ErrCannotGetSession = constError("cannot get session from the store")
+	// ErrNoValueForThisKey is thrown when we cannot get a value for provided key
+	ErrNoValueForThisKey = constError("session holds no value for this key")
 )
 
 const sessionName = "app_session"
@@ -19,7 +24,7 @@ type Session struct {
 // NewSession returns a new application session with requested store engine.
 func NewSession(store sessions.Store) *Session {
 	if store == nil {
-		panic("Must supply a valid session store")
+		panic("must supply a valid session store")
 	}
 
 	return &Session{Store: store}
@@ -29,7 +34,7 @@ func NewSession(store sessions.Store) *Session {
 func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("cannot get session from the store")
+		return ErrCannotGetSession
 	}
 
 	// TODO: lock needed?
@@ -42,13 +47,13 @@ func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value s
 func (s Session) Get(r *http.Request, key string) (string, error) {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return "", errors.New("cannot get session from the store")
+		return "", ErrCannotGetSession
 	}
 
 	// TODO: lock needed?
 	value, ok := session.Values[key].(string)
 	if !ok {
-		return "", fmt.Errorf("session holds no value for key %s", key)
+		return "", ErrNoValueForThisKey
 	}
 
 	return value, nil
@@ -58,7 +63,7 @@ func (s Session) Get(r *http.Request, key string) (string, error) {
 func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("cannot get session from the store")
+		return ErrCannotGetSession
 	}
 
 	delete(session.Values, key)
@@ -70,7 +75,7 @@ func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) erro
 func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 	session, err := s.Store.Get(r, sessionName)
 	if err != nil {
-		return errors.New("cannot get session from the store")
+		return ErrCannotGetSession
 	}
 
 	delete(session.Values, UserIDKey)
