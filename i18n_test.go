@@ -46,4 +46,6 @@ func TestPluralization(t *testing.T) {
 	assert.Equal(t, "There are many oranges", locale.TP("en-US", "oranges", 5))
 	assert.Equal(t, "green apple", locale.TP("en-US", "apples", 1, "green"))
 	assert.Equal(t, "red apples", locale.TP("en-US", "apples", 22, "red"))
+	assert.Equal(t, "Unknown string", locale.TP("en-US", "Unknown string", 10))
+	assert.Equal(t, "Unknown string", locale.TP("fr-FR", "Unknown string", 10))
 }
