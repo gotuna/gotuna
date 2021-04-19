@@ -28,6 +28,8 @@ func TestRoutes(t *testing.T) {
 		{"", "/", http.MethodPost, http.StatusMethodNotAllowed},
 		{"", "/invalid", http.MethodGet, http.StatusNotFound},
 		{"", "/login", http.MethodGet, http.StatusOK},
+		{"", "/error", http.MethodGet, http.StatusInternalServerError},
+		{doubles.MemUser1.GetID(), "/setlocale/en-US", http.MethodGet, http.StatusFound},
 		{doubles.MemUser1.GetID(), "/login", http.MethodGet, http.StatusFound},
 		{doubles.MemUser1.GetID(), "/profile", http.MethodGet, http.StatusOK},
 		{doubles.MemUser2.GetID(), "/profile", http.MethodGet, http.StatusOK},

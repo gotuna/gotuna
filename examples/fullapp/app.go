@@ -109,7 +109,6 @@ func handlerLogin(app App) http.HandlerFunc {
 
 		// user is ok, save to session
 		if err := app.Session.SetUserID(w, r, user.GetID()); err != nil {
-			app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
 			handlerError(app).ServeHTTP(w, r)
 			return
 		}
