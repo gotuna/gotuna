@@ -32,3 +32,27 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 	assert.Equal(t, response.Code, http.StatusOK)
 	assert.Equal(t, fakeUser, userInContext)
 }
+
+func TestSkipIfWeCannotFindUser(t *testing.T) {
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	app := gotuna.App{
+		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+		UserRepository: doubles.NewUserRepositoryStub(),
+	}
+
+	middleware := app.StoreUserToContext()
+
+	var userInContext gotuna.User
+	var noUserErr error
+
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userInContext, noUserErr = gotuna.GetUserFromContext(r.Context())
+	})).ServeHTTP(response, request)
+
+	assert.Equal(t, response.Code, http.StatusOK)
+	assert.Error(t, noUserErr)
+	assert.Equal(t, nil, userInContext)
+}
