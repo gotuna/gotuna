@@ -182,11 +182,38 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
+	ses.SetUserLocale(w, r, "pt-PT")
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 
 	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
+
+	gotuna.App{
+		Session: ses,
+		ViewFiles: doubles.NewFileSystemStub(
+			map[string][]byte{
+				"view.html": []byte(tmpl),
+			}),
+	}.
+		NewTemplatingEngine().
+		Render(w, r, "view.html")
+
+	assert.Equal(t, want, w.Body.String())
+
+	messages := ses.Flashes(w, r)
+	assert.Equal(t, 0, len(messages))
+}
+
+func TestLocaleIsIncludedForLoggedInUsers(t *testing.T) {
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+
+	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
+	ses.SetUserLocale(w, r, "pt-PT")
+
+	tmpl := `{{define "app"}}{{if not isGuest}}Hi user, your locale is {{currentLocale}}{{end}}{{end}}`
+	want := `Hi user, your locale is pt-PT`
 
 	gotuna.App{
 		Session: ses,
