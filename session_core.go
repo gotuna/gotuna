@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// ErrCannotGetSession is thrown when we cannot get retreive a valid session from the store
+	// ErrCannotGetSession is thrown when we cannot retrieve a valid session from the store
 	ErrCannotGetSession = constError("cannot get session from the store")
 	// ErrNoValueForThisKey is thrown when we cannot get a value for provided key
 	ErrNoValueForThisKey = constError("session holds no value for this key")
