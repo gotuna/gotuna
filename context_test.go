@@ -2,12 +2,26 @@ package gotuna_test
 
 import (
 	"context"
+	"net/url"
 	"testing"
 
 	"github.com/gotuna/gotuna"
 	"github.com/gotuna/gotuna/test/assert"
 	"github.com/gotuna/gotuna/test/doubles"
 )
+
+func TestStoringAndGettingRequestParamsFromContext(t *testing.T) {
+	t.Run("get url parameter", func(t *testing.T) {
+		params := url.Values{
+			"color":    {"red"},
+			"password": {"pass123"},
+		}
+		ctx := gotuna.ContextWithParams(context.Background(), params)
+		assert.Equal(t, "red", gotuna.GetParam(ctx, "color"))
+		assert.Equal(t, "pass123", gotuna.GetParam(ctx, "password"))
+		assert.Equal(t, "", gotuna.GetParam(ctx, "non-existing"))
+	})
+}
 
 func TestStoringAndGettingUserFromContext(t *testing.T) {
 

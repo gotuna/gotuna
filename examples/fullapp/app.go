@@ -45,12 +45,13 @@ func MakeApp(app App) App {
 		},
 	}
 
-	app.Router = mux.NewRouter()
+	app.Router = gotuna.NewMuxRouter()
 
 	// middlewares for all routes
 	app.Router.Handle("/error", handlerError(app)).Methods(http.MethodGet, http.MethodPost)
 	app.Router.Use(app.Recoverer("/error"))
 	app.Router.Use(app.Logging())
+	app.Router.Use(app.StoreToContext())
 	app.Router.Use(app.Csrf)
 	app.Router.Methods(http.MethodOptions)
 	app.Router.Use(app.Cors())
@@ -58,7 +59,6 @@ func MakeApp(app App) App {
 	// for logged in users
 	user := app.Router.NewRoute().Subrouter()
 	user.Use(app.Authenticate("/login"))
-	user.Use(app.StoreUserToContext())
 	user.Handle("/", handlerHome(app)).Methods(http.MethodGet)
 	user.Handle("/profile", handlerProfile(app)).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", handlerLogout(app)).Methods(http.MethodPost)
@@ -137,8 +137,8 @@ func handlerProfile(app App) http.Handler {
 
 func handlerChangeLocale(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		app.Session.SetUserLocale(w, r, vars["locale"])
+		locale := gotuna.GetParam(r.Context(), "locale")
+		app.Session.SetUserLocale(w, r, locale)
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 }
