@@ -76,5 +76,56 @@ func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
 	gotuna.NewSession(nil)
 
 	t.Errorf("templating engine should panic")
+}
 
+func TestTypeToStringAndBackToType(t *testing.T) {
+
+	type testType struct {
+		Str string
+		Bl  bool
+	}
+
+	val := testType{
+		Str: "test string",
+		Bl:  true,
+	}
+
+	s, err := gotuna.TypeToString(val)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"Str":"test string","Bl":true}`, s)
+
+	r := testType{}
+	err = gotuna.TypeFromString(s, &r)
+	assert.NoError(t, err)
+	assert.Equal(t, "test string", r.Str)
+	assert.Equal(t, true, r.Bl)
+}
+
+func TestTypeToStringWithUnsupportedType(t *testing.T) {
+
+	type testType struct {
+		Str string
+		Fn  func(string)
+	}
+
+	val := testType{
+		Str: "test string",
+		Fn:  func(a string) {},
+	}
+
+	_, err := gotuna.TypeToString(val)
+	assert.Error(t, err)
+}
+
+func TestTypeFromGarbageString(t *testing.T) {
+
+	type testType struct {
+		Str string
+		Fn  func(string)
+	}
+
+	val := testType{}
+
+	err := gotuna.TypeFromString("garbage===", val)
+	assert.Error(t, err)
 }
