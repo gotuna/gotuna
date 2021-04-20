@@ -118,14 +118,6 @@ func TestTypeToStringWithUnsupportedType(t *testing.T) {
 }
 
 func TestTypeFromGarbageString(t *testing.T) {
-
-	type testType struct {
-		Str string
-		Fn  func(string)
-	}
-
-	val := testType{}
-
-	err := gotuna.TypeFromString("garbage===", val)
+	err := gotuna.TypeFromString("garbage===", struct{}{})
 	assert.Error(t, err)
 }
