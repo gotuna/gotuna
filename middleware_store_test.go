@@ -95,7 +95,7 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
+		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID()), "test"),
 		UserRepository: doubles.NewUserRepositoryStub(),
 	}
 
@@ -117,7 +117,7 @@ func TestSkipIfWeCannotFindUser(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+		Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(""), "test"),
 		UserRepository: doubles.NewUserRepositoryStub(),
 	}
 

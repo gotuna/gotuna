@@ -25,7 +25,7 @@ func main() {
 		App: gotuna.App{
 			Logger:         log.New(os.Stdout, "", 0),
 			UserRepository: doubles.NewUserRepositoryStub(),
-			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs))),
+			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs)), "app_session"),
 			Static:         static.EmbededStatic,
 			StaticPrefix:   "",
 			ViewFiles:      views.EmbededViews,

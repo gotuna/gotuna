@@ -17,6 +17,7 @@ type App struct {
 	ViewFiles      fs.FS
 	ViewHelpers    []ViewHelperFunc
 	Session        *Session
+	SessionName    string
 	UserRepository UserRepository
 	Locale         Locale
 }

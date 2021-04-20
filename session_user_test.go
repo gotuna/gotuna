@@ -14,7 +14,7 @@ func TestReadingUserIDFromEmptyStore(t *testing.T) {
 
 	r := &http.Request{}
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotuna.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 	assert.Equal(t, true, ses.IsGuest(r))
 
@@ -30,7 +30,7 @@ func TestSaveUserIDAndRetrieve(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotuna.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 	err := ses.SetUserID(w, r, doubles.MemUser1.GetID())
 	assert.NoError(t, err)
@@ -47,7 +47,7 @@ func TestSettingUserLocale(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-	ses := gotuna.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 	assert.Equal(t, "", ses.GetUserLocale(r))
 

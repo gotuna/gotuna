@@ -43,7 +43,7 @@ func TestRoutes(t *testing.T) {
 
 			app := fullapp.MakeApp(fullapp.App{
 				gotuna.App{
-					Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID)),
+					Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID), "test"),
 					Static:         doubles.NewFileSystemStub(map[string][]byte{}),
 					UserRepository: doubles.NewUserRepositoryStub(),
 					ViewFiles:      views.EmbededViews,
@@ -88,7 +88,7 @@ func TestLogin(t *testing.T) {
 
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
-				Session:   gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
+				Session:   gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				ViewFiles: views.EmbededViews,
 			},
 			middlewareCsrfStub,
@@ -108,7 +108,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
-				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
+				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
 			},
@@ -128,7 +128,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
-				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
+				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
 			},
@@ -146,7 +146,7 @@ func TestLogin(t *testing.T) {
 
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
-				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc"))),
+				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
 			},
@@ -177,7 +177,7 @@ func TestLogout(t *testing.T) {
 
 	app := fullapp.MakeApp(fullapp.App{
 		gotuna.App{
-			Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID())),
+			Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID()), "test"),
 			ViewFiles:      views.EmbededViews,
 			UserRepository: doubles.NewUserRepositoryStub(),
 		},

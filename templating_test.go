@@ -36,7 +36,7 @@ func TestUsingTranslation(t *testing.T) {
 	rendered := `Hello, this is my auto. There are many oranges`
 
 	app := gotuna.App{
-		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())),
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test"),
 		Locale: gotuna.NewLocale(map[string]map[string]string{
 			"car": {
 				"en-US": "auto",
@@ -181,7 +181,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
+	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
 	ses.SetUserLocale(w, r, "pt-PT")
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
@@ -209,7 +209,7 @@ func TestLocaleIsIncludedForLoggedInUsers(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()))
+	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
 	ses.SetUserLocale(w, r, "pt-PT")
 
 	tmpl := `{{define "app"}}{{if not isGuest}}Hi user, your locale is {{currentLocale}}{{end}}{{end}}`

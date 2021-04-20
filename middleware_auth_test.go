@@ -16,7 +16,7 @@ func TestGuestIsRedirectedToTheLoginPage(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(""), "test"),
 	}
 
 	middleware := app.Authenticate("/pleaselogin")
@@ -33,7 +33,7 @@ func TestUserIsNotRedirectedToTheLoginPage(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("123")),
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("123"), "test"),
 	}
 
 	middleware := app.Authenticate("/pleaselogin")
@@ -52,7 +52,7 @@ func TestUserIsRedirectedToHome(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID())),
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(fakeUser.GetID()), "test"),
 	}
 
 	middleware := app.RedirectIfAuthenticated("/dashboard")
@@ -69,7 +69,7 @@ func TestGuestIsNotRedirectedToHome(t *testing.T) {
 	response := httptest.NewRecorder()
 
 	app := gotuna.App{
-		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy("")),
+		Session: gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(""), "test"),
 	}
 
 	middleware := app.RedirectIfAuthenticated("/dashboard")

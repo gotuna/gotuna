@@ -14,25 +14,31 @@ var (
 	ErrNoValueForThisKey = constError("session holds no value for this key")
 )
 
-const sessionName = "app_session"
-
 // Session is the main application session store.
 type Session struct {
-	Store sessions.Store
+	store sessions.Store
+	name  string
 }
 
 // NewSession returns a new application session with requested store engine.
-func NewSession(store sessions.Store) *Session {
+func NewSession(store sessions.Store, name string) *Session {
 	if store == nil {
 		panic("must supply a valid session store")
 	}
 
-	return &Session{Store: store}
+	if name == "" {
+		panic("must supply a valid session name")
+	}
+
+	return &Session{
+		store: store,
+		name:  name,
+	}
 }
 
 // Put string value in the session for specified key.
 func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value string) error {
-	session, err := s.Store.Get(r, sessionName)
+	session, err := s.store.Get(r, s.name)
 	if err != nil {
 		return ErrCannotGetSession
 	}
@@ -40,12 +46,12 @@ func (s Session) Put(w http.ResponseWriter, r *http.Request, key string, value s
 	// TODO: lock needed?
 	session.Values[key] = value
 
-	return s.Store.Save(r, w, session)
+	return s.store.Save(r, w, session)
 }
 
 // Get string value from the session for specified key.
 func (s Session) Get(r *http.Request, key string) (string, error) {
-	session, err := s.Store.Get(r, sessionName)
+	session, err := s.store.Get(r, s.name)
 	if err != nil {
 		return "", ErrCannotGetSession
 	}
@@ -61,19 +67,19 @@ func (s Session) Get(r *http.Request, key string) (string, error) {
 
 // Delete value from the session for key.
 func (s Session) Delete(w http.ResponseWriter, r *http.Request, key string) error {
-	session, err := s.Store.Get(r, sessionName)
+	session, err := s.store.Get(r, s.name)
 	if err != nil {
 		return ErrCannotGetSession
 	}
 
 	delete(session.Values, key)
 
-	return s.Store.Save(r, w, session)
+	return s.store.Save(r, w, session)
 }
 
 // Destroy the user session by removing the user key and expiring the cookie.
 func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
-	session, err := s.Store.Get(r, sessionName)
+	session, err := s.store.Get(r, s.name)
 	if err != nil {
 		return ErrCannotGetSession
 	}
@@ -81,7 +87,7 @@ func (s Session) Destroy(w http.ResponseWriter, r *http.Request) error {
 	delete(session.Values, UserIDKey)
 	session.Options.MaxAge = -1
 
-	return s.Store.Save(r, w, session)
+	return s.store.Save(r, w, session)
 }
 
 // TypeToString converts any type t to JSON-encoded string value.

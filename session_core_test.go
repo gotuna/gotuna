@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/sessions"
 	"github.com/gotuna/gotuna"
 	"github.com/gotuna/gotuna/test/assert"
 	"github.com/gotuna/gotuna/test/doubles"
@@ -16,7 +17,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 		r := &http.Request{}
 		w := httptest.NewRecorder()
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-		ses := gotuna.NewSession(sessionStoreSpy)
+		ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 		err := ses.Put(w, r, "test", "somevalue")
 		assert.NoError(t, err)
@@ -36,7 +37,7 @@ func TestStoreAndRetrieveData(t *testing.T) {
 	t.Run("test retrieving unsaved data", func(t *testing.T) {
 		r := &http.Request{}
 		sessionStoreSpy := doubles.NewGorillaSessionStoreSpy("")
-		ses := gotuna.NewSession(sessionStoreSpy)
+		ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 		value, err := ses.Get(r, "test")
 		assert.Equal(t, gotuna.ErrNoValueForThisKey, err)
@@ -52,7 +53,7 @@ func TestDestroyActiveSession(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(testUser.GetID())
-	ses := gotuna.NewSession(sessionStoreSpy)
+	ses := gotuna.NewSession(sessionStoreSpy, "test")
 
 	id, err := ses.GetUserID(r)
 	assert.NoError(t, err)
@@ -67,13 +68,42 @@ func TestDestroyActiveSession(t *testing.T) {
 	assert.Equal(t, -1, sessionStoreSpy.Session.Options.MaxAge)
 }
 
-func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
+func TestTryToUseInvalidSession(t *testing.T) {
 
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+	store := sessions.NewCookieStore([]byte("some key"))
+	ses := gotuna.NewSession(store, "bad(((***")
+
+	err := ses.Destroy(w, r)
+	assert.Error(t, err)
+
+	err = ses.Delete(w, r, "some key")
+	assert.Error(t, err)
+
+	_, err = ses.Get(r, "some key")
+	assert.Error(t, err)
+
+	err = ses.Put(w, r, "some key", "some value")
+	assert.Error(t, err)
+}
+
+func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
 	defer func() {
 		recover()
 	}()
 
-	gotuna.NewSession(nil)
+	gotuna.NewSession(nil, "test")
+
+	t.Errorf("templating engine should panic")
+}
+
+func TestSessionWillPanicOnBadSessionName(t *testing.T) {
+	defer func() {
+		recover()
+	}()
+
+	gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(""), "")
 
 	t.Errorf("templating engine should panic")
 }
