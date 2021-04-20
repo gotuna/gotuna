@@ -38,3 +38,14 @@ func TestFlashMessages(t *testing.T) {
 	messages = ses.Flashes(w, r)
 	assert.Equal(t, 0, len(messages))
 }
+
+func TestIvalidFlashMessageInTheSession(t *testing.T) {
+	sessionStoreSpy := doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID())
+	ses := gotuna.NewSession(sessionStoreSpy, "test")
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+
+	ses.Put(w, r, "_flash", "alien saved to the flash key")
+	err := ses.Flash(w, r, gotuna.NewFlash("flash message one"))
+	assert.Error(t, err)
+}
