@@ -7,8 +7,10 @@ import (
 
 type ctxKeyType string
 
-const ctxKeyParams ctxKeyType = "params"
-const ctxKeyUser ctxKeyType = "user"
+const (
+	ctxKeyParams ctxKeyType = "params"
+	ctxKeyUser   ctxKeyType = "user"
+)
 
 // ErrNoUserInContext is thrown when we cannot extract the User from the current context
 var ErrNoUserInContext = constError("no user in the context")

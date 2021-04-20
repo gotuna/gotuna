@@ -5,11 +5,12 @@ import (
 	"net/http"
 )
 
-// UserIDKey is used as session key to store the current's user unique ID.
-const UserIDKey = "_user_id"
-
-// UserLocaleKey is used as session key for the current's user locale settings.
-const UserLocaleKey = "_user_locale"
+const (
+	// UserIDKey is used as session key to store the current's user unique ID.
+	UserIDKey = "_user_id"
+	// UserLocaleKey is used as session key for the current's user locale settings.
+	UserLocaleKey = "_user_locale"
+)
 
 // IsGuest checks if current user is not logged in into the app.
 func (s Session) IsGuest(r *http.Request) bool {
