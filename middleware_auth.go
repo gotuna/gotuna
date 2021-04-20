@@ -2,8 +2,6 @@ package gotuna
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // Authenticate middleware will redirect all guests to the destination.
