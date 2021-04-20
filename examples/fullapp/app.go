@@ -10,14 +10,13 @@ import (
 	"time"
 
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 	"github.com/gotuna/gotuna"
 )
 
 // App is a main dependency store.
 type App struct {
 	gotuna.App
-	Csrf mux.MiddlewareFunc // app-specific config
+	Csrf gotuna.MiddlewareFunc // app-specific config
 }
 
 // MakeApp creates an App with sample dependencies.

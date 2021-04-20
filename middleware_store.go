@@ -10,7 +10,7 @@ import (
 // StoreToContext middleware will add common values to the context for further use
 // this includes all of the parameters for the current request query/form/route
 // and the current logged in user (if any)
-func (app App) StoreToContext() mux.MiddlewareFunc {
+func (app App) StoreToContext() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

@@ -8,7 +8,7 @@ import (
 
 // Authenticate middleware will redirect all guests to the destination.
 // This is used to guard user-only routes and to force guests to login.
-func (app App) Authenticate(destination string) mux.MiddlewareFunc {
+func (app App) Authenticate(destination string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 

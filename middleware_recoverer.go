@@ -3,13 +3,11 @@ package gotuna
 import (
 	"net/http"
 	"runtime/debug"
-
-	"github.com/gorilla/mux"
 )
 
 // Recoverer middleware is used to recover the app from panics, to log the
 // incident, and to redirect user to the error page.
-func (app App) Recoverer(destination string) mux.MiddlewareFunc {
+func (app App) Recoverer(destination string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
