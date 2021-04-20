@@ -26,7 +26,7 @@ func (app App) Authenticate(destination string) MiddlewareFunc {
 // users to the destination.
 // This is used to deflect logged in users from guest-only pages like login
 // or register page back to the app.
-func (app App) RedirectIfAuthenticated(destination string) mux.MiddlewareFunc {
+func (app App) RedirectIfAuthenticated(destination string) MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
