@@ -2,12 +2,10 @@ package gotuna
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // Cors middleware will add CORS headers to every request.
-func (app App) Cors() mux.MiddlewareFunc {
+func (app App) Cors() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == http.MethodOptions {

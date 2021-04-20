@@ -3,12 +3,10 @@ package gotuna
 import (
 	"net/http"
 	"time"
-
-	"github.com/gorilla/mux"
 )
 
 // Logging middleware is used to log every requests to the app's Logger.
-func (app App) Logging() mux.MiddlewareFunc {
+func (app App) Logging() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
