@@ -2,6 +2,9 @@
 # Changelog
 
 ## Upcoming...
+
+## v0.4.0 - 2021-04-20
+
 Breaking changes:
 - Configurable session name added, gotuna.NewSession signature changed
 
