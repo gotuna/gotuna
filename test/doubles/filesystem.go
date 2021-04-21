@@ -11,17 +11,19 @@ import (
 // NewFileSystemStub returns a new fs.FS stub with provided files.
 func NewFileSystemStub(files map[string][]byte) *filesystemStub {
 	return &filesystemStub{
-		files: files,
+		files:   files,
+		badFile: "badfile.txt",
 	}
 }
 
 // implements type FS interface
 type filesystemStub struct {
-	files map[string][]byte
+	files   map[string][]byte
+	badFile string
 }
 
 func (f *filesystemStub) Open(name string) (fs.File, error) {
-	if name == "badfile.txt" {
+	if name == f.badFile {
 		return &badFile{}, nil
 	}
 
