@@ -9,15 +9,15 @@ var Translations = map[string]map[string]string{
 	},
 	"Password": {
 		"en-US": "Password",
+		"fr-FR": "Mot de passe",
 	},
 	"Log In": {
 		"en-US": "Log In",
+		"fr-FR": "Connexion",
 	},
 	"Log Out": {
 		"en-US": "Log Out",
-	},
-	"Login": {
-		"en-US": "Login",
+		"fr-FR": "Déconnexion",
 	},
 	"Home": {
 		"en-US": "Home",
@@ -25,44 +25,22 @@ var Translations = map[string]map[string]string{
 	},
 	"Profile": {
 		"en-US": "Profile",
-	},
-	"Submit": {
-		"en-US": "Submit",
+		"fr-FR": "Profil",
 	},
 	"Name": {
 		"en-US": "Name",
-	},
-	"Change your password": {
-		"en-US": "Change your password",
-	},
-	"New Password": {
-		"en-US": "New Password",
-	},
-	"Repeat Password": {
-		"en-US": "Repeat Password",
-	},
-	"Your password and confirmation do not match": {
-		"en-US": "Your password and confirmation do not match",
-	},
-	"Leave blank if you don't want to change it": {
-		"en-US": "Leave blank if you don't want to change it",
-	},
-	"Your password must be at least %d characters long": {
-		"en-US": "Your password must be at least %d characters long",
-	},
-	"This field is required": {
-		"en-US": "This field is required",
-	},
-	"The information was successfully updated": {
-		"en-US": "The information was successfully updated",
+		"fr-FR": "Nom",
 	},
 	"Login failed, please try again": {
 		"en-US": "Login failed, please try again",
+		"fr-FR": "Échec de la connexion, veuillez réessayer",
 	},
 	"Not found": {
 		"en-US": "Not found",
+		"fr-FR": "Pas trouvé",
 	},
 	"Welcome": {
 		"en-US": "Welcome",
+		"fr-FR": "Salut!",
 	},
 }
