@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-// Cors middleware will add CORS headers to every request.
+// Cors middleware will add CORS headers to OPTIONS request and respond with 204 status.
 func (app App) Cors() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
