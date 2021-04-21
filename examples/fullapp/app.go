@@ -107,10 +107,7 @@ func handlerLogin(app App) http.HandlerFunc {
 		}
 
 		// user is ok, save to session
-		if err := app.Session.SetUserID(w, r, user.GetID()); err != nil {
-			handlerError(app).ServeHTTP(w, r)
-			return
-		}
+		app.Session.SetUserID(w, r, user.GetID())
 
 		app.Session.SetUserLocale(w, r, "en-US")
 
