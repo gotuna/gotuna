@@ -108,8 +108,14 @@ func handlerLogin(app App) http.HandlerFunc {
 
 		// user is ok, save to session
 		app.Session.SetUserID(w, r, user.GetID())
-
 		app.Session.SetUserLocale(w, r, "en-US")
+
+		// log this event
+		app.Logger.Printf(
+			"%s ### User logged in: %s",
+			time.Now().Format(time.RFC3339),
+			user.(gotuna.InMemoryUser).Name,
+		)
 
 		flash(app, w, r, t(app, r, "Welcome"))
 
@@ -119,7 +125,18 @@ func handlerLogin(app App) http.HandlerFunc {
 
 func handlerLogout(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		user, _ := gotuna.GetUserFromContext(r.Context())
+
+		// log this event
+		app.Logger.Printf(
+			"%s ### User logged out: %s",
+			time.Now().Format(time.RFC3339),
+			user.(gotuna.InMemoryUser).Name,
+		)
+
 		app.Session.Destroy(w, r)
+
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
 }
@@ -160,9 +177,7 @@ func handlerError(app App) http.Handler {
 }
 
 func flash(app App, w http.ResponseWriter, r *http.Request, msg string) {
-	if err := app.Session.Flash(w, r, gotuna.NewFlash(msg)); err != nil {
-		app.Logger.Printf("%s %s %s %v", time.Now().Format(time.RFC3339), r.Method, r.URL.Path, err)
-	}
+	app.Session.Flash(w, r, gotuna.NewFlash(msg))
 }
 
 func t(app App, r *http.Request, s string) string {
