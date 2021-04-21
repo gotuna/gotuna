@@ -20,8 +20,8 @@ func (app App) ServeFiles(notFound http.Handler) http.Handler {
 			notFound.ServeHTTP(w, r)
 			return
 		}
-		stat, _ := f.Stat()
-		if stat.IsDir() {
+		stat, err := f.Stat()
+		if err != nil || stat.IsDir() {
 			notFound.ServeHTTP(w, r)
 			return
 		}

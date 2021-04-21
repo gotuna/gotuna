@@ -1,6 +1,7 @@
 package doubles
 
 import (
+	"errors"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -20,6 +21,10 @@ type filesystemStub struct {
 }
 
 func (f *filesystemStub) Open(name string) (fs.File, error) {
+	if name == "badfile.txt" {
+		return &badFile{}, nil
+	}
+
 	tmpfile, err := ioutil.TempFile("", "fsdemo")
 	if err != nil {
 		log.Fatal(err)
@@ -34,4 +39,18 @@ func (f *filesystemStub) Open(name string) (fs.File, error) {
 	tmpfile.Seek(0, 0)
 
 	return tmpfile, nil
+}
+
+type badFile struct{}
+
+func (f *badFile) Stat() (fs.FileInfo, error) {
+	return nil, errors.New("bad file")
+}
+
+func (f *badFile) Read(_ []byte) (int, error) {
+	return 0, errors.New("bad file")
+}
+
+func (f *badFile) Close() error {
+	return errors.New("bad file")
 }
