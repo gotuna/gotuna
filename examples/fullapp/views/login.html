@@ -1,8 +1,9 @@
 {{define "title"}}{{t "Log In"}}{{end}}
 
 {{define "content"}}
-  <div class="guest-form">
-    <form method="POST" action="/login">
+<div class="columns is-centered">
+  <div class="column is-narrow is-two-fifths">
+    <form method="POST" action="/login" class="box">
       {{csrf}}
       <div class="field">
         <label class="label">{{t "Email"}}</label>
@@ -25,4 +26,5 @@
       </div>
     </form>
   </div>
+</div>
 {{end}}

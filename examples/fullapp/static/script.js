@@ -31,6 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         el.style.display = 'none'
       })
     }
-  }, 4000)
+  }, 3000)
 
 })

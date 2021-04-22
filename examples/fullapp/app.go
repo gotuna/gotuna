@@ -162,12 +162,24 @@ func handlerAddUser(app App) http.Handler {
 			return
 		}
 
-		repo.AddUser(gotuna.InMemoryUser{
+		err := repo.AddUser(gotuna.InMemoryUser{
 			ID:       gotuna.GetParam(ctx, "id"),
 			Name:     gotuna.GetParam(ctx, "name"),
 			Email:    gotuna.GetParam(ctx, "email"),
 			Password: gotuna.GetParam(ctx, "password"),
 		})
+
+		if err != nil {
+			app.Session.Flash(w, r, gotuna.FlashMessage{
+				Message:   t(app, r, "Error"),
+				Kind:      "danger",
+				AutoClose: true,
+			})
+			tmpl.Render(w, r, "app.html", "adduser.html")
+			return
+		}
+
+		flash(app, w, r, t(app, r, "Success"))
 
 		http.Redirect(w, r, "/", http.StatusFound)
 	})

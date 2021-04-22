@@ -23,6 +23,14 @@ var Translations = map[string]map[string]string{
 		"en-US": "Confirm",
 		"fr-FR": "Confirmer",
 	},
+	"Success": {
+		"en-US": "Success",
+		"fr-FR": "Succès",
+	},
+	"Error": {
+		"en-US": "Error",
+		"fr-FR": "Erreur",
+	},
 	"Home": {
 		"en-US": "Home",
 		"fr-FR": "Accueil",

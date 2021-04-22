@@ -34,6 +34,7 @@ func TestRoutes(t *testing.T) {
 		{doubles.MemUser1.GetID(), "/profile", http.MethodGet, http.StatusOK},
 		{doubles.MemUser2.GetID(), "/profile", http.MethodGet, http.StatusOK},
 		{doubles.MemUser1.GetID(), "/adduser", http.MethodGet, http.StatusOK},
+		{doubles.MemUser1.GetID(), "/adduser", http.MethodPost, http.StatusOK},
 	}
 
 	for _, r := range routes {

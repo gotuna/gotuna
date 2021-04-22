@@ -60,9 +60,9 @@
     </nav>
     {{end}}
 
-    <div style="position:absolute;width:100%">
+    <div class="notification-wrap">
       {{range $e := .Flashes}}
-      <div class="notification is-radiusless m-0 {{if $e.Kind}}is-{{$e.Kind}}{{end}} {{if $e.AutoClose}}auto-close{{end}}">
+      <div class="notification {{if $e.Kind}}is-{{$e.Kind}}{{end}} {{if $e.AutoClose}}auto-close{{end}}">
         <button class="delete"></button>
         {{$e.Message}}
       </div>
