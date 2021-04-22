@@ -18,13 +18,13 @@ func (app App) StoreToContext() MiddlewareFunc {
 
 			params := url.Values{}
 
-			// parse route vars
+			// Parse route vars
 			vars := mux.Vars(r)
 			for k, v := range vars {
 				params.Add(k, v)
 			}
 
-			// parse form and add to params
+			// Parse form and add to params
 			if err := r.ParseForm(); err == nil {
 				for k, v := range r.Form {
 					for _, vv := range v {
@@ -35,7 +35,7 @@ func (app App) StoreToContext() MiddlewareFunc {
 
 			ctx = ContextWithParams(ctx, params)
 
-			// next, get the user if logged in
+			// Next, get the user ID if logged in
 			if app.Session == nil {
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
@@ -48,9 +48,18 @@ func (app App) StoreToContext() MiddlewareFunc {
 				return
 			}
 
-			if user, err := app.UserRepository.GetUserByID(userID); err == nil {
-				ctx = ContextWithUser(ctx, user)
+			// Get the full user object from the UserRepository
+			user, err := app.UserRepository.GetUserByID(userID)
+
+			if err != nil {
+				// Something went wrong, authenticated user object cannot be retrieved
+				// from the repo. Destroy this session and logout the user.
+				app.Session.Destroy(w, r)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
+
+			ctx = ContextWithUser(ctx, user)
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
