@@ -5,6 +5,8 @@
 
 Breaking changes:
 - StoreToContext middleware split to: StoreUserToContext and StoreParamsToContext
+- Session.SetUserLocale renamed to Session.SetLocale
+- Session.GetUserLocale renamed to Session.GetLocale
 
 ## v0.4.0 - 2021-04-20
 

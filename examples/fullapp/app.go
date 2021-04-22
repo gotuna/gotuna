@@ -85,7 +85,7 @@ func MakeApp(app App) App {
 func handlerHome(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
-			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
+			Set("message", app.Locale.T(app.Session.GetLocale(r), "Home")).
 			Set("users", app.UserRepository.(*gotuna.InMemoryUserRepository).Users).
 			Render(w, r, "app.html", "home.html")
 	})
@@ -103,7 +103,7 @@ func handlerLogin(app App) http.HandlerFunc {
 
 		user, err := app.UserRepository.Authenticate(w, r)
 		if err != nil {
-			tmpl.SetError("email", app.Locale.T(app.Session.GetUserLocale(r), "Login failed, please try again"))
+			tmpl.SetError("email", app.Locale.T(app.Session.GetLocale(r), "Login failed, please try again"))
 			w.WriteHeader(http.StatusUnauthorized)
 			tmpl.Render(w, r, "app.html", "login.html")
 			return
@@ -111,7 +111,7 @@ func handlerLogin(app App) http.HandlerFunc {
 
 		// user is ok, save to session
 		app.Session.SetUserID(w, r, user.GetID())
-		app.Session.SetUserLocale(w, r, "en-US")
+		app.Session.SetLocale(w, r, "en-US")
 
 		// log this event
 		app.Logger.Printf(
@@ -189,7 +189,7 @@ func handlerAddUser(app App) http.Handler {
 func handlerChangeLocale(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		locale := gotuna.GetParam(r.Context(), "locale")
-		app.Session.SetUserLocale(w, r, locale)
+		app.Session.SetLocale(w, r, locale)
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 }
@@ -198,8 +198,8 @@ func handlerNotFound(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		app.NewTemplatingEngine().
-			Set("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
-			SetError("title", app.Locale.T(app.Session.GetUserLocale(r), "Not found")).
+			Set("title", app.Locale.T(app.Session.GetLocale(r), "Not found")).
+			SetError("title", app.Locale.T(app.Session.GetLocale(r), "Not found")).
 			Render(w, r, "404.html")
 	})
 }
@@ -219,5 +219,5 @@ func flash(app App, w http.ResponseWriter, r *http.Request, msg string) {
 }
 
 func t(app App, r *http.Request, s string) string {
-	return app.Locale.T(app.Session.GetUserLocale(r), s)
+	return app.Locale.T(app.Session.GetLocale(r), s)
 }

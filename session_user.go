@@ -36,13 +36,13 @@ func (s Session) GetUserID(r *http.Request) (string, error) {
 	return id, nil
 }
 
-// SetUserLocale will store the user's locale string into the session.
-func (s Session) SetUserLocale(w http.ResponseWriter, r *http.Request, id string) error {
+// SetLocale will store the user's locale string into the session.
+func (s Session) SetLocale(w http.ResponseWriter, r *http.Request, id string) error {
 	return s.Put(w, r, UserLocaleKey, id)
 }
 
-// GetUserLocale retrieves the current user's locale string from the session.
-func (s Session) GetUserLocale(r *http.Request) string {
+// GetLocale retrieves the current user's locale string from the session.
+func (s Session) GetLocale(r *http.Request) string {
 	locale, err := s.Get(r, UserLocaleKey)
 	if err != nil {
 		return "" // TODO: default locale

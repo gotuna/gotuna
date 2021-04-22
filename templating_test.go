@@ -54,7 +54,7 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	app.Session.SetUserLocale(w, r, "en-US")
+	app.Session.SetLocale(w, r, "en-US")
 
 	app.NewTemplatingEngine().Render(w, r, "view.html")
 
@@ -182,7 +182,7 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
-	ses.SetUserLocale(w, r, "pt-PT")
+	ses.SetLocale(w, r, "pt-PT")
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
 	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
 
@@ -210,7 +210,7 @@ func TestLocaleIsIncludedForLoggedInUsers(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
-	ses.SetUserLocale(w, r, "pt-PT")
+	ses.SetLocale(w, r, "pt-PT")
 
 	tmpl := `{{define "app"}}{{if not isGuest}}Hi user, your locale is {{currentLocale}}{{end}}{{end}}`
 	want := `Hi user, your locale is pt-PT`

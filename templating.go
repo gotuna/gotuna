@@ -76,11 +76,11 @@ func (t nativeHTML) getHelpers(w http.ResponseWriter, r *http.Request, patterns 
 			return r
 		},
 		"t": func(s string) string {
-			locale := t.app.Session.GetUserLocale(r)
+			locale := t.app.Session.GetLocale(r)
 			return t.app.Locale.T(locale, s)
 		},
 		"tp": func(s string, n int) string {
-			locale := t.app.Session.GetUserLocale(r)
+			locale := t.app.Session.GetLocale(r)
 			return t.app.Locale.TP(locale, s, n)
 		},
 		"static": func(file string) string {
@@ -92,7 +92,7 @@ func (t nativeHTML) getHelpers(w http.ResponseWriter, r *http.Request, patterns 
 			return user, err
 		},
 		"currentLocale": func() string {
-			return t.app.Session.GetUserLocale(r)
+			return t.app.Session.GetLocale(r)
 		},
 		"isGuest": func() bool {
 			return t.app.Session.IsGuest(r)
