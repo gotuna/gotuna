@@ -7,7 +7,7 @@
       <div class="field">
         <label class="label">{{t "Email"}}</label>
         <div class="control">
-          <input class="input {{if index .Errors "email"}}is-danger{{end}}" type="email" name="email" placeholder="{{t "Email"}}" value="john@example.com">
+          <input class="input {{if index .Errors "email"}}is-danger{{end}}" name="email" placeholder="{{t "Email"}}" value="john@example.com">
         </div>
         <p class="help is-danger">{{index .Errors "email"}}</p>
       </div>

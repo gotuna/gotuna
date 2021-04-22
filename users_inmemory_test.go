@@ -100,3 +100,39 @@ func TestAuthenticate(t *testing.T) {
 	}
 
 }
+
+func TestAddNewUser(t *testing.T) {
+
+	repo := gotuna.NewInMemoryUserRepository([]gotuna.InMemoryUser{
+		{
+			ID:   "555",
+			Name: "Ted",
+		},
+	}).(*gotuna.InMemoryUserRepository)
+
+	t.Run("test add new user", func(t *testing.T) {
+		err := repo.AddUser(gotuna.InMemoryUser{
+			ID:   "333",
+			Name: "Peter",
+		})
+		assert.NoError(t, err)
+
+		user, err := repo.GetUserByID("333")
+		assert.NoError(t, err)
+		assert.Equal(t, "Peter", user.(gotuna.InMemoryUser).Name)
+	})
+
+	t.Run("test add new user fails if user with the same ID exists", func(t *testing.T) {
+		err := repo.AddUser(gotuna.InMemoryUser{
+			ID:   "555",
+			Name: "Rob",
+		})
+		assert.Equal(t, gotuna.ErrNotUnique, err)
+
+		// original user is not overwritten
+		user, err := repo.GetUserByID("555")
+		assert.NoError(t, err)
+		assert.Equal(t, "Ted", user.(gotuna.InMemoryUser).Name)
+	})
+
+}

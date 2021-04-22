@@ -60,6 +60,7 @@ func MakeApp(app App) App {
 	user.Use(app.Authenticate("/login"))
 	user.Handle("/", handlerHome(app)).Methods(http.MethodGet)
 	user.Handle("/profile", handlerProfile(app)).Methods(http.MethodGet, http.MethodPost)
+	user.Handle("/adduser", handlerAddUser(app)).Methods(http.MethodGet, http.MethodPost)
 	user.Handle("/logout", handlerLogout(app)).Methods(http.MethodPost)
 	user.Handle("/setlocale/{locale}", handlerChangeLocale(app)).Methods(http.MethodGet, http.MethodPost)
 
@@ -84,6 +85,7 @@ func handlerHome(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Set("message", app.Locale.T(app.Session.GetUserLocale(r), "Home")).
+			Set("users", app.UserRepository.(*gotuna.InMemoryUserRepository).Users).
 			Render(w, r, "app.html", "home.html")
 	})
 }
@@ -145,6 +147,29 @@ func handlerProfile(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.NewTemplatingEngine().
 			Render(w, r, "app.html", "profile.html")
+	})
+}
+
+func handlerAddUser(app App) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tmpl := app.NewTemplatingEngine()
+
+		ctx := r.Context()
+		repo := app.UserRepository.(*gotuna.InMemoryUserRepository)
+
+		if r.Method == http.MethodGet {
+			tmpl.Render(w, r, "app.html", "adduser.html")
+			return
+		}
+
+		repo.AddUser(gotuna.InMemoryUser{
+			ID:       gotuna.GetParam(ctx, "id"),
+			Name:     gotuna.GetParam(ctx, "name"),
+			Email:    gotuna.GetParam(ctx, "email"),
+			Password: gotuna.GetParam(ctx, "password"),
+		})
+
+		http.Redirect(w, r, "/", http.StatusFound)
 	})
 }
 

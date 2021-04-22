@@ -1,0 +1,40 @@
+{{define "title"}}{{t "Profile"}}{{end}}
+
+{{define "content"}}
+  <div class="columns">
+    <div class="column">
+    <form method="POST" action="/adduser">
+      {{csrf}}
+      <div class="field">
+        <label class="label">{{t "ID"}}</label>
+        <div class="control">
+          <input class="input" name="id">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">{{t "Name"}}</label>
+        <div class="control">
+          <input class="input" name="name">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">{{t "Email"}}</label>
+        <div class="control">
+          <input class="input" name="email">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">{{t "Password"}}</label>
+        <div class="control">
+          <input class="input" type="password" name="password">
+        </div>
+      </div>
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-link">{{t "Confirm"}}</button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+{{end}}

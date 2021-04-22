@@ -13,6 +13,8 @@ var (
 	ErrCannotFindUser = constError("user not found")
 	// ErrRequiredField is thrown when requestfield is required
 	ErrRequiredField = constError("this field is required")
+	// ErrNotUnique is thrown when we try to add new user with existing ID
+	ErrNotUnique = constError("user with this ID already exists")
 )
 
 // InMemoryUser is a sample User entity implementation with some
@@ -36,14 +38,16 @@ func (u InMemoryUser) GetID() string {
 // NewInMemoryUserRepository returns a sample in-memory UserRepository
 // implementation which can be used in tests or sample apps.
 func NewInMemoryUserRepository(users []InMemoryUser) UserRepository {
-	return inMemoryUserRepository{users}
+	return &InMemoryUserRepository{users}
 }
 
-type inMemoryUserRepository struct {
-	users []InMemoryUser
+// InMemoryUserRepository is a sample in-memory UserRepository
+type InMemoryUserRepository struct {
+	Users []InMemoryUser
 }
 
-func (u inMemoryUserRepository) Authenticate(w http.ResponseWriter, r *http.Request) (User, error) {
+// Authenticate tries to authenticate the user when submitting the login form
+func (u InMemoryUserRepository) Authenticate(w http.ResponseWriter, r *http.Request) (User, error) {
 
 	email := strings.ToLower(strings.TrimSpace(r.FormValue("email")))
 	Password := r.FormValue("password")
@@ -68,8 +72,9 @@ func (u inMemoryUserRepository) Authenticate(w http.ResponseWriter, r *http.Requ
 	return found, nil
 }
 
-func (u inMemoryUserRepository) GetUserByID(id string) (User, error) {
-	for _, user := range u.users {
+// GetUserByID will try to find and return the user with this ID from the repository
+func (u InMemoryUserRepository) GetUserByID(id string) (User, error) {
+	for _, user := range u.Users {
 		if user.ID == id {
 			return user, nil
 		}
@@ -78,12 +83,21 @@ func (u inMemoryUserRepository) GetUserByID(id string) (User, error) {
 	return InMemoryUser{}, ErrCannotFindUser
 }
 
-func (u inMemoryUserRepository) getUserByEmail(email string) (InMemoryUser, error) {
-	for _, user := range u.users {
+func (u InMemoryUserRepository) getUserByEmail(email string) (InMemoryUser, error) {
+	for _, user := range u.Users {
 		if user.Email == email {
 			return user, nil
 		}
 	}
 
 	return InMemoryUser{}, errors.New("user not found")
+}
+
+// AddUser will add user to the repository or return error if ID is not unique or blank
+func (u *InMemoryUserRepository) AddUser(user InMemoryUser) error {
+	if _, err := u.GetUserByID(user.ID); user.ID == "" || err != ErrCannotFindUser {
+		return ErrNotUnique
+	}
+	u.Users = append(u.Users, user)
+	return nil
 }

@@ -19,6 +19,10 @@ var Translations = map[string]map[string]string{
 		"en-US": "Log Out",
 		"fr-FR": "Déconnexion",
 	},
+	"Confirm": {
+		"en-US": "Confirm",
+		"fr-FR": "Confirmer",
+	},
 	"Home": {
 		"en-US": "Home",
 		"fr-FR": "Accueil",
@@ -26,6 +30,10 @@ var Translations = map[string]map[string]string{
 	"Profile": {
 		"en-US": "Profile",
 		"fr-FR": "Profil",
+	},
+	"Add User": {
+		"en-US": "Add User",
+		"fr-FR": "Ajouter un utilisateur",
 	},
 	"Name": {
 		"en-US": "Name",
