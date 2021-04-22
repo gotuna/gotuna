@@ -3,6 +3,9 @@
 
 ## Upcoming...
 
+Breaking changes:
+- StoreToContext middleware split to: StoreUserToContext and StoreParamsToContext
+
 ## v0.4.0 - 2021-04-20
 
 Breaking changes:

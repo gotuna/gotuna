@@ -19,7 +19,7 @@ func TestStoringURLParamsToContext(t *testing.T) {
 
 	app := gotuna.App{}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreParamsToContext()
 
 	color := ""
 	size := ""
@@ -46,7 +46,7 @@ func TestStoringFormParamsToContext(t *testing.T) {
 
 	app := gotuna.App{}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreParamsToContext()
 
 	color := ""
 	size := ""
@@ -70,7 +70,7 @@ func TestStoringRouteParamsToContext(t *testing.T) {
 		Router: gotuna.NewMuxRouter(),
 	}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreParamsToContext()
 
 	manufacturer := ""
 	model := ""
@@ -99,7 +99,7 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 		UserRepository: doubles.NewUserRepositoryStub(),
 	}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreUserToContext()
 
 	var userInContext gotuna.User
 
@@ -111,7 +111,7 @@ func TestStoringLoggedInUserToContext(t *testing.T) {
 	assert.Equal(t, fakeUser, userInContext)
 }
 
-func TestSkipIfWeCannotFindUser(t *testing.T) {
+func TestSkipStoringUserIfWeCannotFindAUser(t *testing.T) {
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
 	response := httptest.NewRecorder()
@@ -121,7 +121,30 @@ func TestSkipIfWeCannotFindUser(t *testing.T) {
 		UserRepository: doubles.NewUserRepositoryStub(),
 	}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreUserToContext()
+
+	var userInContext gotuna.User
+	var noUserErr error
+
+	middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		userInContext, noUserErr = gotuna.GetUserFromContext(r.Context())
+	})).ServeHTTP(response, request)
+
+	assert.Equal(t, response.Code, http.StatusOK)
+	assert.Error(t, noUserErr)
+	assert.Equal(t, nil, userInContext)
+}
+
+func TestSkipStoringUserIfWeDontHaveASession(t *testing.T) {
+
+	request := httptest.NewRequest(http.MethodGet, "/", nil)
+	response := httptest.NewRecorder()
+
+	app := gotuna.App{
+		UserRepository: doubles.NewUserRepositoryStub(),
+	}
+
+	middleware := app.StoreUserToContext()
 
 	var userInContext gotuna.User
 	var noUserErr error
@@ -153,7 +176,7 @@ func TestErrorIfWeCannotRetreiveAuthenticatedUserFromTheRepo(t *testing.T) {
 		UserRepository: gotuna.NewInMemoryUserRepository(repo),
 	}
 
-	middleware := app.StoreToContext()
+	middleware := app.StoreUserToContext()
 
 	middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	})).ServeHTTP(response, request)

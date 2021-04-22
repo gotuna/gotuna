@@ -7,10 +7,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// StoreToContext middleware will add common values to the context for further use
-// this includes all of the parameters for the current request query/form/route
-// and the current logged in user (if any)
-func (app App) StoreToContext() MiddlewareFunc {
+// StoreParamsToContext middleware will add all parameters from the current
+// request to the context, this includes query, form, and route params
+func (app App) StoreParamsToContext() MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
@@ -33,7 +32,18 @@ func (app App) StoreToContext() MiddlewareFunc {
 				}
 			}
 
-			ctx = ContextWithParams(ctx, params)
+			next.ServeHTTP(w, r.WithContext(ContextWithParams(ctx, params)))
+		})
+	}
+}
+
+// StoreUserToContext middleware will add the current logged in
+// user object (if any) to the request context for further use.
+func (app App) StoreUserToContext() MiddlewareFunc {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+			ctx := r.Context()
 
 			// Next, get the user ID if logged in
 			if app.Session == nil {
