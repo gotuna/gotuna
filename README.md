@@ -33,22 +33,91 @@ Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentat
 # Requirements
 - Make sure you have Go >= 1.16 installed
 
+# Quick Start
+Initialize new app and install GoTuna:
+```
+mkdir testapp
+cd testap
+go mod init testapp
+go get -u github.com/gotuna/gotuna
+```
+
+Now create two files `main.go` and `app.html` as an example:
+```
+// main.go
+
+package main
+
+import (
+	"embed"
+	"fmt"
+	"net/http"
+	"os"
+
+	"github.com/gotuna/gotuna"
+)
+
+//go:embed *
+var embededViews embed.FS
+
+func main() {
+	app := gotuna.App{
+		ViewFiles: os.DirFS("."),
+	}
+	app.Router = gotuna.NewMuxRouter()
+	app.Router.Handle("/", handlerHome(app))
+	app.Router.Handle("/login", handlerLogin(app)).Methods(http.MethodGet, http.MethodPost)
+
+	fmt.Println("Running on http://localhost:8888")
+	http.ListenAndServe(":8888", app.Router)
+}
+
+func handlerHome(app gotuna.App) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.NewTemplatingEngine().
+			Render(w, r, "app.html")
+	})
+}
+
+func handlerLogin(app gotuna.App) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Login form...")
+	})
+}
+```
+
+```
+// app.html
+
+{{- define "app" -}}
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <a href="/login">Please login!</a>
+  </body>
+</html>
+{{- end -}}
+```
+
+Now you can run this app and visit http://localhost:8888 in your browser:
+```
+go run main.go
+```
+
+
+# Running example apps
+GoTuna comes with few working examples. Make sure you have git and Go >= 1.16 installed.
+```
+git clone https://github.com/gotuna/gotuna.git
+cd gotuna
+go run examples/fullapp/cmd/main.go
+```
+
 # Testing
 ```
 go test -race -v ./...
 ```
-
-# Running examples
-```
-go run examples/fullapp/cmd/main.go
-```
-
-# External dependencies
-External modules are mostly used when the feature is too complex to build or maintain - Router, Secure cookies
-
-# TODO
-- Validation (input/forms)
-- Cache
 
 # Licence
 This project is licensed under the MIT License.
