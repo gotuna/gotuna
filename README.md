@@ -37,7 +37,7 @@ Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentat
 Initialize new app and install GoTuna:
 ```
 mkdir testapp
-cd testap
+cd testapp
 go mod init testapp
 go get -u github.com/gotuna/gotuna
 ```
