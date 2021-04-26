@@ -48,16 +48,12 @@ Now create two files `main.go` and `app.html` as an example:
 package main
 
 import (
-	"embed"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gotuna/gotuna"
 )
-
-//go:embed *
-var embededViews embed.FS
 
 func main() {
 	app := gotuna.App{
