@@ -86,6 +86,8 @@ func handlerLogin(app gotuna.App) http.Handler {
 }
 ```
 
+This will be your app's html layout:
+
 ```
 // app.html
 
@@ -100,7 +102,7 @@ func handlerLogin(app gotuna.App) http.Handler {
 {{- end -}}
 ```
 
-Now you can run this app and visit http://localhost:8888 in your browser:
+Run this simple app and visit http://localhost:8888 in your browser:
 ```
 go run main.go
 ```
