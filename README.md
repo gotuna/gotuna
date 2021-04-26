@@ -35,14 +35,16 @@ Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentat
 
 # Quick Start
 Initialize new app and install GoTuna:
-```
+
+```shell
 mkdir testapp
 cd testapp
 go get -u github.com/gotuna/gotuna
 ```
 
 Now create two files `main.go` and `app.html` as an example:
-```
+
+```go
 // main.go
 
 package main
@@ -83,7 +85,7 @@ func handlerLogin(app gotuna.App) http.Handler {
 
 This will be your app's html layout:
 
-```
+```html
 // app.html
 
 {{- define "app" -}}
@@ -98,21 +100,22 @@ This will be your app's html layout:
 ```
 
 Run this simple app and visit http://localhost:8888 in your browser:
-```
+```shell
 go run main.go
 ```
 
 
 # Running example apps
 GoTuna comes with few working examples. Make sure you have git and Go >= 1.16 installed.
-```
+```shell
 git clone https://github.com/gotuna/gotuna.git
 cd gotuna
 go run examples/fullapp/cmd/main.go
 ```
 
 # Testing
-```
+
+```shell
 go test -race -v ./...
 ```
 
