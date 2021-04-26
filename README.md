@@ -38,7 +38,6 @@ Initialize new app and install GoTuna:
 ```
 mkdir testapp
 cd testapp
-go mod init testapp
 go get -u github.com/gotuna/gotuna
 ```
 
