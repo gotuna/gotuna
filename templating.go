@@ -52,6 +52,10 @@ func (t nativeHTML) GetErrors() map[string]string {
 
 func (t *nativeHTML) Render(w http.ResponseWriter, r *http.Request, patterns ...string) {
 
+	if t.app.ViewFiles == nil {
+		panic("view filesystem not configured")
+	}
+
 	if t.app.Session != nil {
 		t.Flashes = t.app.Session.Flashes(w, r)
 	}

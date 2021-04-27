@@ -61,6 +61,22 @@ func TestUsingTranslation(t *testing.T) {
 	assert.Equal(t, rendered, w.Body.String())
 }
 
+func TestCannotRenderWithoutViewFilesystem(t *testing.T) {
+
+	r := &http.Request{}
+	w := httptest.NewRecorder()
+
+	defer func() {
+		recover()
+	}()
+
+	gotuna.App{}.NewTemplatingEngine().
+		Render(w, r, "view.html")
+
+	t.Errorf("templating engine should panic")
+
+}
+
 func TestBadTemplateShouldPanic(t *testing.T) {
 
 	tmpl := `{{define "app"}} {{.Invalid.Variable}} {{end}}`
