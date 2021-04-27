@@ -61,7 +61,6 @@ func main() {
 	app := gotuna.App{
 		ViewFiles: os.DirFS("."),
 		Router:    gotuna.NewMuxRouter(),
-
 	}
 	
 	app.Router.Handle("/", handlerHome(app))
