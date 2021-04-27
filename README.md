@@ -60,8 +60,10 @@ import (
 func main() {
 	app := gotuna.App{
 		ViewFiles: os.DirFS("."),
+		Router:    gotuna.NewMuxRouter(),
+
 	}
-	app.Router = gotuna.NewMuxRouter()
+	
 	app.Router.Handle("/", handlerHome(app))
 	app.Router.Handle("/login", handlerLogin(app)).Methods(http.MethodGet, http.MethodPost)
 
