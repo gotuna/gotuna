@@ -13,12 +13,10 @@ import (
 
 func TestRecoveringFromPanic(t *testing.T) {
 
-	needle := "assignment to entry in nil map"
 	destination := "/error"
 
 	badHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var x map[string]int
-		x["y"] = 1 // this code will panic with: assignment to entry in nil map
+		panic("boo!")
 	})
 
 	request := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -33,5 +31,5 @@ func TestRecoveringFromPanic(t *testing.T) {
 	recoverer(badHandler).ServeHTTP(response, request)
 
 	assert.Redirects(t, response, destination, http.StatusInternalServerError)
-	assert.Contains(t, wlog.String(), needle)
+	assert.Contains(t, wlog.String(), "boo!")
 }

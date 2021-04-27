@@ -17,8 +17,8 @@ func TestCORSHeadersAreAddedForOptionsMethod(t *testing.T) {
 
 	middleware(http.NotFoundHandler()).ServeHTTP(response, request)
 
-	assert.Equal(t, "*", response.HeaderMap.Get("Access-Control-Allow-Origin"))
-	assert.Equal(t, "OPTIONS,HEAD,GET,POST,PUT,PATCH,DELETE", response.HeaderMap.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, "*", response.Result().Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "OPTIONS,HEAD,GET,POST,PUT,PATCH,DELETE", response.Result().Header.Get("Access-Control-Allow-Methods"))
 }
 
 func TestCORSHeadersAreNotAddedForGETMethod(t *testing.T) {
@@ -29,8 +29,9 @@ func TestCORSHeadersAreNotAddedForGETMethod(t *testing.T) {
 
 	middleware(http.NotFoundHandler()).ServeHTTP(response, request)
 
-	assert.Equal(t, "", response.HeaderMap.Get("Access-Control-Allow-Origin"))
-	assert.Equal(t, "", response.HeaderMap.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, "", response.Result().Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "", response.Result().Header.Get("Access-Control-Allow-Methods"))
+
 }
 
 func TestCORSHeadersAreNotAddedForPOSTMethod(t *testing.T) {
@@ -41,6 +42,6 @@ func TestCORSHeadersAreNotAddedForPOSTMethod(t *testing.T) {
 
 	middleware(http.NotFoundHandler()).ServeHTTP(response, request)
 
-	assert.Equal(t, "", response.HeaderMap.Get("Access-Control-Allow-Origin"))
-	assert.Equal(t, "", response.HeaderMap.Get("Access-Control-Allow-Methods"))
+	assert.Equal(t, "", response.Result().Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "", response.Result().Header.Get("Access-Control-Allow-Methods"))
 }
