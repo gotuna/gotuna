@@ -110,8 +110,8 @@ func handlerLogin(app App) http.HandlerFunc {
 		}
 
 		// user is ok, save to session
-		app.Session.SetUserID(w, r, user.GetID())
-		app.Session.SetLocale(w, r, "en-US")
+		_ = app.Session.SetUserID(w, r, user.GetID())
+		_ = app.Session.SetLocale(w, r, "en-US")
 
 		// log this event
 		app.Logger.Printf(
@@ -138,7 +138,7 @@ func handlerLogout(app App) http.Handler {
 			user.(gotuna.InMemoryUser).Name,
 		)
 
-		app.Session.Destroy(w, r)
+		_ = app.Session.Destroy(w, r)
 
 		http.Redirect(w, r, "/login", http.StatusFound)
 	})
@@ -171,7 +171,7 @@ func handlerAddUser(app App) http.Handler {
 		})
 
 		if err != nil {
-			app.Session.Flash(w, r, gotuna.FlashMessage{
+			_ = app.Session.Flash(w, r, gotuna.FlashMessage{
 				Message:   t(app, r, "Error"),
 				Kind:      "danger",
 				AutoClose: true,
@@ -189,7 +189,7 @@ func handlerAddUser(app App) http.Handler {
 func handlerChangeLocale(app App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		locale := gotuna.GetParam(r.Context(), "locale")
-		app.Session.SetLocale(w, r, locale)
+		_ = app.Session.SetLocale(w, r, locale)
 		http.Redirect(w, r, "/", http.StatusFound)
 	})
 }
@@ -215,7 +215,7 @@ func handlerError(app App) http.Handler {
 }
 
 func flash(app App, w http.ResponseWriter, r *http.Request, msg string) {
-	app.Session.Flash(w, r, gotuna.NewFlash(msg))
+	_ = app.Session.Flash(w, r, gotuna.NewFlash(msg))
 }
 
 func t(app App, r *http.Request, s string) string {

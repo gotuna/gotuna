@@ -18,6 +18,6 @@ func MakeApp(app gotuna.App) gotuna.App {
 
 func handlerHome(app gotuna.App) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello World!")
+		_, _ = fmt.Fprintf(w, "Hello World!")
 	})
 }

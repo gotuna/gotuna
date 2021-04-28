@@ -38,8 +38,8 @@ func (f *FilesystemStub) Open(name string) (fs.File, error) {
 		return nil, os.ErrNotExist
 	}
 
-	tmpfile.Write([]byte(contents))
-	tmpfile.Seek(0, 0)
+	_, _ = tmpfile.Write([]byte(contents))
+	_, _ = tmpfile.Seek(0, 0)
 
 	return tmpfile, nil
 }
