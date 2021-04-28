@@ -9,20 +9,21 @@ import (
 )
 
 // NewFileSystemStub returns a new fs.FS stub with provided files.
-func NewFileSystemStub(files map[string][]byte) *filesystemStub {
-	return &filesystemStub{
+func NewFileSystemStub(files map[string][]byte) *FilesystemStub {
+	return &FilesystemStub{
 		files:   files,
 		badFile: "badfile.txt",
 	}
 }
 
-// implements type FS interface
-type filesystemStub struct {
+// FilesystemStub implements type FS interface
+type FilesystemStub struct {
 	files   map[string][]byte
 	badFile string
 }
 
-func (f *filesystemStub) Open(name string) (fs.File, error) {
+// Open opens the named file
+func (f *FilesystemStub) Open(name string) (fs.File, error) {
 	if name == f.badFile {
 		return &badFile{}, nil
 	}

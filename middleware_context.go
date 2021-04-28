@@ -64,7 +64,8 @@ func (app App) StoreUserToContext() MiddlewareFunc {
 			if err != nil {
 				// Something went wrong, authenticated user object cannot be retrieved
 				// from the repo. Destroy this session and logout the user.
-				app.Session.Destroy(w, r)
+				_ = app.Session.Destroy(w, r)
+
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}

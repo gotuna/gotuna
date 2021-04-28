@@ -22,8 +22,10 @@ func TestFlashMessages(t *testing.T) {
 	assert.Equal(t, 0, len(messages))
 
 	// request2: add two flash messages
-	ses.Flash(w, r, gotuna.NewFlash("flash message one"))
-	ses.Flash(w, r, gotuna.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
+	err := ses.Flash(w, r, gotuna.NewFlash("flash message one"))
+	assert.NoError(t, err)
+	err = ses.Flash(w, r, gotuna.FlashMessage{Message: "flash message two", Kind: "active", AutoClose: true})
+	assert.NoError(t, err)
 
 	// request3: pop flash messages
 	messages = ses.Flashes(w, r)
@@ -45,7 +47,9 @@ func TestIvalidFlashMessageInTheSession(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	ses.Put(w, r, "_flash", "alien saved to the flash key")
-	err := ses.Flash(w, r, gotuna.NewFlash("flash message one"))
+	err := ses.Put(w, r, "_flash", "alien saved to the flash key")
+	assert.NoError(t, err)
+
+	err = ses.Flash(w, r, gotuna.NewFlash("flash message one"))
 	assert.Error(t, err)
 }

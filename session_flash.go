@@ -60,9 +60,9 @@ func (s Session) Flashes(w http.ResponseWriter, r *http.Request) []FlashMessage 
 		return messages
 	}
 
-	TypeFromString(raw, &messages)
+	_ = TypeFromString(raw, &messages)
 
-	s.Delete(w, r, flashKey)
+	_ = s.Delete(w, r, flashKey)
 
 	return messages
 }

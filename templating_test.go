@@ -54,7 +54,8 @@ func TestUsingTranslation(t *testing.T) {
 	r := &http.Request{}
 	w := httptest.NewRecorder()
 
-	app.Session.SetLocale(w, r, "en-US")
+	err := app.Session.SetLocale(w, r, "en-US")
+	assert.NoError(t, err)
 
 	app.NewTemplatingEngine().Render(w, r, "view.html")
 
@@ -67,7 +68,7 @@ func TestCannotRenderWithoutViewFilesystem(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	defer func() {
-		recover()
+		_ = recover()
 	}()
 
 	gotuna.App{}.NewTemplatingEngine().
@@ -85,7 +86,7 @@ func TestBadTemplateShouldPanic(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	defer func() {
-		recover()
+		_ = recover()
 	}()
 
 	doubles.NewStubTemplatingEngine(tmpl).
@@ -198,9 +199,13 @@ func TestFlashMessagesAreIncluded(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
-	ses.SetLocale(w, r, "pt-PT")
-	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
-	ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
+	err := ses.SetLocale(w, r, "pt-PT")
+	assert.NoError(t, err)
+
+	err = ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash one"})
+	assert.NoError(t, err)
+	err = ses.Flash(w, r, gotuna.FlashMessage{Kind: "success", Message: "flash two", AutoClose: true})
+	assert.NoError(t, err)
 
 	tmpl := `{{define "app"}}{{range $el := .Flashes}} * {{$el.Message}}{{end}}{{end}}`
 	want := ` * flash one * flash two`
@@ -226,7 +231,8 @@ func TestLocaleIsIncludedForLoggedInUsers(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	ses := gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.GetID()), "test")
-	ses.SetLocale(w, r, "pt-PT")
+	err := ses.SetLocale(w, r, "pt-PT")
+	assert.NoError(t, err)
 
 	tmpl := `{{define "app"}}{{if not isGuest}}Hi user, your locale is {{currentLocale}}{{end}}{{end}}`
 	want := `Hi user, your locale is pt-PT`

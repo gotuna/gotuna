@@ -59,7 +59,8 @@ func TestDestroyActiveSession(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, testUser.GetID(), id)
 
-	ses.Destroy(w, r)
+	err = ses.Destroy(w, r)
+	assert.NoError(t, err)
 
 	id, err = ses.GetUserID(r)
 	assert.Error(t, err)
@@ -90,7 +91,7 @@ func TestTryToUseInvalidSession(t *testing.T) {
 
 func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
 	defer func() {
-		recover()
+		_ = recover()
 	}()
 
 	gotuna.NewSession(nil, "test")
@@ -100,7 +101,7 @@ func TestSessionWillPanicOnBadSessionStore(t *testing.T) {
 
 func TestSessionWillPanicOnBadSessionName(t *testing.T) {
 	defer func() {
-		recover()
+		_ = recover()
 	}()
 
 	gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(""), "")

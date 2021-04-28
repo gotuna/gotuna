@@ -8,32 +8,35 @@ import (
 )
 
 // NewGorillaSessionStoreSpy return a new gorilla.Store spy
-func NewGorillaSessionStoreSpy(userID string) *storeSpy {
-	userSession := sessions.NewSession(&storeSpy{}, "")
+func NewGorillaSessionStoreSpy(userID string) *StoreSpy {
+	userSession := sessions.NewSession(&StoreSpy{}, "")
 	userSession.Values[gotuna.UserIDKey] = userID
 
-	return &storeSpy{Session: userSession}
+	return &StoreSpy{Session: userSession}
 }
 
-// implements gorilla.Store interface
-type storeSpy struct {
+// StoreSpy implements gorilla.Store interface
+type StoreSpy struct {
 	Session   *sessions.Session
 	GetCalls  int
 	NewCalls  int
 	SaveCalls int
 }
 
-func (spy *storeSpy) Get(r *http.Request, name string) (*sessions.Session, error) {
+// Get counts the Get calls
+func (spy *StoreSpy) Get(r *http.Request, name string) (*sessions.Session, error) {
 	spy.GetCalls++
 	return spy.Session, nil
 }
 
-func (spy *storeSpy) New(r *http.Request, name string) (*sessions.Session, error) {
+// New counts the New calls
+func (spy *StoreSpy) New(r *http.Request, name string) (*sessions.Session, error) {
 	spy.NewCalls++
 	return spy.Session, nil
 }
 
-func (spy *storeSpy) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
+// Save counts the Save calls
+func (spy *StoreSpy) Save(r *http.Request, w http.ResponseWriter, s *sessions.Session) error {
 	spy.SaveCalls++
 	return nil
 }
