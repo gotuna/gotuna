@@ -107,7 +107,7 @@ go run main.go
 
 
 # Running example apps
-GoTuna comes with few working examples. Make sure you have git and Go >= 1.16 installed.
+GoTuna comes with an example app. Make sure you have git and Go >= 1.16 installed.
 ```shell
 git clone https://github.com/gotuna/gotuna.git
 cd gotuna
