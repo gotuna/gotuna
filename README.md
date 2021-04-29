@@ -11,7 +11,9 @@
 </p>
 
 # GoTuna - Web framework for Go
-Please visit [https://gotuna.org](https://gotuna.org)  for the latest documentation, examples, and more.
+GoTuna a lightweight web framework for Go with mux router, middlewares, user sessions, templates, embedded views, and static file server.
+
+Please visit [https://gotuna.org](https://gotuna.org) for the latest documentation, examples, and more.
 
 
 # Features
