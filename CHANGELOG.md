@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Upcoming...
 
+## v0.6.0 - 2021-05-04
+
+- Tests refactor
+
 ## v0.5.0 - 2021-04-22
 
 Breaking changes:
