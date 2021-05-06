@@ -21,7 +21,8 @@ func main() {
 	port := ":8888"
 	keyPairs := os.Getenv("APP_KEY")
 	cookieStore := sessions.NewCookieStore([]byte(keyPairs))
-	cookieStore.Options.HttpOnly = true
+	cookieStore.Options.HttpOnly = true         // more secure
+	cookieStore.Options.MaxAge = 30 * 24 * 3600 // expire in one month
 
 	app := fullapp.MakeApp(fullapp.App{
 		App: gotuna.App{
