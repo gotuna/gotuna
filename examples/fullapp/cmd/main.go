@@ -20,12 +20,14 @@ func main() {
 
 	port := ":8888"
 	keyPairs := os.Getenv("APP_KEY")
+	cookieStore := sessions.NewCookieStore([]byte(keyPairs))
+	cookieStore.Options.HttpOnly = true
 
 	app := fullapp.MakeApp(fullapp.App{
 		App: gotuna.App{
 			Logger:         log.New(os.Stdout, "", 0),
 			UserRepository: doubles.NewUserRepositoryStub(),
-			Session:        gotuna.NewSession(sessions.NewCookieStore([]byte(keyPairs)), "app_session"),
+			Session:        gotuna.NewSession(cookieStore, "app_session"),
 			Static:         static.EmbededStatic,
 			StaticPrefix:   "",
 			ViewFiles:      views.EmbededViews,
