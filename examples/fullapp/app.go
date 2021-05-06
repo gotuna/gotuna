@@ -204,8 +204,7 @@ func handlerGetCars(app App) http.Handler {
 			"Škoda",
 			"BMW",
 		}
-
-		json.NewEncoder(w).Encode(cars)
+		_ = json.NewEncoder(w).Encode(cars)
 	})
 }
 
