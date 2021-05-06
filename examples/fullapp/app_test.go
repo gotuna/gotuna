@@ -242,6 +242,22 @@ func TestLogout(t *testing.T) {
 	assert.Redirects(t, response, "/login", http.StatusFound)
 }
 
+func TestAPIEndpoint(t *testing.T) {
+	app := fullapp.MakeApp(fullapp.App{
+		gotuna.App{
+			Router: gotuna.NewMuxRouter(),
+		},
+		middlewareCsrfStub,
+	})
+
+	r := httptest.NewRequest(http.MethodGet, "/api/getcars", nil)
+	w := httptest.NewRecorder()
+	app.Router.ServeHTTP(w, r)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Contains(t, w.Body.String(), `["Ford","Škoda","BMW"]`)
+}
+
 func loginRequest(form url.Values) *http.Request {
 	request := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
 	request.Header.Add("Content-Type", "application/x-www-form-urlencoded")

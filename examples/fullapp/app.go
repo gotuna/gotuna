@@ -1,6 +1,7 @@
 package fullapp
 
 import (
+	"encoding/json"
 	"html/template"
 	"io"
 	"log"
@@ -64,9 +65,13 @@ func MakeApp(app App) App {
 	user.Handle("/setlocale/{locale}", handlerChangeLocale(app)).Methods(http.MethodGet, http.MethodPost)
 
 	// for guests
-	auth := app.Router.NewRoute().Subrouter()
-	auth.Use(app.RedirectIfAuthenticated("/"))
-	auth.Handle("/login", handlerLogin(app)).Methods(http.MethodGet, http.MethodPost)
+	guests := app.Router.NewRoute().Subrouter()
+	guests.Use(app.RedirectIfAuthenticated("/"))
+	guests.Handle("/login", handlerLogin(app)).Methods(http.MethodGet, http.MethodPost)
+
+	// public json api
+	api := app.Router.NewRoute().Subrouter()
+	api.Handle("/api/getcars", handlerGetCars(app)).Methods(http.MethodGet)
 
 	// path prefix for static files
 	// e.g. "/public" or "http://cdn.example.com/assets"
@@ -189,6 +194,18 @@ func handlerChangeLocale(app App) http.Handler {
 		locale := gotuna.GetParam(r.Context(), "locale")
 		_ = app.Session.SetLocale(w, r, locale)
 		http.Redirect(w, r, "/", http.StatusFound)
+	})
+}
+
+func handlerGetCars(app App) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cars := []string{
+			"Ford",
+			"Škoda",
+			"BMW",
+		}
+
+		json.NewEncoder(w).Encode(cars)
 	})
 }
 
