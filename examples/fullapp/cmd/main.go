@@ -26,6 +26,7 @@ func main() {
 
 	app := fullapp.MakeApp(fullapp.App{
 		App: gotuna.App{
+			Router:         gotuna.NewMuxRouter(),
 			Logger:         log.New(os.Stdout, "", 0),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			Session:        gotuna.NewSession(cookieStore, "app_session"),

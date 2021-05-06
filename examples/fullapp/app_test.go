@@ -45,6 +45,7 @@ func TestRoutes(t *testing.T) {
 
 			app := fullapp.MakeApp(fullapp.App{
 				gotuna.App{
+					Router:         gotuna.NewMuxRouter(),
 					Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(r.userID), "test"),
 					Static:         doubles.NewFileSystemStub(map[string][]byte{}),
 					UserRepository: doubles.NewUserRepositoryStub(),
@@ -67,6 +68,7 @@ func TestServingStaticFilesFromPublicFolder(t *testing.T) {
 
 	app := fullapp.MakeApp(fullapp.App{
 		gotuna.App{
+			Router:       gotuna.NewMuxRouter(),
 			Static:       doubles.NewFileSystemStub(files),
 			StaticPrefix: "/publicprefix",
 		},
@@ -90,6 +92,7 @@ func TestLogin(t *testing.T) {
 
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
+				Router:    gotuna.NewMuxRouter(),
 				Session:   gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				ViewFiles: views.EmbededViews,
 			},
@@ -110,6 +113,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
+				Router:         gotuna.NewMuxRouter(),
 				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
@@ -130,6 +134,7 @@ func TestLogin(t *testing.T) {
 		response := httptest.NewRecorder()
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
+				Router:         gotuna.NewMuxRouter(),
 				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
@@ -148,6 +153,7 @@ func TestLogin(t *testing.T) {
 
 		app := fullapp.MakeApp(fullapp.App{
 			gotuna.App{
+				Router:         gotuna.NewMuxRouter(),
 				Session:        gotuna.NewSession(sessions.NewCookieStore([]byte("abc")), "test"),
 				UserRepository: doubles.NewUserRepositoryStub(),
 				ViewFiles:      views.EmbededViews,
@@ -176,6 +182,7 @@ func TestLogin(t *testing.T) {
 func TestAddNewUserToTheRepo(t *testing.T) {
 	app := fullapp.MakeApp(fullapp.App{
 		gotuna.App{
+			Router:         gotuna.NewMuxRouter(),
 			Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(doubles.MemUser1.ID), "test"),
 			UserRepository: doubles.NewUserRepositoryStub(),
 			ViewFiles:      views.EmbededViews,
@@ -208,6 +215,7 @@ func TestLogout(t *testing.T) {
 
 	app := fullapp.MakeApp(fullapp.App{
 		gotuna.App{
+			Router:         gotuna.NewMuxRouter(),
 			Session:        gotuna.NewSession(doubles.NewGorillaSessionStoreSpy(user.GetID()), "test"),
 			ViewFiles:      views.EmbededViews,
 			UserRepository: doubles.NewUserRepositoryStub(),

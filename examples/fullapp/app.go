@@ -13,13 +13,13 @@ import (
 	"github.com/gotuna/gotuna"
 )
 
-// App is a main dependency store.
+// App is the main dependency store.
 type App struct {
 	gotuna.App
 	Csrf gotuna.MiddlewareFunc // app-specific config
 }
 
-// MakeApp creates an App with sample dependencies.
+// MakeApp creates and configures the App
 func MakeApp(app App) App {
 
 	if app.Logger == nil {
@@ -43,8 +43,6 @@ func MakeApp(app App) App {
 			}
 		},
 	}
-
-	app.Router = gotuna.NewMuxRouter()
 
 	// middlewares for all routes
 	app.Router.Handle("/error", handlerError(app)).Methods(http.MethodGet, http.MethodPost)
