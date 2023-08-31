@@ -11,7 +11,7 @@
 </p>
 
 # GoTuna - Web framework for Go
-GoTuna a lightweight web framework for Go with mux router, middlewares, user sessions, templates, embedded views, and static file server.
+GoTuna is a lightweight web framework for Go with mux router, middlewares, user sessions, templates, embedded views, and static file server.
 
 Please visit [https://gotuna.netlify.app](https://gotuna.netlify.app) for the latest documentation, examples, and more.
 
