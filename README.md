@@ -33,7 +33,7 @@ Please visit [https://gotuna.netlify.app](https://gotuna.netlify.app) for the la
 - Database agnostic
 
 # Requirements
-- Make sure you have Go >= 1.16 installed
+- Make sure you have Go >= 1.23 installed
 
 # Quick Start
 Initialize new app and install GoTuna:
@@ -41,6 +41,7 @@ Initialize new app and install GoTuna:
 ```shell
 mkdir testapp
 cd testapp
+go mod init testapp
 go get -u github.com/gotuna/gotuna
 ```
 
@@ -109,7 +110,7 @@ go run main.go
 
 
 # Running example apps
-GoTuna comes with an example app. Make sure you have git and Go >= 1.16 installed.
+GoTuna comes with an example app. Make sure you have git and Go >= 1.23 installed.
 ```shell
 git clone https://github.com/gotuna/gotuna.git
 cd gotuna

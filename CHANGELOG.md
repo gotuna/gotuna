@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## Upcoming...
 
+## v0.7.0 - 2024-12-27
+
+- Go version bump to >=1.23
+
 ## v0.6.0 - 2021-05-04
 
 - Tests refactor
